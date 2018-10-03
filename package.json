@@ -7,8 +7,7 @@
   "license": "MIT",
   "scripts": {
     "start": "webpack-dev-server --inline --colors --watch --hot",
-    "build:dev": "webpack --mode development",
-    "build:prod": "webpack --mode production"
+    "build": "webpack --mode production"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^4.5.2",
