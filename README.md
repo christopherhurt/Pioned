@@ -2,7 +2,14 @@
 
 Project for CS 4644 Creative Computing Capstone.
 
-## Development Guide
+## Todo
+
+- [x] Add movable player
+- [ ] Fix camera movement with respect to player
+- [ ] Communication between server and client(s) 
+    - [ ] Render all characters in the game
+
+## Getting started
 
 > Install yarn [here](https://yarnpkg.com/en/docs/install).
 
