@@ -93,7 +93,9 @@ export class Game {
   }
 
   async load() {
-    await this.loader.load('tiles', 'assets/tiles.png');
+    await Promise.all([
+      this.loader.load('tiles', 'assets/tiles.png'),
+    ]);
   }
 
   async init() {
