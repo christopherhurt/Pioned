@@ -1,4 +1,4 @@
-import { ImageLoader, Keyboard } from './utils';
+import { ImageLoader, Keyboard, Keys } from './utils';
 
 const map = {
   cols: 12,
@@ -33,28 +33,32 @@ const map = {
   ]],
 };
 const getTile = (layer, col, row) => map.layers[layer][row * map.cols + col];
+const mapWidth = map.cols * map.tsize;
+const mapHeight = map.rows * map.tsize;
 
-const Keys = {
-  LEFT: 37,
-  RIGHT: 39,
-  UP: 38,
-  DOWN: 40,
-};
+const DEFAULT_SPEED = 4 * map.tsize; // Pixels per second
 
-class Player {
-  constructor(map, width, height, size) {
-    this.x = width / 2;
-    this.y = height / 2;
-    this.size = size;
-    this.maxX = width - size;
-    this.maxY = height - size;
-    this.SPEED = 256; // Pixels per second
+class GameObject {
+  constructor(x, y, width, height) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+  }
+}
+
+class Player extends GameObject {
+  constructor(width, height, speed = DEFAULT_SPEED) {
+    super(0, 0, width, height);
+    this.maxX = mapWidth - width;
+    this.maxY = mapHeight - height;
+    this.speed = speed;
   }
 
   move(delta, dirx, diry) {
     // Move player
-    this.x += dirx * this.SPEED * delta;
-    this.y += diry * this.SPEED * delta;
+    this.x += dirx * this.speed * delta;
+    this.y += diry * this.speed * delta;
     // Clamp values
     this.x = Math.max(0, Math.min(this.x, this.maxX));
     this.y = Math.max(0, Math.min(this.y, this.maxY));
@@ -62,20 +66,19 @@ class Player {
 }
 
 class Camera {
-  constructor(map, width, height) {
-    this.x = width * 0.25;
-    this.y = height * 0.25;
+  constructor(width, height) {
+    this.x = 0;
+    this.y = 0;
     this.width = width;
     this.height = height;
-    this.maxX = map.cols * map.tsize - width;
-    this.maxY = map.rows * map.tsize - height;
-    this.SPEED = 256; // Pixels per second
+    this.maxX = mapWidth - width;
+    this.maxY = mapHeight - height;
   }
 
-  move(delta, dirx, diry) {
-    // Move camera
-    this.x += dirx * this.SPEED * delta;
-    this.y += diry * this.SPEED * delta;
+  update(gameObject) {
+    // Center camera on game object
+    this.x = gameObject.x - this.width / 2;
+    this.y = gameObject.y - this.height / 2;
     // Clamp values
     this.x = Math.max(0, Math.min(this.x, this.maxX));
     this.y = Math.max(0, Math.min(this.y, this.maxY));
@@ -83,10 +86,10 @@ class Camera {
 }
 
 export class Game {
-  constructor(ctx, width, height) {
+  constructor(ctx, canvasWidth, canvasHeight) {
     this.ctx = ctx;
-    this.width = width;
-    this.height = height;
+    this.canvasWidth = canvasWidth;
+    this.canvasHeight = canvasHeight;
     this.previousElapsed = 0;
     this.loader = new ImageLoader();
     this.keyboard = new Keyboard();
@@ -107,13 +110,10 @@ export class Game {
       Keys.DOWN,
     ]);
 
-    this.tileAtlas = this.loader.get('tiles');
-    this.camera = new Camera(map, this.width, this.height);
-
     const createCanvas = () => {
       const c = document.createElement('canvas');
-      c.width = this.width;
-      c.height = this.height;
+      c.width = this.canvasWidth;
+      c.height = this.canvasHeight;
       return c;
     };
 
@@ -121,7 +121,10 @@ export class Game {
     this.layerCanvas = map.layers.map(createCanvas);
     this.playerCanvas = createCanvas();
 
-    this.mainCharacter = new Player(map, this.width, this.height, 40);
+    this.tileAtlas = this.loader.get('tiles');
+    this.camera = new Camera(this.canvasWidth, this.canvasHeight);
+    this.mainCharacter = new Player(40, 40);
+    this.camera.update(this.mainCharacter);
 
     // initial draw of the map
     this._drawMap();
@@ -135,7 +138,7 @@ export class Game {
       window.requestAnimationFrame(tick);
 
       // Clear previous frame
-      this.ctx.clearRect(0, 0, this.width, this.height);
+      this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
       // Compute delta time in seconds -- also cap it
       // Maximum delta of 250 ms
@@ -160,28 +163,32 @@ export class Game {
     if (this.keyboard.isDown(Keys.DOWN)) { diry = 1; }
 
     if (dirx || diry) {
-      // Make diagonal movement same speed as horiz or vert
+      this.hasScrolled = true;
+
+      // Make diagonal movement same speed as horizontal and vertical movement
       if (dirx && diry) {
         dirx *= Math.sqrt(2) / 2;
         diry *= Math.sqrt(2) / 2;
       }
 
-      this.camera.move(delta, dirx, diry);
       this.mainCharacter.move(delta, dirx, diry);
-      this.hasScrolled = true;
+      this.camera.update(this.mainCharacter);
     }
   }
 
   _drawPlayers() {
     const ctx = this.playerCanvas.getContext('2d');
-    ctx.clearRect(0, 0, this.width, this.height);
+    ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+
+    const x = -this.camera.x + this.mainCharacter.x;
+    const y = -this.camera.y + this.mainCharacter.y;
 
     ctx.fillStyle = 'blue';
     ctx.fillRect(
-      this.mainCharacter.x | 0, // x
-      this.mainCharacter.y | 0, // y
-      this.mainCharacter.size, // width
-      this.mainCharacter.size // height
+      Math.round(x),
+      Math.round(y),
+      this.mainCharacter.width,
+      this.mainCharacter.height
     );
   }
 
@@ -191,21 +198,22 @@ export class Game {
 
   _drawLayer(layer) {
     const ctx = this.layerCanvas[layer].getContext('2d');
-    ctx.clearRect(0, 0, this.width, this.height);
+    ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
-    const startCol = Math.floor(this.camera.x / map.tsize);
-    const endCol = startCol + (this.camera.width / map.tsize);
-    const startRow = Math.floor(this.camera.y / map.tsize);
-    const endRow = startRow + (this.camera.height / map.tsize);
+    const startCol = this.camera.x / map.tsize | 0;
+    const startRow = this.camera.y / map.tsize | 0;
+    const numCols = this.camera.width / map.tsize + 1;
+    const numRows = this.camera.height / map.tsize + 1;
+
     const offsetX = -this.camera.x + startCol * map.tsize;
     const offsetY = -this.camera.y + startRow * map.tsize;
 
-    for (let c = startCol; c <= endCol; c++) {
-      for (let r = startRow; r <= endRow; r++) {
-        const tile = getTile(layer, c, r);
-        const x = (c - startCol) * map.tsize + offsetX;
-        const y = (r - startRow) * map.tsize + offsetY;
-        if (tile !== 0) { // 0 => empty tile
+    for (let i = 0; i < numCols; i++) {
+      for (let j = 0; j < numRows; j++) {
+        const tile = getTile(layer, startCol + i, startRow + j);
+        const x = i * map.tsize + offsetX;
+        const y = j * map.tsize + offsetY;
+        if (tile) { // 0 => empty tile
           ctx.drawImage(
             this.tileAtlas, // image
             (tile - 1) * map.tsize, // source x

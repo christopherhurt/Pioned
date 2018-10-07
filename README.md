@@ -5,7 +5,7 @@ Project for CS 4644 Creative Computing Capstone.
 ## Todo
 
 - [x] Add movable player
-- [ ] Fix camera movement with respect to player
+- [x] Fix camera movement with respect to player
 - [ ] Communication between server and client(s) 
     - [ ] Render all characters in the game
 

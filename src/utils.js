@@ -58,3 +58,10 @@ export class Keyboard {
     return this._keys[keyCode];
   }
 }
+
+export const Keys = {
+  LEFT: 37,
+  RIGHT: 39,
+  UP: 38,
+  DOWN: 40,
+};
