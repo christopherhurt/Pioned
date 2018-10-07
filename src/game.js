@@ -53,6 +53,12 @@ class Player extends GameObject {
     this.maxX = mapWidth - width;
     this.maxY = mapHeight - height;
     this.speed = speed;
+
+    // Assign random color
+    const r = Math.random() * 255;
+    const g = Math.random() * 255;
+    const b = Math.random() * 255;
+    this.color = `rgb(${r}, ${g}, ${b})`;
   }
 
   move(delta, dirx, diry) {
@@ -183,7 +189,16 @@ export class Game {
     const x = -this.camera.x + this.mainCharacter.x;
     const y = -this.camera.y + this.mainCharacter.y;
 
-    ctx.fillStyle = 'blue';
+    // Border around player
+    ctx.fillStyle = 'black';
+    ctx.strokeRect(
+      Math.round(x),
+      Math.round(y),
+      this.mainCharacter.width,
+      this.mainCharacter.height
+    );
+
+    ctx.fillStyle = this.mainCharacter.color;
     ctx.fillRect(
       Math.round(x),
       Math.round(y),
