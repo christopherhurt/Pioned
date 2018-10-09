@@ -8,11 +8,11 @@ Project for CS 4644 Creative Computing Capstone.
 
 First run `yarn` to install dependencies.
 
-Then use `yarn start` to start the development server. It will be running at [localhost:8080](http://localhost:8080/).
+Use `yarn dev` to start the development server. It will be running at [localhost:8080](http://localhost:8080/).
 
-To run the game server, use `yarn serve`.
+To run the game server, use `yarn server`.
 
-To do both at once, use `yarn dev`.
+To do both at once, use `yarn start`.
 
 To create a build, run `yarn build`.
 

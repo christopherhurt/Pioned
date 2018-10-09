@@ -6,10 +6,10 @@
   "author": "Jack Cogdill <jackcogdill@users.noreply.github.com>",
   "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server --inline --colors --watch --hot",
+    "dev": "webpack-dev-server --inline --colors --watch --hot",
     "build": "webpack --mode production",
-    "serve": "nodemon --exec node ./server-start.js",
-    "dev": "concurrently \"yarn start\" \"yarn serve\""
+    "server": "nodemon --exec node ./server-start.js",
+    "start": "concurrently \"yarn dev\" \"yarn server\""
   },
   "devDependencies": {
     "@babel/core": "^7.1.2",
