@@ -6,15 +6,17 @@
   "author": "Jack Cogdill <jackcogdill@users.noreply.github.com>",
   "license": "MIT",
   "scripts": {
-    "dev": "webpack-dev-server --inline --colors --watch --hot",
+    "start": "webpack-dev-server --inline --colors --watch --hot",
     "build": "webpack --mode production",
-    "serve": "nodemon --exec node ./server-start.js"
+    "serve": "nodemon --exec node ./server-start.js",
+    "dev": "concurrently \"yarn start\" \"yarn serve\""
   },
   "devDependencies": {
     "@babel/core": "^7.1.2",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "babel-register": "^6.26.0",
+    "concurrently": "^4.0.1",
     "copy-webpack-plugin": "^4.5.2",
     "nodemon": "^1.18.4",
     "webpack": "^4.20.2",
