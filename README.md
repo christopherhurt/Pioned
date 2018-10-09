@@ -10,7 +10,7 @@ First run `yarn` to install dependencies.
 
 Then use `yarn start` to start the development server. It will be running at [localhost:8080](http://localhost:8080/).
 
-To run the server, use `yarn serve`.
+To run the game server, use `yarn serve`.
 
 To do both at once, use `yarn dev`.
 
@@ -28,6 +28,8 @@ To create a build, run `yarn build`.
 ## Ideas
 
 - [ ] Store the map server-side and allow players to edit the map
+- [ ] Built-in chat
+    - [ ] Also can print info and error messages here (e.g., player joined, disconnected from server)
 - [ ] Better aesthetics
     - [ ] Find a larger tilemap image with more tiles.
     - [ ] Find better character images.
