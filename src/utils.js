@@ -1,3 +1,7 @@
+export function messageFormat(type, data) {
+  return JSON.stringify({type, data});
+}
+
 export class ImageLoader {
   constructor() {
     this.images = {};

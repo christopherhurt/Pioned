@@ -1,4 +1,4 @@
-import { ImageLoader, Keyboard, Keys } from './utils';
+import { ImageLoader, Keyboard, Keys, messageFormat } from './utils';
 
 const map = {
   cols: 12,
@@ -38,7 +38,7 @@ const mapHeight = map.rows * map.tsize;
 
 const DEFAULT_SPEED = 4 * map.tsize; // Pixels per second
 
-class GameObject {
+export class GameObject {
   constructor(x, y, width, height) {
     this.x = x;
     this.y = y;
@@ -47,7 +47,7 @@ class GameObject {
   }
 }
 
-class Player extends GameObject {
+export class Player extends GameObject {
   constructor(width, height, speed = DEFAULT_SPEED) {
     super(0, 0, width, height);
     this.maxX = mapWidth - width;
@@ -101,12 +101,6 @@ export class Game {
     this.keyboard = new Keyboard();
   }
 
-  async load() {
-    await Promise.all([
-      this.loader.load('tiles', 'assets/tiles.png'),
-    ]);
-  }
-
   async init() {
     await this.load();
     this.keyboard.listenForEvents([
@@ -128,13 +122,59 @@ export class Game {
     this.playerCanvas = createCanvas();
 
     this.tileAtlas = this.loader.get('tiles');
+    this.selfPlayer = new Player(40, 40);
     this.camera = new Camera(this.canvasWidth, this.canvasHeight);
-    this.mainCharacter = new Player(40, 40);
-    this.camera.update(this.mainCharacter);
+    this.camera.update(this.selfPlayer);
+
+    this.selfid = -1;
+    this.players = {};
+
+    this.socketSetup();
 
     // initial draw of the map
     this._drawMap();
     this._drawPlayers();
+  }
+
+  async load() {
+    await Promise.all([
+      this.loader.load('tiles', 'assets/tiles.png'),
+    ]);
+  }
+
+  socketSetup() {
+    // Connect to server
+    this.socket = new WebSocket("ws://localhost:5000");
+
+    this.socket.onopen = event => {
+      this.socket.send(messageFormat('playerUpdate', this.selfPlayer));
+    };
+
+    this.socket.onmessage = event => {
+      const { type, data } = JSON.parse(event.data);
+      switch (type) {
+        case 'selfid':
+          this.selfid = data;
+          break;
+        case 'players':
+          for (let key in data) {
+            this.players[key] = Object.assign(new Player, data[key]);
+          }
+          this.render(true);
+          break;
+        case 'playerUpdate':
+          this.players[data.id] = Object.assign(new Player, data.player);
+          this.render(true);
+          break;
+        case 'deletePlayer':
+          delete this.players[data];
+          this.render(true);
+          break;
+        case 'info':
+          console.log('info:', data);
+          break;
+      }
+    };
   }
 
   async run() {
@@ -159,7 +199,7 @@ export class Game {
   }
 
   update(delta) {
-    this.hasScrolled = false;
+    this.hasUpdated = false;
     // Handle camera movement with arrow keys
     let dirx = 0;
     let diry = 0;
@@ -169,7 +209,7 @@ export class Game {
     if (this.keyboard.isDown(Keys.DOWN)) { diry = 1; }
 
     if (dirx || diry) {
-      this.hasScrolled = true;
+      this.hasUpdated = true;
 
       // Make diagonal movement same speed as horizontal and vertical movement
       if (dirx && diry) {
@@ -177,8 +217,9 @@ export class Game {
         diry *= Math.sqrt(2) / 2;
       }
 
-      this.mainCharacter.move(delta, dirx, diry);
-      this.camera.update(this.mainCharacter);
+      this.selfPlayer.move(delta, dirx, diry);
+      this.socket.send(messageFormat('playerUpdate', this.selfPlayer));
+      this.camera.update(this.selfPlayer);
     }
   }
 
@@ -186,25 +227,32 @@ export class Game {
     const ctx = this.playerCanvas.getContext('2d');
     ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
-    const x = -this.camera.x + this.mainCharacter.x;
-    const y = -this.camera.y + this.mainCharacter.y;
+    const drawPlayer = player => {
+      const x = -this.camera.x + player.x;
+      const y = -this.camera.y + player.y;
 
-    // Border around player
-    ctx.fillStyle = 'black';
-    ctx.strokeRect(
-      Math.round(x),
-      Math.round(y),
-      this.mainCharacter.width,
-      this.mainCharacter.height
-    );
+      // Border around player
+      ctx.fillStyle = 'black';
+      ctx.strokeRect(
+        Math.round(x),
+        Math.round(y),
+        player.width,
+        player.height
+      );
 
-    ctx.fillStyle = this.mainCharacter.color;
-    ctx.fillRect(
-      Math.round(x),
-      Math.round(y),
-      this.mainCharacter.width,
-      this.mainCharacter.height
-    );
+      ctx.fillStyle = player.color;
+      ctx.fillRect(
+        Math.round(x),
+        Math.round(y),
+        player.width,
+        player.height
+      );
+    };
+
+    for (let key in this.players) {
+      drawPlayer(this.players[key]);
+    }
+    drawPlayer(this.selfPlayer);
   }
 
   _drawMap() {
@@ -245,9 +293,9 @@ export class Game {
     }
   }
 
-  render() {
+  render(force = false) {
     // Redraw map if there has been scroll
-    if (this.hasScrolled) {
+    if (force || this.hasUpdated) {
       this._drawMap();
       this._drawPlayers();
     }

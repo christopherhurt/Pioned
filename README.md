@@ -6,8 +6,8 @@ Project for CS 4644 Creative Computing Capstone.
 
 - [x] Add movable player
 - [x] Fix camera movement with respect to player
-- [ ] Communication between server and client(s) 
-    - [ ] Render all characters in the game
+- [x] Communication between server and client(s) 
+    - [x] Render all characters in the game
 
 ## Getting started
 
@@ -15,7 +15,9 @@ Project for CS 4644 Creative Computing Capstone.
 
 First run `yarn` to install dependencies.
 
-Then use `yarn start` to start the development server. It will be running at [localhost:8080](http://localhost:8080/).
+Then use `yarn dev` to start the development server. It will be running at [localhost:8080](http://localhost:8080/).
+
+To run the server, use `yarn serve`.
 
 To create a build, run `yarn build`.
 
