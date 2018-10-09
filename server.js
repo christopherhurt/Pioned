@@ -1,5 +1,4 @@
 import WebSocket from 'ws';
-import { Player } from './src/game.js';
 import { messageFormat } from './src/utils.js';
 
 let index = 0;
@@ -37,9 +36,8 @@ wss.on('connection', socket => {
     const { type, data } = JSON.parse(message);
     switch (type) {
       case 'playerUpdate':
-        const player = Object.assign(new Player, data);
-        players[socket.id] = player;
-        wss.broadcastOthers(socket, messageFormat('playerUpdate', { id: socket.id, player }));
+        players[socket.id] = data;
+        wss.broadcastOthers(socket, messageFormat('playerUpdate', { id: socket.id, player: data }));
         break;
     }
   });
