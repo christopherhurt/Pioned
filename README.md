@@ -9,6 +9,10 @@ Project for CS 4644 Creative Computing Capstone.
 - [x] Communication between server and client(s) 
     - [x] Render all characters in the game
 
+## Ideas
+
+- [ ] Store the map server-side and allow players to edit the map
+
 ## Getting started
 
 > Install yarn [here](https://yarnpkg.com/en/docs/install).
