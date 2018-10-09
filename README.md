@@ -8,6 +8,7 @@ Project for CS 4644 Creative Computing Capstone.
 - [x] Fix camera movement with respect to player
 - [x] Communication between server and client(s) 
     - [x] Render all characters in the game
+- [ ] Deploy real server to test on multiple machines
 
 ## Ideas
 
