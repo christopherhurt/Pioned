@@ -112,10 +112,14 @@ export class Game {
     ]);
 
     const createCanvas = () => {
-      const c = document.createElement('canvas');
-      c.width = this.canvasWidth;
-      c.height = this.canvasHeight;
-      return c;
+      const canvas = document.createElement('canvas');
+      canvas.width = this.canvasWidth;
+      canvas.height = this.canvasHeight;
+
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+
+      return canvas;
     };
 
     // Create a canvas for each layer
