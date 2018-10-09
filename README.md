@@ -2,18 +2,6 @@
 
 Project for CS 4644 Creative Computing Capstone.
 
-## Todo
-
-- [x] Add movable player
-- [x] Fix camera movement with respect to player
-- [x] Communication between server and client(s) 
-    - [x] Render all characters in the game
-- [ ] Deploy real server to test on multiple machines
-
-## Ideas
-
-- [ ] Store the map server-side and allow players to edit the map
-
 ## Getting started
 
 > Install yarn [here](https://yarnpkg.com/en/docs/install).
@@ -24,9 +12,25 @@ Then use `yarn start` to start the development server. It will be running at [lo
 
 To run the server, use `yarn serve`.
 
-To do both, use `yarn dev`.
+To do both at once, use `yarn dev`.
 
 To create a build, run `yarn build`.
+
+## Todo
+
+- [x] Add movable player
+    - [x] Fix camera movement with respect to player
+- [x] Communication between server and client(s) 
+    - [x] Render all characters in the game
+- [ ] Deploy real server to test on multiple machines
+
+## Ideas
+
+- [ ] Store the map server-side and allow players to edit the map
+- [ ] Better aesthetics
+    - [ ] Find a larger tilemap image with more tiles.
+    - [ ] Find better character images.
+    - [ ] Add direction and walking animations
 
 ## Credits
 
