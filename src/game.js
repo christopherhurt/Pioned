@@ -3,7 +3,8 @@ import { ImageLoader, Keyboard, Keys, messageFormat } from './utils';
 const map = {
   cols: 12,
   rows: 12,
-  tsize: 64,
+  tsize: 64, // Tile size
+  dsize: 64, // Display size
   layers: [[
     3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
     3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3,
@@ -33,10 +34,10 @@ const map = {
   ]],
 };
 const getTile = (layer, col, row) => map.layers[layer][row * map.cols + col];
-const mapWidth = map.cols * map.tsize;
-const mapHeight = map.rows * map.tsize;
+const mapWidth = map.cols * map.dsize;
+const mapHeight = map.rows * map.dsize;
 
-const DEFAULT_SPEED = 4 * map.tsize; // Pixels per second
+const DEFAULT_SPEED = 4 * map.dsize; // Pixels per second
 
 export class GameObject {
   constructor(x, y, width, height) {
@@ -121,7 +122,9 @@ export class Game {
     this.layerCanvas = map.layers.map(createCanvas);
     this.playerCanvas = createCanvas();
 
-    this.tileAtlas = this.loader.get('tiles');
+    this.tileMap = this.loader.get('tiles');
+    this.tileMap.width = 5;
+
     this.selfPlayer = new Player(40, 40);
     this.camera = new Camera(this.canvasWidth, this.canvasHeight);
     this.camera.update(this.selfPlayer);
@@ -262,32 +265,39 @@ export class Game {
     const ctx = this.layerCanvas[layer].getContext('2d');
     ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
-    const startCol = this.camera.x / map.tsize | 0;
-    const startRow = this.camera.y / map.tsize | 0;
-    const numCols = this.camera.width / map.tsize + 1;
-    const numRows = this.camera.height / map.tsize + 1;
+    const startCol = this.camera.x / map.dsize | 0;
+    const startRow = this.camera.y / map.dsize | 0;
+    const numCols = this.camera.width / map.dsize + 1;
+    const numRows = this.camera.height / map.dsize + 1;
 
-    const offsetX = -this.camera.x + startCol * map.tsize;
-    const offsetY = -this.camera.y + startRow * map.tsize;
+    const offsetX = -this.camera.x + startCol * map.dsize;
+    const offsetY = -this.camera.y + startRow * map.dsize;
 
     for (let i = 0; i < numCols; i++) {
       for (let j = 0; j < numRows; j++) {
         const tile = getTile(layer, startCol + i, startRow + j);
-        const x = i * map.tsize + offsetX;
-        const y = j * map.tsize + offsetY;
-        if (tile) { // 0 => empty tile
-          ctx.drawImage(
-            this.tileAtlas, // image
-            (tile - 1) * map.tsize, // source x
-            0, // source y
-            map.tsize, // source width
-            map.tsize, // source height
-            Math.round(x), // target x
-            Math.round(y), // target y
-            map.tsize, // target width
-            map.tsize // target height
-          );
+        // Empty tile
+        if (tile === 0) {
+          continue;
         }
+
+        const tileX = (tile - 1) % this.tileMap.width;
+        const tileY = (tile - 1) / this.tileMap.width | 0;
+
+        const x = i * map.dsize + offsetX;
+        const y = j * map.dsize + offsetY;
+
+        ctx.drawImage(
+          this.tileMap, // image
+          tileX * map.tsize, // source x
+          tileY * map.tsize, // source y
+          map.tsize, // source width
+          map.tsize, // source height
+          Math.round(x), // target x
+          Math.round(y), // target y
+          map.dsize, // target width
+          map.dsize // target height
+        );
       }
     }
   }
