@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { messageFormat } from './src/utils.js';
+import { messageFormat } from './src/utils';
 
 let index = 0;
 const players = {};
