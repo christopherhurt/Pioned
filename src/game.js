@@ -55,9 +55,9 @@ export class Player extends GameObject {
     this.speed = speed;
 
     // Assign random color
-    const r = Math.random() * 255;
-    const g = Math.random() * 255;
-    const b = Math.random() * 255;
+    const r = Math.random() * 255 | 0;
+    const g = Math.random() * 255 | 0;
+    const b = Math.random() * 255 | 0;
     this.color = `rgb(${r}, ${g}, ${b})`;
   }
 
