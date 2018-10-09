@@ -160,15 +160,15 @@ export class Game {
           for (let key in data) {
             this.players[key] = Object.assign(new Player, data[key]);
           }
-          this.render(true);
+          this.playersMoved = true;
           break;
         case 'playerUpdate':
           this.players[data.id] = Object.assign(new Player, data.player);
-          this.render(true);
+          this.playersMoved = true;
           break;
         case 'deletePlayer':
           delete this.players[data];
-          this.render(true);
+          this.playersMoved = true;
           break;
         case 'info':
           console.log('info:', data);
@@ -199,7 +199,6 @@ export class Game {
   }
 
   update(delta) {
-    this.hasUpdated = false;
     // Handle camera movement with arrow keys
     let dirx = 0;
     let diry = 0;
@@ -209,7 +208,7 @@ export class Game {
     if (this.keyboard.isDown(Keys.DOWN)) { diry = 1; }
 
     if (dirx || diry) {
-      this.hasUpdated = true;
+      this.hasScrolled = true;
 
       // Make diagonal movement same speed as horizontal and vertical movement
       if (dirx && diry) {
@@ -293,10 +292,17 @@ export class Game {
     }
   }
 
-  render(force = false) {
+  render() {
     // Redraw map if there has been scroll
-    if (force || this.hasUpdated) {
+    if (this.hasScrolled) {
+      this.hasScrolled = false;
       this._drawMap();
+      this._drawPlayers();
+    }
+
+    // Redraw players if they moved
+    if (this.playersMoved) {
+      this.playersMoved = false;
       this._drawPlayers();
     }
 
