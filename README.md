@@ -23,7 +23,8 @@ To create a build, run `yarn build`.
 - [x] Communication between server and client(s) 
     - [x] Render all characters in the game
     - [ ] Performance: only draw visible characters
-- [ ] Deploy real server to test on multiple machines
+- [x] Deploy real server to test on multiple machines
+- [ ] Yarn build production environment variable (localhost -> server host)
 
 ## Ideas
 
