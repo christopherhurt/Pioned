@@ -71,7 +71,7 @@ export class Game {
       ]);
     }
     catch (err) {
-      console.log('info:', err);
+      postChat(err, 'error')
       return false;
     }
 
@@ -121,11 +121,12 @@ export class Game {
 
   socketSetup() {
     return new Promise((resolve, reject) => {
-      console.log('info', 'Connecting to server...');
+      postChat('Connecting to server...');
       this.socket = new WebSocket("ws://localhost:5000");
 
       this.socket.onopen = event => {
-        console.log('info:', 'Downloading map...');
+        postChat('Connected!');
+        postChat('Downloading map...');
       };
 
       this.socket.onerror = event => {
@@ -142,6 +143,7 @@ export class Game {
           case 'map': {
             this.map = data;
             this.getTile = (layer, col, row) => this.map.layers[layer][row * this.map.cols + col];
+            postChat('Downloaded map!');
             resolve();
             break;
           }
@@ -164,7 +166,7 @@ export class Game {
             break;
           }
           case 'info': {
-            console.log('info:', data);
+            postChat(data);
             break;
           }
         }

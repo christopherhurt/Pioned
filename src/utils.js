@@ -2,9 +2,20 @@ export function send(socket, type, data) {
   socket.send(JSON.stringify({type, data}));
 }
 
-export function postChat(message) {
+export function postChat(message, type='info') {
   const div = document.createElement('div');
   div.className = 'chat-message';
+  switch(type) {
+    case 'info':
+      div.className += ' chat-info-message';
+      break;
+    case 'debug':
+      div.className += ' chat-debug-message';
+      break;
+    case 'error':
+      div.className += ' chat-error-message';
+      break;
+  }
   div.innerText = message;
 
   const chat = document.getElementById('chat');
