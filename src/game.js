@@ -151,7 +151,7 @@ export class Game {
 
   socketSetup() {
     // Connect to server
-    this.socket = new WebSocket("ws://chrishurt.us:5000");
+    this.socket = new WebSocket("ws://localhost:5000");
 
     this.socket.onopen = event => {
       this.socket.send(messageFormat('playerUpdate', this.selfPlayer));
