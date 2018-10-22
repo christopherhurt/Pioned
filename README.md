@@ -39,7 +39,6 @@ Parker:
     - [x] Render all characters in the game
     - [ ] Performance: only draw visible characters
 - [x] Deploy real server to test on multiple machines
-- [ ] Yarn build production environment variable (localhost -> server host)
 
 ## Ideas
 
@@ -47,8 +46,7 @@ Parker:
 - [ ] Built-in chat
     - [ ] Also can print info and error messages here (e.g., player joined, disconnected from server)
 - [ ] Better aesthetics
-    - [ ] Find a larger tilemap image with more tiles.
-    - [ ] Find better character images.
+    - [ ] Find character images.
     - [ ] Add direction and walking animations
 
 ## Credits
