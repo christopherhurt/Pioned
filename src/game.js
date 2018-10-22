@@ -1,4 +1,4 @@
-import { ImageLoader, Keyboard, Keys, messageFormat } from './utils';
+import { ImageLoader, Keyboard, Keys, messageFormat, postChat } from './utils';
 
 const map = {
   cols: 12,
@@ -178,7 +178,7 @@ export class Game {
           this.playersMoved = true;
           break;
         case 'info':
-          console.log('info:', data);
+          postChat(data);
           break;
       }
     };

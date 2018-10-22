@@ -29,7 +29,7 @@ wss.on('connection', socket => {
   socket.send(messageFormat('selfid', socket.id));
   socket.send(messageFormat('players', players));
 
-  const info = messageFormat('info', `Player${socket.id} joined the server!`);
+  const info = messageFormat('info', `Player${socket.id} joined!`);
   wss.broadcastOthers(socket, info);
 
   socket.on('message', message => {
@@ -45,5 +45,7 @@ wss.on('connection', socket => {
   socket.on('close', () => {
     delete players[socket.id];
     wss.broadcastOthers(socket, messageFormat('deletePlayer', socket.id));
+    const info = messageFormat('info', `Player${socket.id} disconnected.`);
+    wss.broadcastOthers(socket, info);
   });
 });

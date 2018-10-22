@@ -2,12 +2,36 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  display: grid;
-  background: #101214;
 }
 
-canvas {
-  margin: auto;
+body {
+  background: #101214;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-gap: 2em;
+  align-content: center;
+}
+
+#canvas {
+  justify-self: right;
   background: black;
   opacity: 0;
+}
+
+#chat {
+  width: 0;
+  opacity: 0;
+  border: 1px solid yellowgreen;
+  box-sizing: border-box;
+  color: yellow;
+  overflow-y: scroll;
+}
+
+.chat-message {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 0.5em;
+  font-family: sans-serif;
+  margin: 1em;
+  padding: 0.5em 1em;
+  font-size: 13px;
 }

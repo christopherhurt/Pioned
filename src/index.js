@@ -10,6 +10,12 @@ window.onload = () => {
   // Show canvas after size adjustments
   canvas.style.opacity = 1;
 
+  const chat = document.getElementById('chat');
+  chat.style.height = height;
+  chat.style.width = 256;
+  // Show chat
+  chat.style.opacity = 1;
+
   const ctx = canvas.getContext('2d');
   const game = new Game(ctx, width, height);
   game.run();

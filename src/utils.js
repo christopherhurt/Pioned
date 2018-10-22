@@ -2,6 +2,17 @@ export function messageFormat(type, data) {
   return JSON.stringify({type, data});
 }
 
+export function postChat(message) {
+  const div = document.createElement('div');
+  div.className = 'chat-message';
+  div.innerText = message;
+
+  const chat = document.getElementById('chat');
+  chat.appendChild(div);
+  // Scroll to bottom
+  chat.scrollTop = chat.scrollHeight;
+}
+
 export class ImageLoader {
   constructor() {
     this.images = {};
