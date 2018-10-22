@@ -16,6 +16,17 @@ To do both at once, use `yarn start`.
 
 To create a build, run `yarn build`.
 
+## This Week
+
+Jack:
+- [ ] Map mutability
+
+Chris:
+- [ ] Map generation
+
+Parker:
+- [ ] Collision detection
+
 ## Todo
 
 - [x] Add movable player
