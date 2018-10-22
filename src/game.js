@@ -1,44 +1,5 @@
 import { ImageLoader, Keyboard, Keys, send, postChat } from './utils';
 
-const map = {
-  cols: 12,
-  rows: 12,
-  tsize: 8, // Tile size
-  dsize: 64, // Display size
-  layers: [[
-    33, 33, 1, 417, 417, 417, 417, 1, 1, 1, 1, 1,
-    33, 33, 1, 417, 417, 417, 417, 1, 1, 1, 1, 1,
-    33, 33, 1, 417, 417, 417, 1, 1, 1, 1, 1, 1,
-    33, 33, 1, 417, 417, 417, 1, 1, 1, 1, 1, 1,
-    33, 33, 1, 417, 417, 417, 1, 1, 1, 1, 1, 1,
-    33, 33, 1, 1, 417, 417, 2, 1, 1, 1, 1, 1,
-    33, 33, 2, 2, 417, 417, 1, 1, 1, 1, 1, 1,
-    33, 33, 2, 2, 417, 417, 1, 1, 1, 1, 1, 1,
-    33, 1, 1, 1, 417, 417, 1, 1, 1, 1, 1, 1,
-    33, 1, 1, 1, 417, 417, 1, 1, 1, 1, 1, 1,
-    33, 1, 1, 1, 417, 417, 1, 1, 1, 1, 1, 1,
-    33, 1, 1, 1, 417, 417, 1, 1, 1, 1, 1, 3
-  ], [
-    15, 15, 0, 10, 11, 11, 12, 0, 0, 0, 0, 0,
-    15, 15, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0,
-    15, 15, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0,
-    15, 15, 0, 42, 0, 0, 0, 0, 0, 5, 0, 0,
-    15, 0, 0, 74, 0, 0, 0, 0, 0, 0, 0, 0,
-    15, 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0,
-    15, 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0,
-    15, 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0,
-    15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    15, 0, 0, 0, 5, 4, 4, 4, 4, 4, 4, 0,
-    15, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0
-  ]],
-};
-const getTile = (layer, col, row) => map.layers[layer][row * map.cols + col];
-const mapWidth = map.cols * map.dsize;
-const mapHeight = map.rows * map.dsize;
-
-const DEFAULT_SPEED = 4 * map.dsize; // Pixels per second
-
 export class GameObject {
   constructor(x, y, width, height) {
     this.x = x;
@@ -49,7 +10,7 @@ export class GameObject {
 }
 
 export class Player extends GameObject {
-  constructor(width, height, speed = DEFAULT_SPEED) {
+  constructor(width, height, mapWidth, mapHeight, speed) {
     super(0, 0, width, height);
     this.maxX = mapWidth - width;
     this.maxY = mapHeight - height;
@@ -73,7 +34,7 @@ export class Player extends GameObject {
 }
 
 class Camera {
-  constructor(width, height) {
+  constructor(width, height, mapWidth, mapHeight) {
     this.x = 0;
     this.y = 0;
     this.width = width;
@@ -103,7 +64,17 @@ export class Game {
   }
 
   async init() {
-    await this.load();
+    try {
+      await Promise.all([
+        this.socketSetup(),
+        this.loader.load('tiles', 'assets/tilesetP8.png'),
+      ]);
+    }
+    catch (err) {
+      console.log('info:', err);
+      return false;
+    }
+
     this.keyboard.listenForEvents([
       Keys.LEFT,
       Keys.RIGHT,
@@ -128,74 +99,84 @@ export class Game {
     };
 
     // Create a canvas for each layer
-    this.layerCanvas = map.layers.map(createCanvas);
+    this.layerCanvas = this.map.layers.map(createCanvas);
     this.playerCanvas = createCanvas();
 
     this.tileMap = this.loader.get('tiles');
     this.tileMap.width = 32;
 
-    this.selfPlayer = new Player(40, 40);
-    this.camera = new Camera(this.canvasWidth, this.canvasHeight);
+    const DEFAULT_SPEED = 4 * this.map.dsize;
+    this.selfPlayer = new Player(40, 40, this.map.width, this.map.height, DEFAULT_SPEED);
+    send(this.socket, 'playerUpdate', this.selfPlayer);
+
+    this.camera = new Camera(this.canvasWidth, this.canvasHeight, this.map.width, this.map.height);
     this.camera.update(this.selfPlayer);
-
-    this.selfid = -1;
-    this.players = {};
-
-    this.socketSetup();
 
     // initial draw of the map
     this._drawMap();
     this._drawPlayers();
-  }
 
-  async load() {
-    await Promise.all([
-      this.loader.load('tiles', 'assets/tilesetP8.png'),
-    ]);
+    return true;
   }
 
   socketSetup() {
-    // Connect to server
-    this.socket = new WebSocket("ws://localhost:5000");
+    return new Promise((resolve, reject) => {
+      console.log('info', 'Connecting to server...');
+      this.socket = new WebSocket("ws://localhost:5000");
 
-    this.socket.onopen = event => {
-      send(this.socket, 'playerUpdate', this.selfPlayer);
-    };
+      this.socket.onopen = event => {
+        console.log('info:', 'Downloading map...');
+      };
 
-    this.socket.onmessage = event => {
-      const { type, data } = JSON.parse(event.data);
-      switch (type) {
-        case 'selfid': {
-          this.selfid = data;
-          break;
-        }
-        case 'players': {
-          for (let key in data) {
-            this.players[key] = Object.assign(new Player, data[key]);
+      this.socket.onerror = event => {
+        reject('Could not connect to server.');
+      };
+
+      this.socket.onmessage = event => {
+        const { type, data } = JSON.parse(event.data);
+        switch (type) {
+          case 'selfid': {
+            this.selfid = data;
+            break;
           }
-          this.playersMoved = true;
-          break;
+          case 'map': {
+            this.map = data;
+            this.getTile = (layer, col, row) => this.map.layers[layer][row * this.map.cols + col];
+            resolve();
+            break;
+          }
+          case 'players': {
+            this.players = {};
+            for (let key in data) {
+              this.players[key] = Object.assign(new Player, data[key]);
+            }
+            this.playersMoved = true;
+            break;
+          }
+          case 'playerUpdate': {
+            this.players[data.id] = Object.assign(new Player, data.player);
+            this.playersMoved = true;
+            break;
+          }
+          case 'deletePlayer': {
+            delete this.players[data];
+            this.playersMoved = true;
+            break;
+          }
+          case 'info': {
+            console.log('info:', data);
+            break;
+          }
         }
-        case 'playerUpdate': {
-          this.players[data.id] = Object.assign(new Player, data.player);
-          this.playersMoved = true;
-          break;
-        }
-        case 'deletePlayer': {
-          delete this.players[data];
-          this.playersMoved = true;
-          break;
-        }
-        case 'info': {
-          postChat(data);
-          break;
-        }
-      }
-    };
+      };
+    });
   }
 
   async run() {
-    await this.init();
+    const success = await this.init();
+    if (!success) {
+      return;
+    }
 
     const tick = (elapsed) => {
       window.requestAnimationFrame(tick);
@@ -272,24 +253,24 @@ export class Game {
   }
 
   _drawMap() {
-    map.layers.forEach((layer, index) => this._drawLayer(index));
+    this.map.layers.forEach((layer, index) => this._drawLayer(index));
   }
 
   _drawLayer(layer) {
     const ctx = this.layerCanvas[layer].getContext('2d');
     ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
-    const startCol = this.camera.x / map.dsize | 0;
-    const startRow = this.camera.y / map.dsize | 0;
-    const numCols = this.camera.width / map.dsize + 1;
-    const numRows = this.camera.height / map.dsize + 1;
+    const startCol = this.camera.x / this.map.dsize | 0;
+    const startRow = this.camera.y / this.map.dsize | 0;
+    const numCols = this.camera.width / this.map.dsize + 1;
+    const numRows = this.camera.height / this.map.dsize + 1;
 
-    const offsetX = -this.camera.x + startCol * map.dsize;
-    const offsetY = -this.camera.y + startRow * map.dsize;
+    const offsetX = -this.camera.x + startCol * this.map.dsize;
+    const offsetY = -this.camera.y + startRow * this.map.dsize;
 
     for (let i = 0; i < numCols; i++) {
       for (let j = 0; j < numRows; j++) {
-        const tile = getTile(layer, startCol + i, startRow + j);
+        const tile = this.getTile(layer, startCol + i, startRow + j);
         // Empty tile
         if (tile === 0) {
           continue;
@@ -298,19 +279,19 @@ export class Game {
         const tileX = (tile - 1) % this.tileMap.width;
         const tileY = (tile - 1) / this.tileMap.width | 0;
 
-        const x = i * map.dsize + offsetX;
-        const y = j * map.dsize + offsetY;
+        const x = i * this.map.dsize + offsetX;
+        const y = j * this.map.dsize + offsetY;
 
         ctx.drawImage(
           this.tileMap, // image
-          tileX * map.tsize, // source x
-          tileY * map.tsize, // source y
-          map.tsize, // source width
-          map.tsize, // source height
+          tileX * this.map.tsize, // source x
+          tileY * this.map.tsize, // source y
+          this.map.tsize, // source width
+          this.map.tsize, // source height
           Math.round(x), // target x
           Math.round(y), // target y
-          map.dsize, // target width
-          map.dsize // target height
+          this.map.dsize, // target width
+          this.map.dsize // target height
         );
       }
     }
