@@ -3,6 +3,7 @@ html, body {
   padding: 0;
   height: 100%;
   display: grid;
+  background: #101214;
 }
 
 canvas {
