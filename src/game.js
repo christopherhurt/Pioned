@@ -129,6 +129,10 @@ export class Game {
         postChat('Downloading map...');
       };
 
+      this.socket.onclose = event => {
+        postChat('Disconnected from server.', 'error')
+      };
+
       this.socket.onerror = event => {
         reject('Could not connect to server.');
       };
