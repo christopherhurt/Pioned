@@ -109,6 +109,11 @@ export class Game {
       Keys.RIGHT,
       Keys.UP,
       Keys.DOWN,
+      Keys.W,
+      Keys.A,
+      Keys.S,
+      Keys.D,
+      Keys.K,
     ]);
 
     const createCanvas = () => {
@@ -209,10 +214,10 @@ export class Game {
     // Handle camera movement with arrow keys
     let dirx = 0;
     let diry = 0;
-    if (this.keyboard.isDown(Keys.LEFT)) { dirx = -1; }
-    if (this.keyboard.isDown(Keys.RIGHT)) { dirx = 1; }
-    if (this.keyboard.isDown(Keys.UP)) { diry = -1; }
-    if (this.keyboard.isDown(Keys.DOWN)) { diry = 1; }
+    if (this.keyboard.isDown([Keys.LEFT, Keys.A])) { dirx = -1; }
+    if (this.keyboard.isDown([Keys.RIGHT, Keys.D])) { dirx = 1; }
+    if (this.keyboard.isDown([Keys.UP, Keys.W])) { diry = -1; }
+    if (this.keyboard.isDown([Keys.DOWN, Keys.S])) { diry = 1; }
 
     if (dirx || diry) {
       this.hasScrolled = true;
