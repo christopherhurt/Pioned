@@ -5,7 +5,7 @@ html, body {
 }
 
 body {
-  background: #101214;
+  background: #101214 url(assets/binding_dark.png);
   display: grid;
   grid-template-columns: 2fr 1fr;
   grid-gap: 2em;
