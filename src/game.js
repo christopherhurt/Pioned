@@ -1,4 +1,4 @@
-import { ImageLoader, Keyboard, Keys, messageFormat, postChat } from './utils';
+import { ImageLoader, Keyboard, Keys, send, postChat } from './utils';
 
 const map = {
   cols: 12,
@@ -159,7 +159,7 @@ export class Game {
     this.socket = new WebSocket("ws://localhost:5000");
 
     this.socket.onopen = event => {
-      this.socket.send(messageFormat('playerUpdate', this.selfPlayer));
+      send(this.socket, 'playerUpdate', this.selfPlayer);
     };
 
     this.socket.onmessage = event => {
@@ -229,7 +229,7 @@ export class Game {
       }
 
       this.selfPlayer.move(delta, dirx, diry);
-      this.socket.send(messageFormat('playerUpdate', this.selfPlayer));
+      send(this.socket, 'playerUpdate', this.selfPlayer);
       this.camera.update(this.selfPlayer);
     }
   }

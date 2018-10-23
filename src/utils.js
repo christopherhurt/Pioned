@@ -1,5 +1,5 @@
-export function messageFormat(type, data) {
-  return JSON.stringify({type, data});
+export function send(socket, type, data) {
+  socket.send(JSON.stringify({type, data}));
 }
 
 export function postChat(message) {
