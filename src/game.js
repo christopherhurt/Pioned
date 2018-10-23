@@ -146,7 +146,10 @@ export class Game {
           }
           case 'map': {
             this.map = data;
+
             this.getTile = (layer, col, row) => this.map.layers[layer][row * this.map.cols + col];
+            this.setTile = (layer, col, row, type) => this.map.layers[layer][row * this.map.cols + col] = type;
+
             postChat('Downloaded map!');
             resolve();
             break;
@@ -160,8 +163,15 @@ export class Game {
             break;
           }
           case 'playerUpdate': {
-            this.players[data.id] = Object.assign(new Player, data.player);
+            const { id, player } = data;
+            this.players[id] = Object.assign(new Player, player);
             this.playersMoved = true;
+            break;
+          }
+          case 'tileUpdate': {
+            const { layer, col, row, type } = data;
+            this.setTile(layer, col, row, type);
+            this.hasScrolled = true;
             break;
           }
           case 'deletePlayer': {
@@ -223,6 +233,24 @@ export class Game {
       this.selfPlayer.move(delta, dirx, diry);
       send(this.socket, 'playerUpdate', this.selfPlayer);
       this.camera.update(this.selfPlayer);
+    }
+
+    // Place tree
+    if (this.keyboard.isDown(Keys.K)) {
+      const tree = 15;
+      const ocean = 417;
+
+      const col = this.selfPlayer.x / this.map.dsize | 0;
+      const row = this.selfPlayer.y / this.map.dsize | 0;
+
+      const base = this.getTile(0, col, row);
+      const top = this.getTile(1, col, row);
+
+      if (base !== ocean && top !== tree) {
+        this.setTile(1, col, row, tree);
+        send(this.socket, 'tileUpdate', { layer: 1, col, row, type: tree });
+        this.hasScrolled = true;
+      }
     }
   }
 

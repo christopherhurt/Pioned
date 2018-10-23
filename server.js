@@ -39,6 +39,7 @@ const map = {
 };
 map.width = map.cols * map.dsize;
 map.height = map.rows * map.dsize;
+const setTile = (layer, col, row, type) => map.layers[layer][row * map.cols + col] = type;
 
 const wss = new WebSocket.Server({ port: 5000 });
 
@@ -74,6 +75,11 @@ wss.on('connection', socket => {
       case 'playerUpdate': {
         players[socket.id] = data;
         wss.broadcastOthers(socket, 'playerUpdate', { id: socket.id, player: data });
+        break;
+      }
+      case 'tileUpdate': {
+        setTile(data.layer, data.col, data.row, data.type);
+        wss.broadcastOthers(socket, 'tileUpdate', data);
         break;
       }
     }
