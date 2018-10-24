@@ -6,10 +6,11 @@
   "author": "Jack Cogdill <jackcogdill@users.noreply.github.com>",
   "license": "MIT",
   "scripts": {
-    "build": "webpack --mode production",
     "client": "webpack-dev-server --inline --colors --watch --hot",
-    "server": "nodemon --exec babel-node --presets @babel/preset-env ./server.js",
-    "start": "concurrently \"yarn client\" \"yarn server\""
+    "server": "nodemon --exec \"yarn serve\"",
+    "start": "concurrently \"yarn client\" \"yarn server\"",
+    "build": "webpack --mode production",
+    "serve": "babel-node --presets @babel/preset-env ./server.js"
   },
   "devDependencies": {
     "@babel/core": "^7.1.2",

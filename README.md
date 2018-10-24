@@ -10,11 +10,15 @@ First run `yarn` to install dependencies.
 
 Use `yarn client` to start the development server. It will be running at [localhost:8080](http://localhost:8080/).
 
-To run the game server, use `yarn server`.
+To run the game server (for development), use `yarn server`.
 
 To do both at once, use `yarn start`. *(Recommended)*
 
+## Running in Production
+
 To create a build, run `yarn build`.
+
+To run the game server, use `yarn serve`.
 
 ## This Week
 
