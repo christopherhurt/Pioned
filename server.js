@@ -34,10 +34,11 @@ wss.on('connection', socket => {
   socket.on('message', message => {
     const { type, data } = JSON.parse(message);
     switch (type) {
-      case 'playerUpdate':
+      case 'playerUpdate': {
         players[socket.id] = data;
         wss.broadcastOthers(socket, 'playerUpdate', { id: socket.id, player: data });
         break;
+      }
     }
   });
 

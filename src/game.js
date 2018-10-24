@@ -165,26 +165,31 @@ export class Game {
     this.socket.onmessage = event => {
       const { type, data } = JSON.parse(event.data);
       switch (type) {
-        case 'selfid':
+        case 'selfid': {
           this.selfid = data;
           break;
-        case 'players':
+        }
+        case 'players': {
           for (let key in data) {
             this.players[key] = Object.assign(new Player, data[key]);
           }
           this.playersMoved = true;
           break;
-        case 'playerUpdate':
+        }
+        case 'playerUpdate': {
           this.players[data.id] = Object.assign(new Player, data.player);
           this.playersMoved = true;
           break;
-        case 'deletePlayer':
+        }
+        case 'deletePlayer': {
           delete this.players[data];
           this.playersMoved = true;
           break;
-        case 'info':
+        }
+        case 'info': {
           postChat(data);
           break;
+        }
       }
     };
   }
