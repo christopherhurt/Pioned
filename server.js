@@ -78,7 +78,8 @@ wss.on('connection', socket => {
         break;
       }
       case 'tileUpdate': {
-        setTile(data.layer, data.col, data.row, data.type);
+        const { layer, col, row, type } = data;
+        setTile(layer, col, row, type);
         wss.broadcastOthers(socket, 'tileUpdate', data);
         break;
       }
