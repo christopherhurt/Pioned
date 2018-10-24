@@ -23,7 +23,7 @@ body {
   opacity: 0;
   border: 1px solid yellowgreen;
   box-sizing: border-box;
-  color: yellow;
+  color: white;
   overflow-y: scroll;
 }
 
@@ -34,4 +34,16 @@ body {
   margin: 1em;
   padding: 0.5em 1em;
   font-size: 13px;
+}
+
+.chat-info-message {
+  color: yellow;
+}
+
+.chat-debug-message {
+  color: cyan;
+}
+
+.chat-error-message {
+  color: red;
 }
