@@ -23,7 +23,7 @@ To run the game server, use `yarn serve`.
 ## This Week
 
 Jack:
-- [ ] Map mutability
+- [x] Map mutability
 
 Chris:
 - [ ] Map generation
