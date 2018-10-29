@@ -1,41 +1,23 @@
 import WebSocket from 'ws';
 import { send } from './src/utils';
+import { createMap } from './src/map-gen.js';
 
 let index = 0;
 const players = {};
 
+const MAP_BASE = 12;
+const MAP_ITER = 3;
+const MAP_SIZE = MAP_BASE * Math.pow(2, MAP_ITER);
+const MAP_LAND_PROB = 0.3;
+const MAP_SMOOTHNESS = 5;
+const MAP_OBJECTS = { 'tree' : 0.25, 'coastLeft' : 0.1 };
+
 const map = {
-  cols: 12,
-  rows: 12,
+  cols: MAP_SIZE,
+  rows: MAP_SIZE,
   tsize: 8, // Tile size
   dsize: 64, // Display size
-  layers: [[
-    33, 33, 1, 417, 417, 417, 417, 1, 1, 1, 1, 1,
-    33, 33, 1, 417, 417, 417, 417, 1, 1, 1, 1, 1,
-    33, 33, 1, 417, 417, 417, 1, 1, 1, 1, 1, 1,
-    33, 33, 1, 417, 417, 417, 1, 1, 1, 1, 1, 1,
-    33, 33, 1, 417, 417, 417, 1, 1, 1, 1, 1, 1,
-    33, 33, 1, 1, 417, 417, 2, 1, 1, 1, 1, 1,
-    33, 33, 2, 2, 417, 417, 1, 1, 1, 1, 1, 1,
-    33, 33, 2, 2, 417, 417, 1, 1, 1, 1, 1, 1,
-    33, 1, 1, 1, 417, 417, 1, 1, 1, 1, 1, 1,
-    33, 1, 1, 1, 417, 417, 1, 1, 1, 1, 1, 1,
-    33, 1, 1, 1, 417, 417, 1, 1, 1, 1, 1, 1,
-    33, 1, 1, 1, 417, 417, 1, 1, 1, 1, 1, 3
-  ], [
-    15, 15, 0, 10, 11, 11, 12, 0, 0, 0, 0, 0,
-    15, 15, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0,
-    15, 15, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0,
-    15, 15, 0, 42, 0, 0, 0, 0, 0, 5, 0, 0,
-    15, 0, 0, 74, 0, 0, 0, 0, 0, 0, 0, 0,
-    15, 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0,
-    15, 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0,
-    15, 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0,
-    15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    15, 0, 0, 0, 5, 4, 4, 4, 4, 4, 4, 0,
-    15, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0
-  ]],
+  layers: createMap('land', 'water', MAP_BASE, MAP_LAND_PROB, MAP_ITER, MAP_SMOOTHNESS, MAP_OBJECTS)
 };
 map.width = map.cols * map.dsize;
 map.height = map.rows * map.dsize;
