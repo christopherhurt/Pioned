@@ -22,22 +22,22 @@ To run the game server, use `yarn serve`.
 
 ## This Week
 
-Jack:
-- [x] Map mutability
-
-Chris:
-- [x] Map generation
-
-Parker:
-- [ ] Collision detection
+- [ ] Collision detection (including trees)
+- [ ] Inventory
+- [ ] Destroy trees to get wood
+- [ ] Be able to place bridges
+- [ ] Server: Track the discreet islands
+- [ ] Server: Decide where players start (balance on islands)
+- [ ] Track which islands player has visited
 
 ## Todo
 
-- [ ] Server decides where players start (balance on islands)
 - [ ] Performance: only draw visible characters
+- [ ] Performance: only redraw map if parts of the visible map changed (socket messages)
 - [ ] Use environment variables to set the (websocket) host
 - [ ] Better aesthetics
     - [ ] Find character images.
+    - [ ] Add current random color mask on top (so players look different)
     - [ ] Add direction and walking animations
 
 ## Completed Tasks
@@ -48,6 +48,8 @@ Parker:
 - [x] Store the map server-side and allow players to edit the map
 - [x] Built-in chat
     - [x] Also can print info and error messages here (e.g., player joined, disconnected from server)
+- [x] Map mutability
+- [x] Map generation
 
 ## Credits
 
