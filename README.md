@@ -22,13 +22,19 @@ To run the game server, use `yarn serve`.
 
 ## This Week
 
+**Parker**:
 - [ ] Collision detection (including trees)
+
+**Jack**:
 - [ ] Inventory
 - [ ] Destroy trees to get wood
 - [ ] Be able to place bridges
+- [ ] Show dotted line around square that will be changed
+
+**Chris**:
 - [ ] Server: Track the discreet islands
 - [ ] Server: Decide where players start (balance on islands)
-- [ ] Track which islands player has visited
+- [ ] Track which islands player has visited (for potential objective; e.g., player needs to build a bridge to new island, travel to 4 islands, etc)
 
 ## Todo
 
