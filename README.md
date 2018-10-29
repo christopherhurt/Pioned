@@ -33,21 +33,21 @@ Parker:
 
 ## Todo
 
-- [x] Add movable player
-    - [x] Fix camera movement with respect to player
-- [x] Communication between server and client(s) 
-    - [x] Render all characters in the game
-    - [ ] Performance: only draw visible characters
-- [x] Deploy real server to test on multiple machines
-
-## Ideas
-
-- [ ] Store the map server-side and allow players to edit the map
-- [ ] Built-in chat
-    - [ ] Also can print info and error messages here (e.g., player joined, disconnected from server)
+- [ ] Server decides where players start (balance on islands)
+- [ ] Performance: only draw visible characters
+- [ ] Use environment variables to set the (websocket) host
 - [ ] Better aesthetics
     - [ ] Find character images.
     - [ ] Add direction and walking animations
+
+## Completed Tasks
+- [x] Add movable player
+    - [x] Fix camera movement with respect to player
+- [x] Render all characters in the game
+- [x] Deploy real server to test on multiple machines
+- [x] Store the map server-side and allow players to edit the map
+- [x] Built-in chat
+    - [x] Also can print info and error messages here (e.g., player joined, disconnected from server)
 
 ## Credits
 
