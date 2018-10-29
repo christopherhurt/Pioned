@@ -12,8 +12,8 @@ const BLOCKS = {
 /* Create and return generated tile map array */
 export function createMap(mainBlock, fillBlock, seedSize, mainBlockChance, passes, smoothing, objects) {
   // Getting IDs of blocks used to generate map
-  var mainID = BLOCKS[mainBlock];
-  var fillID = BLOCKS[fillBlock];
+  const mainID = BLOCKS[mainBlock];
+  const fillID = BLOCKS[fillBlock];
 
   if(mainID == undefined || fillID == undefined) {
     throw 'Invalid block name when generating map';
@@ -27,28 +27,28 @@ export function createMap(mainBlock, fillBlock, seedSize, mainBlockChance, passe
   if(seedSize < 1) throw 'Seed size of map generation must be positive';
   if(mainBlockChance < 0 || mainBlockChance > 1) throw 'Main block probability in map generation must be between 0 and 1';
 
-  var lay1 = seedGen(mainID, fillID, seedSize, mainBlockChance);
+  let lay1 = seedGen(mainID, fillID, seedSize, mainBlockChance);
 
   // Iterating to produce greater map detail
-  for(var i = 0; i < passes; i++) {
+  for(let i = 0; i < passes; i++) {
     lay1 = iterateMapGen(lay1, mainID, fillID, smoothing);
   }
 
   // Construct second layer, randomly consists listed objects
-  var lay2 = constructObjectLayer(lay1, mainID, objects);
+  const lay2 = constructObjectLayer(lay1, mainID, objects);
 
   // Reorganize and combine layers to create final map
-  var data1 = [];
-  var data2 = [];
+  const data1 = [];
+  const data2 = [];
 
-  for(var i = 0; i < lay1.length; i++) {
-    for(var j = 0; j < lay1[0].length; j++) {
+  for(let i = 0; i < lay1.length; i++) {
+    for(let j = 0; j < lay1[0].length; j++) {
       data1.push(lay1[i][j]);
       data2.push(lay2[i][j]);
     }
   }
 
-  var map = [];
+  const map = [];
   map.push(data1);
   map.push(data2);
 
@@ -57,12 +57,12 @@ export function createMap(mainBlock, fillBlock, seedSize, mainBlockChance, passe
 
 /* Default seed value */
 function seedGen(mainID, fillID, seedSize, mainBlockChance) {
-  var seed = [];
+  const seed = [];
 
-  for(var i = 0; i < seedSize; i++) {
+  for(let i = 0; i < seedSize; i++) {
     seed[i] = [];
 
-    for(var j = 0; j < seedSize; j++) {
+    for(let j = 0; j < seedSize; j++) {
       seed[i][j] = Math.random() < mainBlockChance ? mainID : fillID;
     }
   }
@@ -73,12 +73,12 @@ function seedGen(mainID, fillID, seedSize, mainBlockChance) {
 /* Iterates on map array to produce greater detail */
 function iterateMapGen(map, mainID, fillID, smoothing) {
   // Expand map so each block becomes four blocks
-  var expansion = [];
+  const expansion = [];
 
-  for(var i = 0; i < map.length; i++) {
-    var row = [];
+  for(let i = 0; i < map.length; i++) {
+    const row = [];
 
-    for(var j = 0; j < map[0].length; j++) {
+    for(let j = 0; j < map[0].length; j++) {
       row.push(map[i][j]);
       row.push(map[i][j]);
     }
@@ -88,12 +88,12 @@ function iterateMapGen(map, mainID, fillID, smoothing) {
   }
 
   // Copy expanded map to keep original static
-  var mapCopy = [];
+  const mapCopy = [];
 
-  for(var i = 0; i < expansion.length; i++) {
-    var row = [];
+  for(let i = 0; i < expansion.length; i++) {
+    const row = [];
 
-    for(var j = 0; j < expansion[0].length; j++) {
+    for(let j = 0; j < expansion[0].length; j++) {
       row.push(expansion[i][j]);
     }
 
@@ -101,12 +101,12 @@ function iterateMapGen(map, mainID, fillID, smoothing) {
   }
 
   // Refine map to create smooth edges
-  for(var i = 0; i < mapCopy.length; i++) {
-    for(var j = 0; j < mapCopy[0].length; j++) {
-      var surroundingMain = surroundingMainBlocks(expansion, mainID, i, j);
-      var surroundingTotal = surroundingTotalBlocks(expansion, i, j);
+  for(let i = 0; i < mapCopy.length; i++) {
+    for(let j = 0; j < mapCopy[0].length; j++) {
+      const surroundingMain = surroundingMainBlocks(expansion, mainID, i, j);
+      const surroundingTotal = surroundingTotalBlocks(expansion, i, j);
 
-      var newBlock;
+      let newBlock;
       if(surroundingTotal - surroundingMain > smoothing || Math.random() * surroundingTotal >= surroundingMain) {
         newBlock = fillID;
       } else {
@@ -122,12 +122,12 @@ function iterateMapGen(map, mainID, fillID, smoothing) {
 
 /* Determines number of surrounding main blocks at given (x, y) location on map (including (x, y) itself) */
 function surroundingMainBlocks(map, mainID, x, y) {
-  var count = 0;
+  let count = 0;
 
-  for(var i = -1; i <= 1; i++) {
-    for(var j = -1; j <= 1; j++) {
-      var xIndex = x + i;
-      var yIndex = y + j;
+  for(let i = -1; i <= 1; i++) {
+    for(let j = -1; j <= 1; j++) {
+      const xIndex = x + i;
+      const yIndex = y + j;
 
       if(xIndex >= 0 && xIndex < map.length && yIndex >= 0 && yIndex < map[0].length && map[xIndex][yIndex] == mainID) {
         count++;
@@ -140,12 +140,12 @@ function surroundingMainBlocks(map, mainID, x, y) {
 
 /* Determines total number of surrounding blocks on map at (x, y), will always be 9 unless block is on the edge of the map */
 function surroundingTotalBlocks(map, x, y) {
-  var count = 0;
+  let count = 0;
 
-  for(var i = -1; i <= 1; i++) {
-    for(var j = -1; j <= 1; j++) {
-      var xIndex = x + i;
-      var yIndex = y + j;
+  for(let i = -1; i <= 1; i++) {
+    for(let j = -1; j <= 1; j++) {
+      const xIndex = x + i;
+      const yIndex = y + j;
 
       if(xIndex >= 0 && xIndex < map.length && yIndex >= 0 && yIndex < map[0].length) {
         count++;
@@ -159,29 +159,29 @@ function surroundingTotalBlocks(map, x, y) {
 /* Creates second map layer consisting of overlaid objects */
 function constructObjectLayer(bottomLayer, mainID, objects) {
   // Generate key array, necessary for ordering
-  var keys = [];
+  const keys = [];
 
-  for(var key in objects) {
+  for(const key in objects) {
     keys.push(key);
   }
 
   // Constructing layer using listed objects and relative probabilities
-  var lay = [];
+  const lay = [];
 
-  for(var i = 0; i < bottomLayer.length; i++) {
-    var row = [];
+  for(let i = 0; i < bottomLayer.length; i++) {
+    const row = [];
 
-    for(var j = 0; j < bottomLayer[0].length; j++) {
+    for(let j = 0; j < bottomLayer[0].length; j++) {
       if(bottomLayer[i][j] == mainID) {
-        var keyIndex = parseInt(Math.random() * keys.length);
-        var key = keys[keyIndex];
-        var prob = objects[key];
+        const keyIndex = parseInt(Math.random() * keys.length);
+        const key = keys[keyIndex];
+        const prob = objects[key];
 
         if(prob == undefined || prob < 0 || prob > 1) {
           throw 'Relative object probabilities must be between 0 and 1';
         }
 
-        var keyID = BLOCKS[key];
+        const keyID = BLOCKS[key];
 
         if(keyID == undefined) {
           throw 'Object name in map generation does not exist';
