@@ -26,7 +26,7 @@ Jack:
 - [x] Map mutability
 
 Chris:
-- [ ] Map generation
+- [x] Map generation
 
 Parker:
 - [ ] Collision detection
