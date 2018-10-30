@@ -14,7 +14,16 @@ export class GameObject {
 
 export class Player extends GameObject {
   constructor(width, height, map) {
-    super(0, 0, width, height, map);
+    var col = 0
+    var row = 0
+    for(let i = 0; i < this.map.layers.length; i++){
+      while(this.map.getTile(i,col,row) === 417){
+        col++;
+        row++;
+      }
+      break;
+    }
+    super(col, row, width, height, map);
     this.maxX = this.map.width - width;
     this.maxY = this.map.height - height;
 
@@ -29,9 +38,69 @@ export class Player extends GameObject {
     // Move player
     this.x += dirx * this.speed * delta;
     this.y += diry * this.speed * delta;
+    
+    this.collide(dirx,diry)
+
     // Clamp values
     this.x = Math.max(0, Math.min(this.x, this.maxX));
     this.y = Math.max(0, Math.min(this.y, this.maxY));
+  }
+
+  collide(dirx, diry) {
+    var row, col;
+    // -1 in right and bottom is because image ranges from 0..63
+    // and not up to 64
+    var left = this.x - this.width / 2;
+    var right = this.x + this.width / 2 - 1;
+    var top = this.y - this.height / 2;
+    var bottom = this.y + this.height / 2 - 1;
+
+
+    // const startCol = this.x / map.dsize | 0;
+    // const startRow = this.y / map.dsize | 0;
+    // const numCols = this.width / map.dsize + 1;
+    // const numRows = this.height / map.dsize + 1;
+
+    // const offsetX = -this.x + startCol * map.dsize;
+    // const offsetY = -this.y + startRow * map.dsize;
+    // var collision = false
+    // for (let i = 0; i < numCols; i++) {
+    //   for (let j = 0; j < numRows; j++) {
+    //     const x = i * map.dsize + offsetX;
+    //     const y = j * map.dsize + offsetY;
+    //     collision = isSolidTileAtXY(x,y) && collision
+    //   }
+    // }
+    // check for collisions on sprite sides
+    var collision =
+        this.map.isSolidTileAtXY(left, top) ||
+        this.map.isSolidTileAtXY(right, top) ||
+        this.map.isSolidTileAtXY(right, bottom) ||
+        this.map.isSolidTileAtXY(left, bottom);
+    if(!collision) return;
+    
+    // if (diry > 0 && dirx > 0) {
+    //   row = getRow(bottom);
+    //   this.y = -this.height / 2 + getY(row);
+    //   col = getCol(right);
+    //   this.x = -this.width / 2 + getX(col);
+    // }
+    if (diry > 0) {
+        row = this.map.getRow(bottom);
+        this.y = -this.height / 2 + getY(row);
+    }
+    if (diry < 0) {
+        row = this.map.getRow(top);
+        this.y = this.height / 2 + getY(row + 1);
+    }
+    if (dirx > 0) {
+        col = this.map.getCol(right);
+        this.x = -this.width / 2 + getX(col);
+    }
+    if (dirx < 0) {
+        col = this.map.getCol(left);
+        this.x = this.width / 2 + getX(col + 1);
+    }
   }
 }
 
