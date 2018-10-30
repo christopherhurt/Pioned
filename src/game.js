@@ -39,14 +39,25 @@ export class Player extends GameObject {
     this.x += dirx * this.speed * delta;
     this.y += diry * this.speed * delta;
     
-    this.collide(dirx,diry)
+    var currentDir = "";
+    if(dirx === 0 && diry === 1){currentDir = "S";}
+    else if(dirx === 0 && diry === -1){currentDir = "N";}
+    else if(dirx === 1 && diry === 0){currentDir = "E";}
+    else if(dirx === -1 && diry === 0){currentDir = "W";}
+    else if(dirx === Math.sqrt(2)/2 && diry === Math.sqrt(2)/2){currentDir = "SE";}
+    else if(dirx === Math.sqrt(2)/2 && diry === -Math.sqrt(2)/2){currentDir = "NE";}
+    else if(dirx === -Math.sqrt(2)/2 && diry === Math.sqrt(2)/2){currentDir = "SW";}
+    else if(dirx === -Math.sqrt(2)/2 && diry === -Math.sqrt(2)/2){currentDir = "NW";}
+    // postChat(currentDir)
+    this.collide(dirx,diry);
 
     // Clamp values
     this.x = Math.max(0, Math.min(this.x, this.maxX));
     this.y = Math.max(0, Math.min(this.y, this.maxY));
   }
 
-  collide(dirx, diry) {
+  collide(dirx,diry) {  
+    
     var row, col;
     // -1 in right and bottom is because image ranges from 0..63
     // and not up to 64
@@ -54,8 +65,8 @@ export class Player extends GameObject {
     var right = this.x + this.width / 2 - 1;
     var top = this.y - this.height / 2;
     var bottom = this.y + this.height / 2 - 1;
-
-
+    
+   
     // const startCol = this.x / map.dsize | 0;
     // const startRow = this.y / map.dsize | 0;
     // const numCols = this.width / map.dsize + 1;
@@ -71,20 +82,17 @@ export class Player extends GameObject {
     //     collision = isSolidTileAtXY(x,y) && collision
     //   }
     // }
-    // check for collisions on sprite sides
+    // check for collisions on sprite sides 
+    
     var collision =
         this.map.isSolidTileAtXY(left, top) ||
         this.map.isSolidTileAtXY(right, top) ||
         this.map.isSolidTileAtXY(right, bottom) ||
         this.map.isSolidTileAtXY(left, bottom);
     if(!collision) return;
-    
-    // if (diry > 0 && dirx > 0) {
-    //   row = getRow(bottom);
-    //   this.y = -this.height / 2 + getY(row);
-    //   col = getCol(right);
-    //   this.x = -this.width / 2 + getX(col);
-    // }
+    postChat("Collision: "+collision);
+
+
     if (diry > 0) {
         row = this.map.getRow(bottom);
         this.y = -this.height / 2 + getY(row);
