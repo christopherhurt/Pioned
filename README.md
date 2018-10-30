@@ -38,6 +38,7 @@ To run the game server, use `yarn serve`.
 
 ## Todo
 
+- [ ] Make game canvas entire window dimensions, add resive event listener, overlay chat
 - [ ] Performance: only draw visible characters
 - [ ] Performance: only redraw map if parts of the visible map changed (socket messages)
 - [ ] Use environment variables to set the (websocket) host
