@@ -1,4 +1,5 @@
 import { ImageLoader, Keyboard, Keys, send, postChat } from './utils';
+import { GameMap } from './map';
 
 export class GameObject {
   constructor(x, y, width, height) {
@@ -145,11 +146,7 @@ export class Game {
             break;
           }
           case 'map': {
-            this.map = data;
-
-            this.getTile = (layer, col, row) => this.map.layers[layer][row * this.map.cols + col];
-            this.setTile = (layer, col, row, type) => this.map.layers[layer][row * this.map.cols + col] = type;
-
+            this.map = Object.assign(new GameMap, data);
             postChat('Downloaded map!');
             resolve();
             break;
@@ -170,7 +167,7 @@ export class Game {
           }
           case 'tileUpdate': {
             const { layer, col, row, type } = data;
-            this.setTile(layer, col, row, type);
+            this.map.setTile(layer, col, row, type);
             this.hasScrolled = true;
             break;
           }
@@ -243,11 +240,11 @@ export class Game {
       const col = this.selfPlayer.x / this.map.dsize | 0;
       const row = this.selfPlayer.y / this.map.dsize | 0;
 
-      const base = this.getTile(0, col, row);
-      const top = this.getTile(1, col, row);
+      const base = this.map.getTile(0, col, row);
+      const top = this.map.getTile(1, col, row);
 
       if (base !== ocean && top !== tree) {
-        this.setTile(1, col, row, tree);
+        this.map.setTile(1, col, row, tree);
         send(this.socket, 'tileUpdate', { layer: 1, col, row, type: tree });
         this.hasScrolled = true;
       }
@@ -304,7 +301,7 @@ export class Game {
 
     for (let i = 0; i < numCols; i++) {
       for (let j = 0; j < numRows; j++) {
-        const tile = this.getTile(layer, startCol + i, startRow + j);
+        const tile = this.map.getTile(layer, startCol + i, startRow + j);
         // Empty tile
         if (tile === 0) {
           continue;

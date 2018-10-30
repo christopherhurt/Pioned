@@ -1,6 +1,7 @@
 import WebSocket from 'ws';
 import { send } from './src/utils';
-import { createMap } from './src/map-gen.js';
+import { GameMap } from './src/map';
+import { createMap } from './src/map-gen';
 
 let index = 0;
 const players = {};
@@ -12,16 +13,8 @@ const MAP_LAND_PROB = 0.3;
 const MAP_SMOOTHNESS = 5;
 const MAP_OBJECTS = { 'tree' : 0.25, 'coastLeft' : 0.1 };
 
-const map = {
-  cols: MAP_SIZE,
-  rows: MAP_SIZE,
-  tsize: 8, // Tile size
-  dsize: 64, // Display size
-  layers: createMap('land', 'water', MAP_BASE, MAP_LAND_PROB, MAP_ITER, MAP_SMOOTHNESS, MAP_OBJECTS)
-};
-map.width = map.cols * map.dsize;
-map.height = map.rows * map.dsize;
-const setTile = (layer, col, row, type) => map.layers[layer][row * map.cols + col] = type;
+const layers = createMap('land', 'water', MAP_BASE, MAP_LAND_PROB, MAP_ITER, MAP_SMOOTHNESS, MAP_OBJECTS);
+const map = new GameMap(MAP_SIZE, MAP_SIZE, 8, 64, layers);
 
 const wss = new WebSocket.Server({ port: 5000 });
 
@@ -61,7 +54,7 @@ wss.on('connection', socket => {
       }
       case 'tileUpdate': {
         const { layer, col, row, type } = data;
-        setTile(layer, col, row, type);
+        map.setTile(layer, col, row, type);
         wss.broadcastOthers(socket, 'tileUpdate', data);
         break;
       }
