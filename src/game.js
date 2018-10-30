@@ -2,20 +2,21 @@ import { ImageLoader, Keyboard, Keys, send, postChat } from './utils';
 import { GameMap } from './map';
 
 export class GameObject {
-  constructor(x, y, width, height) {
+  constructor(x, y, width, height, map) {
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
+    this.map = map;
+    this.speed = 4 * map.dsize;
   }
 }
 
 export class Player extends GameObject {
-  constructor(width, height, mapWidth, mapHeight, speed) {
-    super(0, 0, width, height);
-    this.maxX = mapWidth - width;
-    this.maxY = mapHeight - height;
-    this.speed = speed;
+  constructor(width, height, map) {
+    super(0, 0, width, height, map);
+    this.maxX = this.map.width - width;
+    this.maxY = this.map.height - height;
 
     // Assign random color
     const r = Math.random() * 255 | 0;
@@ -34,14 +35,11 @@ export class Player extends GameObject {
   }
 }
 
-class Camera {
-  constructor(width, height, mapWidth, mapHeight) {
-    this.x = 0;
-    this.y = 0;
-    this.width = width;
-    this.height = height;
-    this.maxX = mapWidth - width;
-    this.maxY = mapHeight - height;
+class Camera extends GameObject {
+  constructor(width, height, map) {
+    super(0, 0, width, height, map);
+    this.maxX = this.map.width - width;
+    this.maxY = this.map.height - height;
   }
 
   update(gameObject) {
@@ -107,10 +105,10 @@ export class Game {
     this.tileMap.width = 32;
 
     const DEFAULT_SPEED = 4 * this.map.dsize;
-    this.selfPlayer = new Player(40, 40, this.map.width, this.map.height, DEFAULT_SPEED);
+    this.selfPlayer = new Player(40, 40, this.map);
     send(this.socket, 'playerUpdate', this.selfPlayer);
 
-    this.camera = new Camera(this.canvasWidth, this.canvasHeight, this.map.width, this.map.height);
+    this.camera = new Camera(this.canvasWidth, this.canvasHeight, this.map);
     this.camera.update(this.selfPlayer);
 
     // initial draw of the map
