@@ -105,11 +105,11 @@ export class Game {
     this.tileMap.width = 32;
 
     const DEFAULT_SPEED = 4 * this.map.dsize;
-    this.selfPlayer = new Player(40, 40, this.map);
-    send(this.socket, 'playerUpdate', this.selfPlayer);
+    this.player = new Player(40, 40, this.map.width, this.map.height, DEFAULT_SPEED);
+    send(this.socket, 'newPlayer', this.player);
 
-    this.camera = new Camera(this.canvasWidth, this.canvasHeight, this.map);
-    this.camera.update(this.selfPlayer);
+    this.camera = new Camera(this.canvasWidth, this.canvasHeight, this.map.width, this.map.height);
+    this.camera.update(this.player);
 
     // initial draw of the map
     this._drawMap();
@@ -157,9 +157,17 @@ export class Game {
             this.playersMoved = true;
             break;
           }
-          case 'playerUpdate': {
+          case 'newPlayer': {
             const { id, player } = data;
             this.players[id] = Object.assign(new Player, player);
+            this.playersMoved = true;
+            break;
+          }
+          case 'playerMoved': {
+            const { id, x, y } = data;
+            const player = this.players[id];
+            player.x = x;
+            player.y = y;
             this.playersMoved = true;
             break;
           }
@@ -225,9 +233,9 @@ export class Game {
         diry *= Math.sqrt(2) / 2;
       }
 
-      this.selfPlayer.move(delta, dirx, diry);
-      send(this.socket, 'playerUpdate', this.selfPlayer);
-      this.camera.update(this.selfPlayer);
+      this.player.move(delta, dirx, diry);
+      send(this.socket, 'playerMoved', { x: this.player.x, y: this.player.y });
+      this.camera.update(this.player);
     }
 
     // Place tree
@@ -235,8 +243,8 @@ export class Game {
       const tree = 15;
       const ocean = 417;
 
-      const col = this.selfPlayer.x / this.map.dsize | 0;
-      const row = this.selfPlayer.y / this.map.dsize | 0;
+      const col = this.player.x / this.map.dsize | 0;
+      const row = this.player.y / this.map.dsize | 0;
 
       const base = this.map.getTile(0, col, row);
       const top = this.map.getTile(1, col, row);
@@ -278,7 +286,7 @@ export class Game {
     for (let key in this.players) {
       drawPlayer(this.players[key]);
     }
-    drawPlayer(this.selfPlayer);
+    drawPlayer(this.player);
   }
 
   _drawMap() {
