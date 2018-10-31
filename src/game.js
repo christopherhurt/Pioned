@@ -14,16 +14,18 @@ export class GameObject {
 
 export class Player extends GameObject {
   constructor(width, height, map) {
-    var col = 0
-    var row = 0
-    for(let i = 0; i < this.map.layers.length; i++){
-      while(this.map.getTile(i,col,row) === 417){
-        col++;
-        row++;
+    const coord = (() => {
+      for(let i = 0; i < map.layers.length; i++){
+        for(let j=0; j < map.cols; j++){
+          for(let k=0;k<map.rows; k++){
+            if(map.getTile(i,j,k) !== 417) {
+              return[j,k];
+            }
+          }
+        }
       }
-      break;
-    }
-    super(col, row, width, height, map);
+    })();
+    super(coord[0]*map.dsize, coord[1]*map.dsize, width, height, map);
     this.maxX = this.map.width - width;
     this.maxY = this.map.height - height;
 
@@ -90,24 +92,24 @@ export class Player extends GameObject {
         this.map.isSolidTileAtXY(right, bottom) ||
         this.map.isSolidTileAtXY(left, bottom);
     if(!collision) return;
-    postChat("Collision: "+collision);
+    // postChat("Collision: "+collision);
 
 
     if (diry > 0) {
         row = this.map.getRow(bottom);
-        this.y = -this.height / 2 + getY(row);
+        this.y = -this.height / 2 + this.map.getY(row);
     }
     if (diry < 0) {
         row = this.map.getRow(top);
-        this.y = this.height / 2 + getY(row + 1);
+        this.y = this.height / 2 + this.map.getY(row + 1);
     }
     if (dirx > 0) {
         col = this.map.getCol(right);
-        this.x = -this.width / 2 + getX(col);
+        this.x = -this.width / 2 + this.map.getX(col);
     }
     if (dirx < 0) {
         col = this.map.getCol(left);
-        this.x = this.width / 2 + getX(col + 1);
+        this.x = this.width / 2 + this.map.getX(col + 1);
     }
   }
 }
