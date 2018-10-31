@@ -4,19 +4,16 @@
                 http://www.mrspeaker.net/2010/12/13/terrainer-terrain-generator/
                 */
 
-/* Lookup table to map block name to tile map ID */
-const BLOCKS = {
-  'water' : 417, 'land' : 1, 'tree' : 15, 'coastLeft' : 42
-}
+import { TILES } from './tiles'
 
 /* Create and return generated tile map array */
-export function createMap(mainBlock, fillBlock, seedSize, mainBlockChance, passes, smoothing, objects) {
-  // Getting IDs of blocks used to generate map
-  const mainID = BLOCKS[mainBlock];
-  const fillID = BLOCKS[fillBlock];
+export function createMap(mainTile, fillTile, seedSize, mainTileChance, passes, smoothing, objects) {
+  // Getting IDs of tiles used to generate map
+  const mainID = TILES[mainTile];
+  const fillID = TILES[fillTile];
 
   if(mainID == undefined || fillID == undefined) {
-    throw 'Invalid block name when generating map';
+    throw 'Invalid tile name when generating map';
   }
 
   if(smoothing < 0 || smoothing > 9) {
@@ -25,9 +22,9 @@ export function createMap(mainBlock, fillBlock, seedSize, mainBlockChance, passe
 
   // Generating initial seed array
   if(seedSize < 1) throw 'Seed size of map generation must be positive';
-  if(mainBlockChance < 0 || mainBlockChance > 1) throw 'Main block probability in map generation must be between 0 and 1';
+  if(mainTileChance < 0 || mainTileChance > 1) throw 'Main tile probability in map generation must be between 0 and 1';
 
-  let lay1 = seedGen(mainID, fillID, seedSize, mainBlockChance);
+  let lay1 = seedGen(mainID, fillID, seedSize, mainTileChance);
 
   // Iterating to produce greater map detail
   for(let i = 0; i < passes; i++) {
@@ -56,14 +53,14 @@ export function createMap(mainBlock, fillBlock, seedSize, mainBlockChance, passe
 }
 
 /* Default seed value */
-function seedGen(mainID, fillID, seedSize, mainBlockChance) {
+function seedGen(mainID, fillID, seedSize, mainTileChance) {
   const seed = [];
 
   for(let i = 0; i < seedSize; i++) {
     seed[i] = [];
 
     for(let j = 0; j < seedSize; j++) {
-      seed[i][j] = Math.random() < mainBlockChance ? mainID : fillID;
+      seed[i][j] = Math.random() < mainTileChance ? mainID : fillID;
     }
   }
 
@@ -72,7 +69,7 @@ function seedGen(mainID, fillID, seedSize, mainBlockChance) {
 
 /* Iterates on map array to produce greater detail */
 function iterateMapGen(map, mainID, fillID, smoothing) {
-  // Expand map so each block becomes four blocks
+  // Expand map so each tile becomes four tiles
   const expansion = [];
 
   for(let i = 0; i < map.length; i++) {
@@ -103,25 +100,25 @@ function iterateMapGen(map, mainID, fillID, smoothing) {
   // Refine map to create smooth edges
   for(let i = 0; i < mapCopy.length; i++) {
     for(let j = 0; j < mapCopy[0].length; j++) {
-      const surroundingMain = surroundingMainBlocks(expansion, mainID, i, j);
-      const surroundingTotal = surroundingTotalBlocks(expansion, i, j);
+      const surroundingMain = surroundingMainTiles(expansion, mainID, i, j);
+      const surroundingTotal = surroundingTotalTiles(expansion, i, j);
 
-      let newBlock;
+      let newTile;
       if(surroundingTotal - surroundingMain > smoothing || Math.random() * surroundingTotal >= surroundingMain) {
-        newBlock = fillID;
+        newTile = fillID;
       } else {
-        newBlock = mainID;
+        newTile = mainID;
       }
 
-      mapCopy[i][j] = newBlock;
+      mapCopy[i][j] = newTile;
     }
   }
 
   return mapCopy;
 }
 
-/* Determines number of surrounding main blocks at given (x, y) location on map (including (x, y) itself) */
-function surroundingMainBlocks(map, mainID, x, y) {
+/* Determines number of surrounding main tiles at given (x, y) location on map (including (x, y) itself) */
+function surroundingMainTiles(map, mainID, x, y) {
   let count = 0;
 
   for(let i = -1; i <= 1; i++) {
@@ -138,8 +135,8 @@ function surroundingMainBlocks(map, mainID, x, y) {
   return count;
 }
 
-/* Determines total number of surrounding blocks on map at (x, y), will always be 9 unless block is on the edge of the map */
-function surroundingTotalBlocks(map, x, y) {
+/* Determines total number of surrounding tiles on map at (x, y), will always be 9 unless tile is on the edge of the map */
+function surroundingTotalTiles(map, x, y) {
   let count = 0;
 
   for(let i = -1; i <= 1; i++) {
@@ -181,7 +178,7 @@ function constructObjectLayer(bottomLayer, mainID, objects) {
           throw 'Relative object probabilities must be between 0 and 1';
         }
 
-        const keyID = BLOCKS[key];
+        const keyID = TILES[key];
 
         if(keyID == undefined) {
           throw 'Object name in map generation does not exist';
