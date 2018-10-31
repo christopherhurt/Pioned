@@ -47,9 +47,17 @@ wss.on('connection', socket => {
   socket.on('message', message => {
     const { type, data } = JSON.parse(message);
     switch (type) {
-      case 'playerUpdate': {
+      case 'newPlayer': {
         players[socket.id] = data;
-        wss.broadcastOthers(socket, 'playerUpdate', { id: socket.id, player: data });
+        wss.broadcastOthers(socket, 'newPlayer', { id: socket.id, player: data });
+        break;
+      }
+      case 'playerMoved': {
+        const { x, y } = data;
+        const player = players[socket.id];
+        player.x = x;
+        player.y = y;
+        wss.broadcastOthers(socket, 'playerMoved', { id: socket.id, x, y });
         break;
       }
       case 'tileUpdate': {
