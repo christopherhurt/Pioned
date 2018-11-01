@@ -2,32 +2,20 @@ import { ImageLoader, Keyboard, Keys, send, postChat } from './utils';
 import { GameMap } from './map';
 
 export class GameObject {
-  constructor(x, y, width, height, map) {
+  constructor(x, y, width, height) {
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
-    this.map = map;
-    this.speed = 4 * map.dsize;
   }
 }
 
 export class Player extends GameObject {
-  constructor(width, height, map) {
-    const coord = (() => {
-      for(let i = 0; i < map.layers.length; i++){
-        for(let j=0; j < map.cols; j++){
-          for(let k=0;k<map.rows; k++){
-            if(map.getTile(i,j,k) !== 417) {
-              return[j,k];
-            }
-          }
-        }
-      }
-    })();
-    super(coord[0]*map.dsize, coord[1]*map.dsize, width, height, map);
-    this.maxX = this.map.width - width;
-    this.maxY = this.map.height - height;
+  constructor(x,y,width, height, mapWidth, mapHeight, speed) {
+    super(x, y, width, height);
+    this.maxX = mapWidth - width;
+    this.maxY = mapHeight - height;
+    this.speed = speed;
 
     // Assign random color
     const r = Math.random() * 255 | 0;
@@ -36,89 +24,49 @@ export class Player extends GameObject {
     this.color = `rgb(${r}, ${g}, ${b})`;
   }
 
-  move(delta, dirx, diry) {
+  move(delta, dirx, diry, map) {
     // Move player
-    this.x += dirx * this.speed * delta;
-    this.y += diry * this.speed * delta;
+    // this.x += dirx * this.speed * delta;
+    // this.y += diry * this.speed * delta;
     
-    var currentDir = "";
-    if(dirx === 0 && diry === 1){currentDir = "S";}
-    else if(dirx === 0 && diry === -1){currentDir = "N";}
-    else if(dirx === 1 && diry === 0){currentDir = "E";}
-    else if(dirx === -1 && diry === 0){currentDir = "W";}
-    else if(dirx === Math.sqrt(2)/2 && diry === Math.sqrt(2)/2){currentDir = "SE";}
-    else if(dirx === Math.sqrt(2)/2 && diry === -Math.sqrt(2)/2){currentDir = "NE";}
-    else if(dirx === -Math.sqrt(2)/2 && diry === Math.sqrt(2)/2){currentDir = "SW";}
-    else if(dirx === -Math.sqrt(2)/2 && diry === -Math.sqrt(2)/2){currentDir = "NW";}
-    // postChat(currentDir)
-    this.collide(dirx,diry);
+    
+    this.collide(dirx,diry, map,delta);
 
     // Clamp values
     this.x = Math.max(0, Math.min(this.x, this.maxX));
     this.y = Math.max(0, Math.min(this.y, this.maxY));
   }
 
-  collide(dirx,diry) {  
-    
-    var row, col;
-    // -1 in right and bottom is because image ranges from 0..63
-    // and not up to 64
-    var left = this.x - this.width / 2;
-    var right = this.x + this.width / 2 - 1;
-    var top = this.y - this.height / 2;
-    var bottom = this.y + this.height / 2 - 1;
-    
-   
-    // const startCol = this.x / map.dsize | 0;
-    // const startRow = this.y / map.dsize | 0;
-    // const numCols = this.width / map.dsize + 1;
-    // const numRows = this.height / map.dsize + 1;
-
-    // const offsetX = -this.x + startCol * map.dsize;
-    // const offsetY = -this.y + startRow * map.dsize;
-    // var collision = false
-    // for (let i = 0; i < numCols; i++) {
-    //   for (let j = 0; j < numRows; j++) {
-    //     const x = i * map.dsize + offsetX;
-    //     const y = j * map.dsize + offsetY;
-    //     collision = isSolidTileAtXY(x,y) && collision
-    //   }
-    // }
-    // check for collisions on sprite sides 
-    
-    var collision =
-        this.map.isSolidTileAtXY(left, top) ||
-        this.map.isSolidTileAtXY(right, top) ||
-        this.map.isSolidTileAtXY(right, bottom) ||
-        this.map.isSolidTileAtXY(left, bottom);
-    if(!collision) return;
-    // postChat("Collision: "+collision);
-
-
-    if (diry > 0) {
-        row = this.map.getRow(bottom);
-        this.y = -this.height / 2 + this.map.getY(row);
+  collide(dirx,diry, map,delta) {  
+    var oldX = this.x;
+    this.x += dirx * this.speed * delta; 
+    var collidex1 = map.isSolidTileAtXY(this.x+this.width,this.y)
+    var collidex2 = map.isSolidTileAtXY(this.x,this.y)
+    var collidex3 = map.isSolidTileAtXY(this.x+this.width, this.y+this.height)
+    var collidex4 = map.isSolidTileAtXY(this.x, this.y+this.height)
+    if(collidex1 || collidex2 || collidex3 || collidex4) {
+      this.x = oldX
     }
-    if (diry < 0) {
-        row = this.map.getRow(top);
-        this.y = this.height / 2 + this.map.getY(row + 1);
-    }
-    if (dirx > 0) {
-        col = this.map.getCol(right);
-        this.x = -this.width / 2 + this.map.getX(col);
-    }
-    if (dirx < 0) {
-        col = this.map.getCol(left);
-        this.x = this.width / 2 + this.map.getX(col + 1);
-    }
+    var oldY = this.y
+    this.y += diry * this.speed * delta; 
+    collidex1 = map.isSolidTileAtXY(this.x+this.width,this.y)
+    collidex2 = map.isSolidTileAtXY(this.x,this.y)
+    collidex3 = map.isSolidTileAtXY(this.x+this.width, this.y+this.height)
+    collidex4 = map.isSolidTileAtXY(this.x, this.y+this.height)
+    if(collidex1 || collidex2 || collidex3 || collidex4) {
+      this.y = oldY
+    } 
   }
 }
 
-class Camera extends GameObject {
-  constructor(width, height, map) {
-    super(0, 0, width, height, map);
-    this.maxX = this.map.width - width;
-    this.maxY = this.map.height - height;
+class Camera {
+  constructor(width, height, mapWidth, mapHeight) {
+    this.x = 0;
+    this.y = 0;
+    this.width = width;
+    this.height = height;
+    this.maxX = mapWidth - width;
+    this.maxY = mapHeight - height;
   }
 
   update(gameObject) {
@@ -184,7 +132,18 @@ export class Game {
     this.tileMap.width = 32;
 
     const DEFAULT_SPEED = 4 * this.map.dsize;
-    this.player = new Player(40, 40, this.map.width, this.map.height, DEFAULT_SPEED);
+    const coord = (() => {
+      for(let i = 0; i < this.map.layers.length; i++){
+        for(let j=0; j < this.map.cols; j++){
+          for(let k=0;k<this.map.rows; k++){
+            if(this.map.getTile(i,j,k) !== 417) {
+              return[j,k];
+            }
+          }
+        }
+      }
+    })();
+    this.player = new Player(coord[0]*this.map.dsize,coord[1]*this.map.dsize,40, 40, this.map.width, this.map.height, DEFAULT_SPEED);
     send(this.socket, 'newPlayer', this.player);
 
     this.camera = new Camera(this.canvasWidth, this.canvasHeight, this.map.width, this.map.height);
@@ -312,7 +271,7 @@ export class Game {
         diry *= Math.sqrt(2) / 2;
       }
 
-      this.player.move(delta, dirx, diry);
+      this.player.move(delta, dirx, diry,this.map);
       send(this.socket, 'playerMoved', { x: this.player.x, y: this.player.y });
       this.camera.update(this.player);
     }
