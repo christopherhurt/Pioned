@@ -6,8 +6,6 @@ html, body {
 
 body {
   background: #101214;
-  display: grid;
-  align-content: center;
 }
 
 #shade {
@@ -25,14 +23,17 @@ body {
 }
 
 #chat {
-  justify-self: right;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 256px;
+  height: 25%;
+  margin: 0 2em 2em 0;
   z-index: 2;
-  margin-right: 2em;
+
   background: rgba(16,18,20,0.85);
-  width: 0;
-  opacity: 0;
   border: 1px solid #101214;
-  border-radius: 2px;
+  border-radius: 5px;
   box-sizing: border-box;
   color: white;
   overflow-y: scroll;
