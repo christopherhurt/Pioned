@@ -1,4 +1,4 @@
-import { ImageLoader, Keyboard, Keys, send, postChat } from './utils';
+import { ImageLoader, Keyboard, Keys, send, postChat, createCanvas } from './utils';
 import { GameMap } from './map';
 import { TILES, PLAYERS, SPRITES } from './tiles';
 
@@ -96,20 +96,9 @@ export class Game {
       Keys.K,
     ]);
 
-    const createCanvas = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = this.canvasWidth;
-      canvas.height = this.canvasHeight;
-
-      const ctx = canvas.getContext('2d');
-      ctx.imageSmoothingEnabled = false;
-
-      return canvas;
-    };
-
     // Create a canvas for each layer
-    this.layerCanvas = this.map.layers.map(createCanvas);
-    this.playerCanvas = createCanvas();
+    this.layerCanvas = this.map.layers.map(() => createCanvas(this.canvasWidth, this.canvasHeight));
+    this.playerCanvas = createCanvas(this.canvasWidth, this.canvasHeight);
 
     this.tileMap = this.loader.get('tiles');
     this.tileMap.width = 14;
@@ -137,7 +126,7 @@ export class Game {
       this.socket = new WebSocket("ws://localhost:5000");
 
       this.socket.onopen = event => {
-        postChat('Connected!');
+        postChat('Connected!', 'success');
         postChat('Downloading map...');
       };
 
@@ -158,7 +147,7 @@ export class Game {
           }
           case 'map': {
             this.map = Object.assign(new GameMap, data);
-            postChat('Downloaded map!');
+            postChat('Downloaded map!', 'success');
             resolve();
             break;
           }
@@ -420,5 +409,37 @@ export class Game {
       this.ctx.drawImage(this.layerCanvas[i], 0, 0);
     }
     this.ctx.drawImage(this.playerCanvas, 0, 0);
+
+    // Uncomment the below code once collision detection for trees is finished
+    // =======================================================================
+
+//  // Draw map layers (except last object layer)
+//  const last = this.layerCanvas.length - 1;
+//  for (let i = 0; i < last; i++) {
+//    this.ctx.drawImage(this.layerCanvas[i], 0, 0);
+//  }
+
+//  // Draw players
+//  this.ctx.drawImage(this.playerCanvas, 0, 0);
+
+//  // Draw last object layer
+//  this.ctx.drawImage(this.layerCanvas[last], 0, 0);
+  }
+
+  resize(width, height) {
+    this.canvasWidth = width;
+    this.canvasHeight = height;
+
+    this.layerCanvas = this.map.layers.map(() => createCanvas(width, height));
+    this.playerCanvas = createCanvas(width, height);
+
+    this.camera.width = width;
+    this.camera.height = height;
+    this.camera.maxX = this.map.width - width;
+    this.camera.maxY = this.map.height - height;
+
+    // Re-render
+    this.hasScrolled = true;
+    this.render(this.prevMapSpriteIndex, this.prevPlayerSpriteIndex);
   }
 }

@@ -2,6 +2,17 @@ export function send(socket, type, data) {
   socket.send(JSON.stringify({type, data}));
 }
 
+export function createCanvas(width, height) {
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+
+  return canvas;
+};
+
 export function postChat(message, type='info') {
   const div = document.createElement('div');
   div.className = 'chat-message';
@@ -14,6 +25,9 @@ export function postChat(message, type='info') {
       break;
     case 'error':
       div.className += ' chat-error-message';
+      break;
+    case 'success':
+      div.className += ' chat-success-message';
       break;
   }
   div.innerText = message;
