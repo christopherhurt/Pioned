@@ -212,12 +212,14 @@ export class Game {
       return;
     }
 
-    const spriteFrames = 3; // Frames for each sprite
+    // Frames for each (moving) sprite
+    const mapSpriteFrames = 3;
+    const playerSpriteFrames = 2;
     // SRR = Sprite Refresh Rate (update every x seconds)
     const mapSRR = 1.5;
     const playerSRR = 0.2;
-    const mapUpdateMS = 1000.0 * mapSRR * spriteFrames;
-    const playerUpdateMS = 1000.0 * playerSRR * spriteFrames;
+    const mapUpdateMS = 1000.0 * mapSRR * mapSpriteFrames;
+    const playerUpdateMS = 1000.0 * playerSRR * playerSpriteFrames;
 
     const tick = (elapsed) => {
       window.requestAnimationFrame(tick);
@@ -231,8 +233,8 @@ export class Game {
       this.previousElapsed = elapsed;
 
       const time = new Date().getTime();
-      const mapSpriteIndex = (time % mapUpdateMS) / mapUpdateMS * spriteFrames | 0;
-      const playerSpriteIndex = (time % playerUpdateMS) / playerUpdateMS * spriteFrames | 0;
+      const mapSpriteIndex = (time % mapUpdateMS) / mapUpdateMS * mapSpriteFrames | 0;
+      const playerSpriteIndex = (time % playerUpdateMS) / playerUpdateMS * playerSpriteFrames | 0;
 
       this.update(delta);
       this.render(mapSpriteIndex, playerSpriteIndex);
@@ -319,7 +321,7 @@ export class Game {
       const image = this.spriteMap;
 
       // Only animate player if moving
-      const index = player.moving ? spriteIndex : 0;
+      const index = player.moving ? spriteIndex + 1 : 0;
       const tile = SPRITES[player.sprite][player.dir * 3 + index];
       const tileX = (tile - 1) % image.width;
       const tileY = (tile - 1) / image.width | 0;
