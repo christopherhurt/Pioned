@@ -1,5 +1,6 @@
 import { ImageLoader, Keyboard, Keys, send, postChat } from './utils';
 import { GameMap } from './map';
+import { TILES, PLAYERS, SPRITES } from './tiles';
 
 export class GameObject {
   constructor(x, y, width, height) {
@@ -16,6 +17,12 @@ export class Player extends GameObject {
     this.maxX = mapWidth - width;
     this.maxY = mapHeight - height;
     this.speed = speed;
+
+    // Assign random player
+    const i = Math.random() * PLAYERS.length | 0;
+    this.sprite = PLAYERS[i];
+    this.dir = 3; // Start facing down
+    this.moving = false;
 
     // Assign random color
     const r = Math.random() * 255 | 0;
@@ -111,7 +118,7 @@ export class Game {
     this.spriteMap.width = 9;
 
     const DEFAULT_SPEED = 4 * this.map.dsize;
-    this.player = new Player(40, 40, this.map.width, this.map.height, DEFAULT_SPEED);
+    this.player = new Player(this.map.dsize, this.map.dsize, this.map.width, this.map.height, DEFAULT_SPEED);
     send(this.socket, 'newPlayer', this.player);
 
     this.camera = new Camera(this.canvasWidth, this.canvasHeight, this.map.width, this.map.height);
@@ -170,10 +177,12 @@ export class Game {
             break;
           }
           case 'playerMoved': {
-            const { id, x, y } = data;
+            const { id, x, y, dir, moving } = data;
             const player = this.players[id];
             player.x = x;
             player.y = y;
+            player.dir = dir;
+            player.moving = moving;
             this.playersMoved = true;
             break;
           }
@@ -204,8 +213,11 @@ export class Game {
     }
 
     const spriteFrames = 3; // Frames for each sprite
-    const spriteRefreshRate = 1; // Update every x seconds
-    const updateMS = 1000.0 * spriteRefreshRate * spriteFrames;
+    // SRR = Sprite Refresh Rate (update every x seconds)
+    const mapSRR = 1.5;
+    const playerSRR = 0.2;
+    const mapUpdateMS = 1000.0 * mapSRR * spriteFrames;
+    const playerUpdateMS = 1000.0 * playerSRR * spriteFrames;
 
     const tick = (elapsed) => {
       window.requestAnimationFrame(tick);
@@ -218,11 +230,12 @@ export class Game {
       const delta = Math.min(0.25, (elapsed - this.previousElapsed) / 1000.0);
       this.previousElapsed = elapsed;
 
-      const currentMS = (new Date().getTime()) % updateMS;
-      const spriteIndex = currentMS / updateMS * spriteFrames | 0;
+      const time = new Date().getTime();
+      const mapSpriteIndex = (time % mapUpdateMS) / mapUpdateMS * spriteFrames | 0;
+      const playerSpriteIndex = (time % playerUpdateMS) / playerUpdateMS * spriteFrames | 0;
 
       this.update(delta);
-      this.render(spriteIndex);
+      this.render(mapSpriteIndex, playerSpriteIndex);
     };
 
     tick();
@@ -238,6 +251,16 @@ export class Game {
     if (this.keyboard.isDown([Keys.DOWN, Keys.S])) { diry = 1; }
 
     if (dirx || diry) {
+      if (diry === -1) {
+        this.player.dir = 0; // Up
+      } else if (diry === 1) {
+        this.player.dir = 3; // Down
+      } else if (dirx === -1) {
+        this.player.dir = 1; // Left
+      } else if (dirx === 1) {
+        this.player.dir = 2; // Right
+      }
+
       this.hasScrolled = true;
 
       // Make diagonal movement same speed as horizontal and vertical movement
@@ -246,9 +269,24 @@ export class Game {
         diry *= Math.sqrt(2) / 2;
       }
 
+      this.player.moving = true;
       this.player.move(delta, dirx, diry);
-      send(this.socket, 'playerMoved', { x: this.player.x, y: this.player.y });
+      send(this.socket, 'playerMoved', {
+        x: this.player.x,
+        y: this.player.y,
+        dir: this.player.dir,
+        moving: this.player.moving,
+      });
       this.camera.update(this.player);
+    }
+    else if (this.player.moving) {
+      this.player.moving = false;
+      send(this.socket, 'playerMoved', {
+        x: this.player.x,
+        y: this.player.y,
+        dir: this.player.dir,
+        moving: this.player.moving,
+      });
     }
 
     // Place tree
@@ -278,21 +316,24 @@ export class Game {
       const x = -this.camera.x + player.x;
       const y = -this.camera.y + player.y;
 
-      // Border around player
-      ctx.fillStyle = 'black';
-      ctx.strokeRect(
-        Math.round(x),
-        Math.round(y),
-        player.width,
-        player.height
-      );
+      const image = this.spriteMap;
 
-      ctx.fillStyle = player.color;
-      ctx.fillRect(
-        Math.round(x),
-        Math.round(y),
-        player.width,
-        player.height
+      // Only animate player if moving
+      const index = player.moving ? spriteIndex : 0;
+      const tile = SPRITES[player.sprite][player.dir * 3 + index];
+      const tileX = (tile - 1) % image.width;
+      const tileY = (tile - 1) / image.width | 0;
+
+      ctx.drawImage(
+        image, // image
+        tileX * (1 + this.map.tsize) + 1, // source x
+        tileY * (1 + this.map.tsize) + 1, // source y
+        this.map.tsize, // source width
+        this.map.tsize, // source height
+        Math.round(x), // target x
+        Math.round(y), // target y
+        player.width, // target width
+        player.height // target height
       );
     };
 
@@ -326,9 +367,9 @@ export class Game {
         }
 
         let image;
-        if (tile === -1) { // Water
+        if (tile === TILES['water']) {
           image = this.spriteMap;
-          tile = [35, 44, 53][spriteIndex];
+          tile = SPRITES['water'][spriteIndex];
         }
         else {
           image = this.tileMap;
@@ -355,22 +396,22 @@ export class Game {
     }
   }
 
-  render(spriteIndex) {
-    const spriteUpdate = spriteIndex !== this.previousSpriteIndex;
-    this.previousSpriteIndex = spriteIndex;
-
+  render(mapSpriteIndex, playerSpriteIndex) {
     // Redraw map if there has been scroll
-    if (spriteUpdate || this.hasScrolled) {
+    if (mapSpriteIndex !== this.prevMapSpriteIndex || this.hasScrolled) {
       this.hasScrolled = false;
-      this._drawMap(spriteIndex);
-      this._drawPlayers(spriteIndex);
+      this._drawMap(mapSpriteIndex);
+      this._drawPlayers(playerSpriteIndex);
     }
 
     // Redraw players if they moved
-    if (spriteUpdate || this.playersMoved) {
+    if (playerSpriteIndex !== this.prevPlayerSpriteIndex || this.playersMoved) {
       this.playersMoved = false;
-      this._drawPlayers(spriteIndex);
+      this._drawPlayers(playerSpriteIndex);
     }
+
+    this.prevMapSpriteIndex = mapSpriteIndex;
+    this.prevPlayerSpriteIndex = playerSpriteIndex;
 
     // Draw the map layers into game context
     for (let i = 0; i < this.layerCanvas.length; i++) {

@@ -69,11 +69,13 @@ wss.on('connection', socket => {
         break;
       }
       case 'playerMoved': {
-        const { x, y } = data;
+        const { id, x, y, dir, moving } = data;
         const player = players[socket.id];
         player.x = x;
         player.y = y;
-        wss.broadcastOthers(socket, 'playerMoved', { id: socket.id, x, y });
+        player.dir = dir;
+        player.moving = moving;
+        wss.broadcastOthers(socket, 'playerMoved', { id: socket.id, x, y, dir, moving });
         break;
       }
       case 'tileUpdate': {
