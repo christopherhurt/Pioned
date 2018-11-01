@@ -437,6 +437,7 @@ export class Game {
     this.camera.height = height;
     this.camera.maxX = this.map.width - width;
     this.camera.maxY = this.map.height - height;
+    this.camera.update(this.player);
 
     // Re-render
     this.hasScrolled = true;
