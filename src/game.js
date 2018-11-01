@@ -21,7 +21,16 @@ export class Player extends GameObject {
     // Assign random player
     const i = Math.random() * PLAYERS.length | 0;
     this.sprite = PLAYERS[i];
+
+    // Direction
     this.dir = 3; // Start facing down
+    const dirOffset = [0, 1];
+    // Update select tile
+    this.selectCoords = [
+      (this.x + this.width / 2) + (dirOffset[0] * this.width),
+      (this.y + this.height / 2) + (dirOffset[1] * this.height),
+    ];
+
     this.moving = false;
 
     // Assign random color
@@ -32,12 +41,39 @@ export class Player extends GameObject {
   }
 
   move(delta, dirx, diry) {
+    let dirOffset;
+    if (diry === -1) {
+      this.dir = 0; // Up
+      dirOffset = [0, -1];
+    } else if (diry === 1) {
+      this.dir = 3; // Down
+      dirOffset = [0, 1];
+    } else if (dirx === -1) {
+      this.dir = 1; // Left
+      dirOffset = [-1, 0];
+    } else if (dirx === 1) {
+      this.dir = 2; // Right
+      dirOffset = [1, 0];
+    }
+
+    // Make diagonal movement same speed as horizontal and vertical movement
+    if (dirx && diry) {
+      dirx *= Math.sqrt(2) / 2;
+      diry *= Math.sqrt(2) / 2;
+    }
+
     // Move player
     this.x += dirx * this.speed * delta;
     this.y += diry * this.speed * delta;
     // Clamp values
     this.x = Math.max(0, Math.min(this.x, this.maxX));
     this.y = Math.max(0, Math.min(this.y, this.maxY));
+
+    // Update select tile
+    this.selectCoords = [
+      (this.x + this.width / 2) + (dirOffset[0] * this.width),
+      (this.y + this.height / 2) + (dirOffset[1] * this.height),
+    ];
   }
 }
 
@@ -242,25 +278,9 @@ export class Game {
     if (this.keyboard.isDown([Keys.DOWN, Keys.S])) { diry = 1; }
 
     if (dirx || diry) {
-      if (diry === -1) {
-        this.player.dir = 0; // Up
-      } else if (diry === 1) {
-        this.player.dir = 3; // Down
-      } else if (dirx === -1) {
-        this.player.dir = 1; // Left
-      } else if (dirx === 1) {
-        this.player.dir = 2; // Right
-      }
-
       this.hasScrolled = true;
-
-      // Make diagonal movement same speed as horizontal and vertical movement
-      if (dirx && diry) {
-        dirx *= Math.sqrt(2) / 2;
-        diry *= Math.sqrt(2) / 2;
-      }
-
       this.player.moving = true;
+
       this.player.move(delta, dirx, diry);
       send(this.socket, 'playerMoved', {
         x: this.player.x,
@@ -268,6 +288,7 @@ export class Game {
         dir: this.player.dir,
         moving: this.player.moving,
       });
+
       this.camera.update(this.player);
     }
     else if (this.player.moving) {
@@ -282,56 +303,88 @@ export class Game {
 
     // Place tree
     if (this.keyboard.isDown(Keys.K)) {
-      const tree = 15;
-      const ocean = 417;
-
-      const col = this.player.x / this.map.dsize | 0;
-      const row = this.player.y / this.map.dsize | 0;
+      const [ x, y ] = this.player.selectCoords;
+      const col = x / this.map.dsize | 0;
+      const row = y / this.map.dsize | 0;
 
       const base = this.map.getTile(0, col, row);
-      const top = this.map.getTile(1, col, row);
+      const obj1 = this.map.getTile(1, col, row);
 
-      if (base !== ocean && top !== tree) {
-        this.map.setTile(1, col, row, tree);
-        send(this.socket, 'tileUpdate', { layer: 1, col, row, type: tree });
+      if (base === TILES['land'] && obj1 === 0) {
+        this.map.setTile(1, col, row, TILES['tree_bottom']);
+        send(this.socket, 'tileUpdate', { layer: 1, col, row, type: TILES['tree_bottom'] });
+
+        if (row > 0) {
+          this.map.setTile(2, col, row - 1, TILES['tree_top']);
+          send(this.socket, 'tileUpdate', { layer: 2, col, row: row - 1, type: TILES['tree_top'] });
+        }
+
         this.hasScrolled = true;
       }
     }
+  }
+
+  _drawPlayer(player, spriteIndex) {
+    const ctx = this.playerCanvas.getContext('2d');
+
+    const x = -this.camera.x + player.x;
+    const y = -this.camera.y + player.y;
+
+    const image = this.spriteMap;
+
+    // Only animate player if moving
+    const index = player.moving ? spriteIndex + 1 : 0;
+    const tile = SPRITES[player.sprite][player.dir * 3 + index];
+    const tileX = (tile - 1) % image.width;
+    const tileY = (tile - 1) / image.width | 0;
+
+    ctx.drawImage(
+      image, // image
+      tileX * (1 + this.map.tsize) + 1, // source x
+      tileY * (1 + this.map.tsize) + 1, // source y
+      this.map.tsize, // source width
+      this.map.tsize, // source height
+      Math.round(x), // target x
+      Math.round(y), // target y
+      player.width, // target width
+      player.height // target height
+    );
+  }
+
+  _drawSelect() {
+    const ctx = this.playerCanvas.getContext('2d');
+
+    let [ selectX, selectY ] = this.player.selectCoords;
+    selectX -= selectX % this.map.dsize;
+    selectY -= selectY % this.map.dsize;
+
+    const x = -this.camera.x + selectX;
+    const y = -this.camera.y + selectY;
+    ctx.strokeStyle = `rgba(255,255,255,0.8)`;
+    ctx.strokeRect(
+      x,
+      y,
+      this.map.dsize,
+      this.map.dsize
+    );
   }
 
   _drawPlayers(spriteIndex) {
     const ctx = this.playerCanvas.getContext('2d');
     ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
-    const drawPlayer = player => {
-      const x = -this.camera.x + player.x;
-      const y = -this.camera.y + player.y;
-
-      const image = this.spriteMap;
-
-      // Only animate player if moving
-      const index = player.moving ? spriteIndex + 1 : 0;
-      const tile = SPRITES[player.sprite][player.dir * 3 + index];
-      const tileX = (tile - 1) % image.width;
-      const tileY = (tile - 1) / image.width | 0;
-
-      ctx.drawImage(
-        image, // image
-        tileX * (1 + this.map.tsize) + 1, // source x
-        tileY * (1 + this.map.tsize) + 1, // source y
-        this.map.tsize, // source width
-        this.map.tsize, // source height
-        Math.round(x), // target x
-        Math.round(y), // target y
-        player.width, // target width
-        player.height // target height
-      );
-    };
-
+    // Draw each other player
     for (let key in this.players) {
-      drawPlayer(this.players[key]);
+      this._drawPlayer(this.players[key], spriteIndex);
     }
-    drawPlayer(this.player);
+
+    if (!this.player.moving) {
+      // Draw select tile
+      this._drawSelect();
+    }
+
+    // Draw player
+    this._drawPlayer(this.player, spriteIndex);
   }
 
   _drawMap(spriteIndex) {

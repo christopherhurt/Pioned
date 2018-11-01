@@ -29,7 +29,7 @@ To run the game server, use `yarn serve`.
 - [ ] Inventory
 - [ ] Destroy trees to get wood
 - [ ] Be able to place bridges
-- [ ] Show dotted line around square that will be changed
+- [x] Draw outline around square that will be changed
 
 **Chris**:
 - [ ] Server: Track the discreet islands
