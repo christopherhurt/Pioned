@@ -38,14 +38,10 @@ To run the game server, use `yarn serve`.
 
 ## Todo
 
-- [ ] Make game canvas entire window dimensions, add resive event listener, overlay chat
 - [ ] Performance: only draw visible characters
 - [ ] Performance: only redraw map if parts of the visible map changed (socket messages)
 - [ ] Use environment variables to set the (websocket) host
-- [ ] Better aesthetics
-    - [ ] Find character images.
-    - [ ] Add current random color mask on top (so players look different)
-    - [ ] Add direction and walking animations
+- [ ] Add current random color mask on top of players
 
 ## Completed Tasks
 - [x] Add movable player
@@ -57,6 +53,10 @@ To run the game server, use `yarn serve`.
     - [x] Also can print info and error messages here (e.g., player joined, disconnected from server)
 - [x] Map mutability
 - [x] Map generation
+- [x] Better aesthetics
+    - [x] Find character images.
+    - [x] Add direction and walking animations
+- [x] Make game canvas entire window dimensions, add resive event listener, overlay chat
 
 ## Credits
 
