@@ -27,6 +27,15 @@ const MAP_OBJECTS = {
   'yellow_flower': {
     'prob': 0.1,
   },
+  'red_flower': {
+    'prob': 0.03,
+  },
+  'white_flower': {
+    'prob': 0.02,
+  },
+  'stump': {
+    'prob': 0.01,
+  },
 };
 
 const layers = createMap('land', 'water', MAP_BASE, MAP_LAND_PROB, MAP_ITER, MAP_SMOOTHNESS, MAP_OBJECTS);

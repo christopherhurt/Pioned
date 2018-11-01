@@ -7,6 +7,9 @@ export const TILES = {
   'apple_tree_bottom': 16,
   'apple_tree_top': 2,
   'yellow_flower': 5,
+  'red_flower': 6,
+  'white_flower': 19,
+  'stump': 18,
 };
 
 export const PLAYERS = [
