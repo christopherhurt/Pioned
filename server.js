@@ -11,10 +11,26 @@ const MAP_ITER = 3;
 const MAP_SIZE = MAP_BASE * Math.pow(2, MAP_ITER);
 const MAP_LAND_PROB = 0.3;
 const MAP_SMOOTHNESS = 5;
-const MAP_OBJECTS = { 'tree' : 0.25, 'coastLeft' : 0.1 };
+const MAP_OBJECTS = {
+  'apple_tree_bottom': {
+    'rules': {
+      'apple_tree_top': [-1, 0], // y, x
+    },
+    'prob': 0.05,
+  },
+  'tree_bottom': {
+    'rules': {
+      'tree_top': [-1, 0], // y, x
+    },
+    'prob': 0.25,
+  },
+  'yellow_flower': {
+    'prob': 0.1,
+  },
+};
 
 const layers = createMap('land', 'water', MAP_BASE, MAP_LAND_PROB, MAP_ITER, MAP_SMOOTHNESS, MAP_OBJECTS);
-const map = new GameMap(MAP_SIZE, MAP_SIZE, 8, 64, layers);
+const map = new GameMap(MAP_SIZE, MAP_SIZE, 16, 64, layers);
 
 const wss = new WebSocket.Server({ port: 5000 });
 

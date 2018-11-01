@@ -68,7 +68,8 @@ export class Game {
     try {
       await Promise.all([
         this.socketSetup(),
-        this.loader.load('tiles', 'assets/tilesetP8.png'),
+        this.loader.load('tiles', 'assets/Map.png'),
+        this.loader.load('sprites', 'assets/Sprites.png'),
       ]);
     }
     catch (err) {
@@ -104,7 +105,10 @@ export class Game {
     this.playerCanvas = createCanvas();
 
     this.tileMap = this.loader.get('tiles');
-    this.tileMap.width = 32;
+    this.tileMap.width = 14;
+
+    this.spriteMap = this.loader.get('sprites');
+    this.spriteMap.width = 9;
 
     const DEFAULT_SPEED = 4 * this.map.dsize;
     this.player = new Player(40, 40, this.map.width, this.map.height, DEFAULT_SPEED);
@@ -309,22 +313,30 @@ export class Game {
 
     for (let i = 0; i < numCols; i++) {
       for (let j = 0; j < numRows; j++) {
-        const tile = this.map.getTile(layer, startCol + i, startRow + j);
-        // Empty tile
-        if (tile === 0) {
+        let tile = this.map.getTile(layer, startCol + i, startRow + j);
+        if (tile === 0) { // Empty tile
           continue;
         }
 
-        const tileX = (tile - 1) % this.tileMap.width;
-        const tileY = (tile - 1) / this.tileMap.width | 0;
+        let image;
+        if (tile === -1) { // Water
+          image = this.spriteMap;
+          tile = 35;
+        }
+        else {
+          image = this.tileMap;
+        }
+
+        const tileX = (tile - 1) % image.width;
+        const tileY = (tile - 1) / image.width | 0;
 
         const x = i * this.map.dsize + offsetX;
         const y = j * this.map.dsize + offsetY;
 
         ctx.drawImage(
-          this.tileMap, // image
-          tileX * this.map.tsize, // source x
-          tileY * this.map.tsize, // source y
+          image, // image
+          tileX * (1 + this.map.tsize) + 1, // source x
+          tileY * (1 + this.map.tsize) + 1, // source y
           this.map.tsize, // source width
           this.map.tsize, // source height
           Math.round(x), // target x
@@ -351,8 +363,9 @@ export class Game {
     }
 
     // Draw the map layers into game context
-    this.ctx.drawImage(this.layerCanvas[0], 0, 0);
-    this.ctx.drawImage(this.layerCanvas[1], 0, 0);
+    for (let i = 0; i < this.layerCanvas.length; i++) {
+      this.ctx.drawImage(this.layerCanvas[i], 0, 0);
+    }
     this.ctx.drawImage(this.playerCanvas, 0, 0);
   }
 }

@@ -32,22 +32,20 @@ export function createMap(mainTile, fillTile, seedSize, mainTileChance, passes, 
   }
 
   // Construct second layer, randomly consists listed objects
-  const lay2 = constructObjectLayer(lay1, mainID, objects);
+  const objLayers = constructObjectLayers(lay1, mainID, objects);
 
   // Reorganize and combine layers to create final map
-  const data1 = [];
-  const data2 = [];
+  const numLayers = 1 + objLayers.length;
+  const map = Array(numLayers).fill().map(() => []);
 
   for(let i = 0; i < lay1.length; i++) {
     for(let j = 0; j < lay1[0].length; j++) {
-      data1.push(lay1[i][j]);
-      data2.push(lay2[i][j]);
+      map[0].push(lay1[i][j]);
+      for (let k = 0; k < objLayers.length; k++) {
+        map[k + 1].push(objLayers[k][i][j]);
+      }
     }
   }
-
-  const map = [];
-  map.push(data1);
-  map.push(data2);
 
   return map;
 }
@@ -154,7 +152,7 @@ function surroundingTotalTiles(map, x, y) {
 }
 
 /* Creates second map layer consisting of overlaid objects */
-function constructObjectLayer(bottomLayer, mainID, objects) {
+function constructObjectLayers(bottomLayer, mainID, objects) {
   // Generate key array, necessary for ordering
   const keys = [];
 
@@ -162,40 +160,69 @@ function constructObjectLayer(bottomLayer, mainID, objects) {
     keys.push(key);
   }
 
+  const rows = bottomLayer.length;
+  const cols = bottomLayer[0].length;
+
+  // Initialize 2d array with zeros
+  // Thank you https://stackoverflow.com/a/46792350/1313757
+  const lay1 = Array(rows).fill().map(() => Array(cols).fill(0));
+  const lay2 = Array(rows).fill().map(() => Array(cols).fill(0));
+
   // Constructing layer using listed objects and relative probabilities
-  const lay = [];
-
-  for(let i = 0; i < bottomLayer.length; i++) {
-    const row = [];
-
-    for(let j = 0; j < bottomLayer[0].length; j++) {
-      if(bottomLayer[i][j] == mainID) {
+  for(let i = 0; i < rows; i++) {
+    for(let j = 0; j < cols; j++) {
+      if(bottomLayer[i][j] === mainID && lay1[i][j] === 0) {
         const keyIndex = parseInt(Math.random() * keys.length);
         const key = keys[keyIndex];
-        const prob = objects[key];
+        const obj = objects[key];
+        const prob = obj['prob'];
 
-        if(prob == undefined || prob < 0 || prob > 1) {
+        if(prob === undefined || prob < 0 || prob > 1) {
           throw 'Relative object probabilities must be between 0 and 1';
         }
 
         const keyID = TILES[key];
 
-        if(keyID == undefined) {
+        if(keyID === undefined) {
           throw 'Object name in map generation does not exist';
         }
 
         if(Math.random() < prob) {
-          row.push(keyID);
-        } else {
-          row.push(0);
+          if ('rules' in obj) {
+            const rules = obj['rules'];
+
+            // Verify rules
+            let allow = true;
+            for (const rule in rules) {
+              const [ I, J ] = rules[rule];
+              const y = i + I;
+              const x = j + J;
+              if (x < 0 || x >= cols || y < 0 || y >= rows // Check bounds
+                || lay2[y][x] !== 0) { // Check that layer 2 is empty
+                allow = false;
+                break;
+              }
+            }
+
+            // If rules allow, add to layer and follow rules
+            if (allow) {
+              lay1[i][j] = keyID;
+              // Add other tiles
+              for (const rule in rules) {
+                const [ I, J ] = rules[rule];
+                const y = i + I;
+                const x = j + J;
+                const ruleID = TILES[rule];
+                lay2[y][x] = ruleID;
+              }
+            }
+          } else { // No rules, simply add to layer
+            lay1[i][j] = keyID;
+          }
         }
-      } else {
-        row.push(0);
       }
     }
-
-    lay.push(row);
   }
 
-  return lay;
+  return [lay1, lay2];
 }
