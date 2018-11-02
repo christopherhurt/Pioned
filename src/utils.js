@@ -109,6 +109,7 @@ export class Keyboard {
 }
 
 export const Keys = {
+  ESC: 27,
   LEFT: 37,
   UP: 38,
   RIGHT: 39,

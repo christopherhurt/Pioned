@@ -3,7 +3,15 @@ import { GameMap } from './map';
 import { TILES, SPRITES } from './tiles';
 import { Inventory } from './inventory';
 import { Player, Camera } from './game-objects';
+import { Modes, Context } from './context';
 
+const Styles = {
+  light: 'white',
+  lightBG: 'rgba(255,255,255,0.8)',
+  darkBG: 'rgba(0,0,0,0.8)',
+  largeFont: '50px Roboto Slab',
+  mediumFont: '25px Roboto Slab',
+};
 
 export class Game {
   constructor(ctx, canvasWidth, canvasHeight) {
@@ -39,11 +47,17 @@ export class Game {
       Keys.D,
       Keys.K,
       Keys.L,
+      Keys.I,
+      Keys.ESC,
     ]);
+
+    this.context = new Context(Modes.GAME);
 
     // Create a canvas for each layer
     this.layerCanvas = this.map.layers.map(() => createCanvas(this.canvasWidth, this.canvasHeight));
     this.playerCanvas = createCanvas(this.canvasWidth, this.canvasHeight);
+    this.inventoryCanvas = createCanvas(this.canvasWidth, this.canvasHeight);
+    this.menuCanvas = createCanvas(this.canvasWidth, this.canvasHeight);
 
     this.tileMap = this.loader.get('tiles');
     this.tileMap.width = 14;
@@ -180,6 +194,32 @@ export class Game {
   }
 
   update(delta) {
+    switch (this.context.getMode()) {
+      case Modes.MENU:
+        if (this.context.trySwitchModes(Modes.GAME, this.keyboard.isDown(Keys.ESC))) { break; };
+        this._updateMenu(delta);
+        break;
+      case Modes.GAME:
+        if (this.context.trySwitchModes(Modes.MENU, this.keyboard.isDown(Keys.ESC))) { break; };
+        if (this.context.trySwitchModes(Modes.INVENTORY, this.keyboard.isDown(Keys.I))) { break; };
+        this._updateGame(delta);
+        break;
+      case Modes.INVENTORY:
+        if (this.context.trySwitchModes(Modes.GAME, this.keyboard.isDown(Keys.I))) { break; };
+        this._updateInventory(delta);
+        break;
+    }
+  }
+
+  _updateMenu(delta) {
+
+  }
+
+  _updateInventory(delta) {
+
+  }
+
+  _updateGame(delta) {
     // Handle camera movement with arrow keys
     let dirx = 0;
     let diry = 0;
@@ -264,6 +304,82 @@ export class Game {
     }
   }
 
+  _drawMenu() {
+    const ctx = this.menuCanvas.getContext('2d');
+    ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+
+    const width = this.canvasWidth * 0.60;
+    const height = this.canvasHeight * 0.75;
+
+    let x = (this.canvasWidth - width) / 2;
+    let y = (this.canvasHeight - height) / 2;
+
+    ctx.fillStyle = Styles.darkBG;
+    ctx.fillRect(
+      x,
+      y,
+      width,
+      height,
+    );
+
+    // Margins
+    x += width * 0.1;
+    y += height * 0.15;
+
+    ctx.font = Styles.largeFont;
+    ctx.fillStyle = Styles.light;
+    ctx.fillText('Menu', x, y);
+  }
+
+  _drawInventory() {
+    const ctx = this.inventoryCanvas.getContext('2d');
+    ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+
+    const width = this.canvasWidth * 0.60;
+    const height = this.canvasHeight * 0.75;
+
+    let x = (this.canvasWidth - width) / 2;
+    let y = (this.canvasHeight - height) / 2;
+
+    ctx.fillStyle = Styles.darkBG;
+    ctx.fillRect(
+      x,
+      y,
+      width,
+      height,
+    );
+
+    // Margins
+    x += width * 0.1;
+    y += height * 0.15;
+
+    ctx.font = Styles.largeFont;
+    ctx.fillStyle = Styles.light;
+    ctx.fillText('Inventory', x, y);
+
+    ctx.font = Styles.mediumFont;
+    const separation = 35;
+    y += 65;
+
+    const items = this.inventory.getItems();
+    for (let item in items) {
+      const num = items[item];
+
+      // Skip empty values
+      if (num === 0) {
+        continue;
+      }
+
+      ctx.fillText(
+        `${item.toUpperCase()} : ${num}`,
+        x,
+        y,
+      );
+
+      y += separation;
+    }
+  }
+
   _drawPlayer(player, spriteIndex) {
     const ctx = this.playerCanvas.getContext('2d');
 
@@ -300,7 +416,7 @@ export class Game {
 
     const x = -this.camera.x + selectX;
     const y = -this.camera.y + selectY;
-    ctx.strokeStyle = `rgba(255,255,255,0.8)`;
+    ctx.strokeStyle = Styles.lightBG;
     ctx.strokeRect(
       x,
       y,
@@ -402,6 +518,17 @@ export class Game {
       this.ctx.drawImage(this.layerCanvas[i], 0, 0);
     }
     this.ctx.drawImage(this.playerCanvas, 0, 0);
+
+    switch (this.context.getMode()) {
+      case Modes.MENU:
+        this._drawMenu();
+        this.ctx.drawImage(this.menuCanvas, 0, 0);
+        break;
+      case Modes.INVENTORY:
+        this._drawInventory();
+        this.ctx.drawImage(this.inventoryCanvas, 0, 0);
+        break;
+    }
 
     // Uncomment the below code once collision detection for trees is finished
     // =======================================================================
