@@ -26,7 +26,7 @@ To run the game server, use `yarn serve`.
 - [ ] Collision detection (including trees)
 
 **Jack**:
-- [ ] Inventory
+- [x] Inventory
 - [x] Destroy trees to get wood
 - [x] Be able to place bridges
 - [x] Draw outline around square that will be changed
