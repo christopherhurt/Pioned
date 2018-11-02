@@ -418,8 +418,8 @@ export class Game {
     const y = -this.camera.y + selectY;
     ctx.strokeStyle = Styles.lightBG;
     ctx.strokeRect(
-      x,
-      y,
+      Math.round(x),
+      Math.round(y),
       this.map.dsize,
       this.map.dsize
     );
