@@ -1,6 +1,7 @@
 import { ImageLoader, Keyboard, Keys, send, postChat, createCanvas } from './utils';
 import { GameMap } from './map';
 import { TILES, PLAYERS, SPRITES } from './tiles';
+import { Inventory } from './inventory';
 
 export class GameObject {
   constructor(x, y, width, height) {
@@ -130,6 +131,7 @@ export class Game {
       Keys.S,
       Keys.D,
       Keys.K,
+      Keys.L,
     ]);
 
     // Create a canvas for each layer
@@ -148,6 +150,8 @@ export class Game {
 
     this.camera = new Camera(this.canvasWidth, this.canvasHeight, this.map.width, this.map.height);
     this.camera.update(this.player);
+
+    this.inventory = new Inventory();
 
     // Initial draw of the map
     this._drawMap(0);
@@ -301,24 +305,53 @@ export class Game {
       });
     }
 
-    // Place tree
+    // Place bridge
     if (this.keyboard.isDown(Keys.K)) {
       const [ x, y ] = this.player.selectCoords;
       const col = x / this.map.dsize | 0;
       const row = y / this.map.dsize | 0;
 
       const base = this.map.getTile(0, col, row);
-      const obj1 = this.map.getTile(1, col, row);
+      const obj = this.map.getTile(1, col, row);
 
-      if (base === TILES['land'] && obj1 === 0) {
-        this.map.setTile(1, col, row, TILES['tree_bottom']);
-        send(this.socket, 'tileUpdate', { layer: 1, col, row, type: TILES['tree_bottom'] });
-
-        if (row > 0) {
-          this.map.setTile(2, col, row - 1, TILES['tree_top']);
-          send(this.socket, 'tileUpdate', { layer: 2, col, row: row - 1, type: TILES['tree_top'] });
+      if (base === TILES['water'] && obj === 0 && this.inventory.verify('wood', 1)) {
+        let objID;
+        switch (this.player.dir) {
+          case 0: // Up
+          case 3: // Down
+            objID = 'bridge';
+            break;
+          case 1: // Left
+          case 2: // Right
+            objID = 'side_bridge';
+            break;
         }
 
+        this.map.setTile(1, col, row, TILES[objID]);
+        send(this.socket, 'tileUpdate', { layer: 1, col, row, type: TILES[objID] });
+
+        this.inventory.remove('wood', 1);
+        this.hasScrolled = true;
+      }
+    }
+
+    // Take tree
+    if (this.keyboard.isDown(Keys.L)) {
+      const [ x, y ] = this.player.selectCoords;
+      const col = x / this.map.dsize | 0;
+      const row = y / this.map.dsize | 0;
+
+      const obj = this.map.getTile(1, col, row);
+      if (obj === TILES['tree_bottom'] || obj === TILES['apple_tree_bottom']) {
+        this.map.setTile(1, col, row, 0);
+        send(this.socket, 'tileUpdate', { layer: 1, col, row, type: 0 });
+
+        if (row > 0) {
+          this.map.setTile(2, col, row - 1, 0);
+          send(this.socket, 'tileUpdate', { layer: 2, col, row: row - 1, type: 0 });
+        }
+
+        this.inventory.add('wood', 2);
         this.hasScrolled = true;
       }
     }

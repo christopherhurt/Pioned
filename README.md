@@ -27,8 +27,8 @@ To run the game server, use `yarn serve`.
 
 **Jack**:
 - [ ] Inventory
-- [ ] Destroy trees to get wood
-- [ ] Be able to place bridges
+- [x] Destroy trees to get wood
+- [x] Be able to place bridges
 - [x] Draw outline around square that will be changed
 
 **Chris**:

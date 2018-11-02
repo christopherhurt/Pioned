@@ -10,6 +10,8 @@ export const TILES = {
   'red_flower': 6,
   'white_flower': 19,
   'stump': 18,
+  'bridge': 25,
+  'side_bridge': 13,
 };
 
 export const PLAYERS = [
