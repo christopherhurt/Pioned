@@ -53,8 +53,8 @@ class Camera {
 
   update(gameObject) {
     // Center camera on game object
-    this.x = gameObject.x - this.width / 2;
-    this.y = gameObject.y - this.height / 2;
+    this.x = (gameObject.x + gameObject.width / 2) - this.width / 2;
+    this.y = (gameObject.y + gameObject.height / 2) - this.height / 2;
     // Clamp values
     this.x = Math.max(0, Math.min(this.x, this.maxX));
     this.y = Math.max(0, Math.min(this.y, this.maxY));
