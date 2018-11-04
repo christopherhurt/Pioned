@@ -6,6 +6,30 @@
 
 import { TILES } from './tiles'
 
+/* Find random starting location for a newly-added player */
+export function findStartingCoordinates(layer, mapSize, spawnTile) {
+  // Getting ID of tile player can spawn on
+  const spawnID = TILES[spawnTile];
+  
+  if(spawnID == undefined) {
+    throw 'Invalid tile name when finding player starting coordinates';
+  }
+  
+  // Finding random location on map until it's a spawnable tile
+  let spawnFound = false;
+  let x = -1;
+  let y = -1;
+  while(!spawnFound) {
+    x = parseInt(Math.random() * mapSize);
+    y = parseInt(Math.random() * mapSize);
+    
+    const tileIndex = y * mapSize + x;
+    spawnFound = layer[tileIndex] == spawnID;
+  }
+  
+  return { 'x': x, 'y': y };
+}
+
 /* Create and return generated tile map array */
 export function createMap(mainTile, fillTile, seedSize, mainTileChance, passes, smoothing, objects) {
   // Getting IDs of tiles used to generate map
