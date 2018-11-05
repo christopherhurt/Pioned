@@ -11,8 +11,8 @@ export class GameObject {
 }
 
 export class Player extends GameObject {
-  constructor(x,y,width, height, mapWidth, mapHeight, speed) {
-    super(x, y, width, height);
+  constructor(width, height, mapWidth, mapHeight, speed) {
+    super(0, 0, width, height);
     this.maxX = mapWidth - width;
     this.maxY = mapHeight - height;
     this.speed = speed;
@@ -132,18 +132,18 @@ export class Game {
     this.tileMap.width = 32;
 
     const DEFAULT_SPEED = 4 * this.map.dsize;
-    const coord = (() => {
-      for(let i = 0; i < this.map.layers.length; i++){
-        for(let j=0; j < this.map.cols; j++){
-          for(let k=0;k<this.map.rows; k++){
-            if(this.map.getTile(i,j,k) !== 417) {
-              return[j,k];
-            }
-          }
-        }
-      }
-    })();
-    this.player = new Player(coord[0]*this.map.dsize,coord[1]*this.map.dsize,40, 40, this.map.width, this.map.height, DEFAULT_SPEED);
+    // const coord = (() => {
+    //   for(let i = 0; i < this.map.layers.length; i++){
+    //     for(let j=0; j < this.map.cols; j++){
+    //       for(let k=0;k<this.map.rows; k++){
+    //         if(this.map.getTile(i,j,k) !== 417) {
+    //           return[j,k];
+    //         }
+    //       }
+    //     }
+    //   }
+    // })();
+    this.player = new Player(40, 40, this.map.width, this.map.height, DEFAULT_SPEED);
     send(this.socket, 'newPlayer', this.player);
 
     this.camera = new Camera(this.canvasWidth, this.canvasHeight, this.map.width, this.map.height);
