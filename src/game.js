@@ -157,7 +157,7 @@ export class Game {
             const { x: xLoc, y: yLoc } = data;
 
             const DEFAULT_SPEED = 4 * this.map.dsize;
-            this.player = new Player(xLoc, yLoc, this.map.dsize, this.map.dsize, this.map.width, this.map.height, this.map.dsize, DEFAULT_SPEED);
+            this.player = new Player(xLoc, yLoc, 14 / 16 * this.map.dsize, 15 / 16 * this.map.dsize, this.map.width, this.map.height, this.map.dsize, DEFAULT_SPEED);
             send(this.socket, 'newPlayer', this.player);
 
             resolve();
@@ -467,14 +467,14 @@ export class Game {
 
     ctx.drawImage(
       image, // image
-      tileX * (1 + this.map.tsize) + 1, // source x
+      tileX * (1 + this.map.tsize) + 1 + 1, // source x
       tileY * (1 + this.map.tsize) + 1, // source y
-      this.map.tsize, // source width
+      14, // source width
       this.map.tsize, // source height
       Math.round(x), // target x
-      Math.round(y), // target y
+      Math.round(y) - (1 / 16 * this.map.dsize), // target y
       player.width, // target width
-      player.height // target height
+      this.map.dsize, // target height
     );
   }
 
