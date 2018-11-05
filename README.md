@@ -62,6 +62,6 @@ To run the game server, use `yarn serve`.
 
 Forked from Mozilla's [starting code](https://github.com/mozdevs/gamedev-js-tiles).
 
-Tilemap created by [Onimaru](https://onimaru.itch.io/green-valley-map-pack).
+Tilemap graphics and sprites created by [Onimaru](https://onimaru.itch.io/green-valley-map-pack).
 
 Favicon created with [favicon.io](https://favicon.io/).
