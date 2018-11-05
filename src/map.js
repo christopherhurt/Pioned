@@ -36,10 +36,7 @@ export class GameMap {
     return row * this.dsize;
   }
 
-  isSolidTileAtXY(x, y){
-    const col = this.getCol(x);
-    const row = this.getRow(y);
-
+  isSolidTile(col, row){
     for (let layer = 0; layer < this.layers.length; layer++) {
       const tile = this.getTile(layer, col, row);
       if (SOLID[tile]) {

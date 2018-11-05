@@ -23,18 +23,10 @@ To run the game server, use `yarn serve`.
 ## This Week
 
 **Parker**:
-- [ ] Collision detection (including trees)
 
 **Jack**:
-- [x] Inventory
-- [x] Destroy trees to get wood
-- [x] Be able to place bridges
-- [x] Draw outline around square that will be changed
 
 **Chris**:
-- [ ] Server: Track the discreet islands
-- [ ] Server: Decide where players start (balance on islands)
-- [ ] Track which islands player has visited (for potential objective; e.g., player needs to build a bridge to new island, travel to 4 islands, etc)
 
 ## Todo
 
@@ -57,6 +49,14 @@ To run the game server, use `yarn serve`.
     - [x] Find character images.
     - [x] Add direction and walking animations
 - [x] Make game canvas entire window dimensions, add resive event listener, overlay chat
+- [x] Server: Track the discreet islands
+- [x] Server: Decide where players start (balance on islands)
+- [x] Track which islands player has visited (for potential objective; e.g., player needs to build a bridge to new island, travel to 4 islands, etc)
+- [x] Inventory
+- [x] Destroy trees to get wood
+- [x] Be able to place bridges
+- [x] Draw outline around square that will be changed
+- [x] Collision detection (including trees)
 
 ## Credits
 

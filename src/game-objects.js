@@ -80,27 +80,51 @@ export class Player extends GameObject {
   }
 
   collide(dirx, diry, map, delta) {
-    const collideWidth = 14 / 16 * map.dsize;
-    const collideHeight = map.dsize - 1;
+    const collideWidth = this.width - 1;
+    const collideHeight = this.height - 1;
 
-    const oldX = this.x;
     this.x += dirx * this.speed * delta;
-    let collidex1 = map.isSolidTileAtXY(this.x + collideWidth,this.y)
-    let collidex2 = map.isSolidTileAtXY(this.x,this.y)
-    let collidex3 = map.isSolidTileAtXY(this.x + collideWidth, this.y + collideHeight)
-    let collidex4 = map.isSolidTileAtXY(this.x, this.y + collideHeight)
-    if(collidex1 || collidex2 || collidex3 || collidex4) {
-      this.x = oldX
+
+    let leftCol = map.getCol(this.x);
+    let rightCol = map.getCol(this.x + collideWidth);
+    let topRow = map.getRow(this.y);
+    let bottomRow = map.getRow(this.y + collideHeight);
+
+    if (dirx) {
+      // Check top row
+      if (map.isSolidTile(leftCol, topRow)) {
+        this.x = Math.max(this.x, (leftCol + 1) * map.dsize);
+      } else if (map.isSolidTile(rightCol, topRow)) {
+        this.x = Math.min(this.x, rightCol * map.dsize - this.width);
+      } else if (this.y + collideHeight > (topRow + 1) * map.dsize) { // Check bottom row
+        if (map.isSolidTile(leftCol, bottomRow)) {
+          this.x = Math.max(this.x, (leftCol + 1) * map.dsize);
+        } else if (map.isSolidTile(rightCol, bottomRow)) {
+          this.x = Math.min(this.x, rightCol * map.dsize - this.width);
+        }
+      }
     }
 
-    const oldY = this.y
     this.y += diry * this.speed * delta;
-    collidex1 = map.isSolidTileAtXY(this.x + collideWidth,this.y)
-    collidex2 = map.isSolidTileAtXY(this.x,this.y)
-    collidex3 = map.isSolidTileAtXY(this.x + collideWidth, this.y + collideHeight)
-    collidex4 = map.isSolidTileAtXY(this.x, this.y + collideHeight)
-    if(collidex1 || collidex2 || collidex3 || collidex4) {
-      this.y = oldY
+
+    leftCol = map.getCol(this.x);
+    rightCol = map.getCol(this.x + collideWidth);
+    topRow = map.getRow(this.y);
+    bottomRow = map.getRow(this.y + collideHeight);
+
+    if (diry) {
+      // Check left col
+      if (map.isSolidTile(leftCol, topRow)) {
+        this.y = Math.max(this.y, (topRow + 1) * map.dsize);
+      } else if (map.isSolidTile(leftCol, bottomRow)) {
+        this.y = Math.min(this.y, bottomRow * map.dsize - this.height);
+      } else if (this.x + collideWidth > (leftCol + 1) * map.dsize) { // Check right col
+        if (map.isSolidTile(rightCol, topRow)) {
+          this.y = Math.max(this.y, (topRow + 1) * map.dsize);
+        } else if (map.isSolidTile(rightCol, bottomRow)) {
+          this.y = Math.min(this.y, bottomRow * map.dsize - this.height);
+        }
+      }
     }
   }
 
