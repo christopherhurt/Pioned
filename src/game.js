@@ -194,8 +194,7 @@ export class Game {
             const { id, x, y, dir, moving } = data;
             this.player.x = x;
             this.player.y = y;
-            // TODO: update camera
-            // TODO: initial locations are not valid
+            this.camera.update(this.player);
           }
         }
       };

@@ -11,7 +11,8 @@ const MAP_ITER = 3;
 const MAP_SIZE = MAP_BASE * Math.pow(2, MAP_ITER);
 const MAP_LAND_PROB = 0.3;
 const MAP_SMOOTHNESS = 5;
-const TILE_SIZE = 16;
+const T_SIZE = 16;
+const D_SIZE = 64;
 const MAP_OBJECTS = {
   'apple_tree_bottom': {
     'rules': {
@@ -39,8 +40,12 @@ const MAP_OBJECTS = {
   },
 };
 
+const COLLIDER_OBJECTS = [
+  'tree_bottom', 'apple_tree_bottom', 'stump'
+];
+
 const layers = createMap('land', 'water', MAP_BASE, MAP_LAND_PROB, MAP_ITER, MAP_SMOOTHNESS, MAP_OBJECTS);
-const map = new GameMap(MAP_SIZE, MAP_SIZE, TILE_SIZE, 64, layers);
+const map = new GameMap(MAP_SIZE, MAP_SIZE, T_SIZE, D_SIZE, layers);
 
 const wss = new WebSocket.Server({ port: 5000 });
 
@@ -75,16 +80,15 @@ wss.on('connection', socket => {
     switch (type) {
       case 'newPlayer': {
         const player = data;
-        const spawnLoc = findStartingCoordinates(layers[0], MAP_SIZE, 'land');
+        const spawnLoc = findStartingCoordinates(layers, MAP_SIZE, 'land', COLLIDER_OBJECTS);
         const xLoc = spawnLoc['x'];
         const yLoc = spawnLoc['y'];
         
-        // TODO: make sure this conversion is correct
-        player.x = xLoc * TILE_SIZE + TILE_SIZE / 2 - player.width / 2;
-        player.y = yLoc * TILE_SIZE + TILE_SIZE / 2 - player.height / 2;
+        player.x = xLoc * D_SIZE + D_SIZE / 2 - player.width / 2;
+        player.y = yLoc * D_SIZE + D_SIZE / 2 - player.height / 2;
         
         players[socket.id] = player;
-        wss.broadcastOthers(socket, 'newPlayer', { id: socket.id, player: data });
+        wss.broadcastOthers(socket, 'newPlayer', { id: socket.id, player: player });
         send(socket, 'startingPos', player);
         break;
       }

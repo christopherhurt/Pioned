@@ -7,12 +7,25 @@
 import { TILES } from './tiles'
 
 /* Find random starting location for a newly-added player */
-export function findStartingCoordinates(layer, mapSize, spawnTile) {
+export function findStartingCoordinates(layers, mapSize, spawnTile, colliderObjects) {
   // Getting ID of tile player can spawn on
   const spawnID = TILES[spawnTile];
   
   if(spawnID == undefined) {
-    throw 'Invalid tile name when finding player starting coordinates';
+    throw 'Invalid spawn tile name when finding player starting coordinates';
+  }
+  
+  // Getting IDs of collider objects that can't be spawned on
+  const colliderIDs = [];
+  
+  for(let i = 0; i < colliderObjects.length; i++) {
+    const colliderID = TILES[colliderObjects[i]];
+    
+    if(colliderID == undefined) {
+      throw 'Invalid tile name for collider object when finding player starting coordinates';
+    }
+    
+    colliderIDs.push(colliderID);
   }
   
   // Finding random location on map until it's a spawnable tile
@@ -24,7 +37,25 @@ export function findStartingCoordinates(layer, mapSize, spawnTile) {
     y = parseInt(Math.random() * mapSize);
     
     const tileIndex = y * mapSize + x;
-    spawnFound = layer[tileIndex] == spawnID;
+    if(layers[0][tileIndex] == spawnID) {
+      spawnFound = true;
+      
+      // Making sure player is not spawned on top of a collider object
+      for(let i = 1; i < layers.length; i++) {
+        const layer = layers[i];
+        
+        for(let j = 0; j < colliderIDs.length; j++) {
+          if(layer[tileIndex] == colliderIDs[j]) {
+            spawnFound = false;
+            break;
+          }
+        }
+        
+        if(!spawnFound) {
+          break;
+        }
+      }
+    }
   }
   
   return { 'x': x, 'y': y };
