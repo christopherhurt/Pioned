@@ -43,7 +43,7 @@ export class Player extends GameObject {
     this.visitedIslands = [];
   }
 
-  move(delta, dirx, diry) {
+  move(delta, dirx, diry, map) {
     let dirOffset;
     if (diry === -1) {
       this.dir = 0; // Up
@@ -65,9 +65,9 @@ export class Player extends GameObject {
       diry *= Math.sqrt(2) / 2;
     }
 
-    // Move player
-    this.x += dirx * this.speed * delta;
-    this.y += diry * this.speed * delta;
+    // Move player and do collision detection
+    this.collide(dirx, diry, map, delta);
+
     // Clamp values
     this.x = Math.max(0, Math.min(this.x, this.maxX));
     this.y = Math.max(0, Math.min(this.y, this.maxY));
@@ -77,6 +77,31 @@ export class Player extends GameObject {
       (this.x + this.width / 2) + (dirOffset[0] * this.width),
       (this.y + this.height / 2) + (dirOffset[1] * this.height),
     ];
+  }
+
+  collide(dirx, diry, map, delta) {
+    const collideWidth = 14 / 16 * map.dsize;
+    const collideHeight = map.dsize - 1;
+
+    const oldX = this.x;
+    this.x += dirx * this.speed * delta;
+    let collidex1 = map.isSolidTileAtXY(this.x + collideWidth,this.y)
+    let collidex2 = map.isSolidTileAtXY(this.x,this.y)
+    let collidex3 = map.isSolidTileAtXY(this.x + collideWidth, this.y + collideHeight)
+    let collidex4 = map.isSolidTileAtXY(this.x, this.y + collideHeight)
+    if(collidex1 || collidex2 || collidex3 || collidex4) {
+      this.x = oldX
+    }
+
+    const oldY = this.y
+    this.y += diry * this.speed * delta;
+    collidex1 = map.isSolidTileAtXY(this.x + collideWidth,this.y)
+    collidex2 = map.isSolidTileAtXY(this.x,this.y)
+    collidex3 = map.isSolidTileAtXY(this.x + collideWidth, this.y + collideHeight)
+    collidex4 = map.isSolidTileAtXY(this.x, this.y + collideHeight)
+    if(collidex1 || collidex2 || collidex3 || collidex4) {
+      this.y = oldY
+    }
   }
 
   markIslandVisited(island) {

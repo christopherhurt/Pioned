@@ -53,6 +53,22 @@ export const DROPS = [
   ['wood', 1],                 // side_bridge
 ];
 
+export const SOLID = [
+  null,                        // ==== N/A ====
+  true,                        // water
+  false,                       // land
+  true,                        // tree_bottom
+  false,                       // tree_top
+  true,                        // apple_tree_bottom
+  false,                       // apple_tree_top
+  false,                       // yellow_flower
+  false,                       // red_flower
+  false,                       // white_flower
+  true,                        // stump
+  false,                       // bridge
+  false,                       // side_bridge
+];
+
 export const BASES = {
   'wood': 'water',
   'yellow_flower': 'land',

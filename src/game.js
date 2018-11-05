@@ -272,7 +272,7 @@ export class Game {
       this.hasScrolled = true;
       this.player.moving = true;
 
-      this.player.move(delta, dirx, diry);
+      this.player.move(delta, dirx, diry, this.map);
       send(this.socket, 'playerMoved', {
         x: this.player.x,
         y: this.player.y,
@@ -584,10 +584,14 @@ export class Game {
     }
 
     // Draw the map layers into game context
-    for (let i = 0; i < this.layerCanvas.length; i++) {
+    const last = this.layerCanvas.length - 1;
+    for (let i = 0; i < last; i++) {
       this.ctx.drawImage(this.layerCanvas[i], 0, 0);
     }
     this.ctx.drawImage(this.playerCanvas, 0, 0);
+
+    // Draw final object layer above player
+    this.ctx.drawImage(this.layerCanvas[last], 0, 0);
 
     switch (this.context.getMode()) {
       case Modes.MENU:
