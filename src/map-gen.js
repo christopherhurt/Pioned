@@ -11,24 +11,24 @@ import { copyArray, fillZeros } from './utils';
 export function findStartingCoordinates(layers, mapSize, spawnTile, colliderObjects) {
   // Getting ID of tile player can spawn on
   const spawnID = TILES[spawnTile];
-  
+
   if(spawnID == undefined) {
     throw 'Invalid spawn tile name when finding player starting coordinates';
   }
-  
+
   // Getting IDs of collider objects that can't be spawned on
   const colliderIDs = [];
-  
+
   for(let i = 0; i < colliderObjects.length; i++) {
     const colliderID = TILES[colliderObjects[i]];
-    
+
     if(colliderID == undefined) {
       throw 'Invalid tile name for collider object when finding player starting coordinates';
     }
-    
+
     colliderIDs.push(colliderID);
   }
-  
+
   // Finding random location on map until it's a spawnable tile
   let spawnFound = false;
   let x = -1;
@@ -36,29 +36,29 @@ export function findStartingCoordinates(layers, mapSize, spawnTile, colliderObje
   while(!spawnFound) {
     x = parseInt(Math.random() * mapSize);
     y = parseInt(Math.random() * mapSize);
-    
+
     const tileIndex = y * mapSize + x;
     if(layers[0][tileIndex] == spawnID) {
       spawnFound = true;
-      
+
       // Making sure player is not spawned on top of a collider object
       for(let i = 1; i < layers.length; i++) {
         const layer = layers[i];
-        
+
         for(let j = 0; j < colliderIDs.length; j++) {
           if(layer[tileIndex] == colliderIDs[j]) {
             spawnFound = false;
             break;
           }
         }
-        
+
         if(!spawnFound) {
           break;
         }
       }
     }
   }
-  
+
   return { 'x': x, 'y': y };
 }
 
@@ -82,7 +82,7 @@ export function createMap(mainTile, fillTile, seedSize, mainTileChance, passes, 
 
   let lay1 = seedGen(mainID, fillID, seedSize, mainTileChance);
   const islands = findIslands(lay1, mainID);
-  
+
   // Iterating to produce greater map detail
   for(let i = 0; i < passes; i++) {
     lay1 = iterateMapGen(lay1, mainID, fillID, smoothing);
@@ -103,7 +103,7 @@ export function createMap(mainTile, fillTile, seedSize, mainTileChance, passes, 
       }
     }
   }
-  
+
   return [map, islands];
 }
 
@@ -212,8 +212,8 @@ function constructObjectLayers(bottomLayer, mainID, objects) {
 
   // Initialize 2d array with zeros
   // Thank you https://stackoverflow.com/a/46792350/1313757
-  const lay1 = Array(rows).fill().map(() => Array(cols).fill(0));
-  const lay2 = Array(rows).fill().map(() => Array(cols).fill(0));
+  const lay1 = fillZeros(cols, rows);
+  const lay2 = fillZeros(cols, rows);
 
   // Constructing layer using listed objects and relative probabilities
   for(let i = 0; i < rows; i++) {
@@ -279,7 +279,7 @@ function findIslands(seed, mainID) {
   const height = seed.length;
   const width = seed[0].length;
   let islandID = 0;
-  
+
   const islands = fillZeros(width, height);
   for(let i = 0; i < height; i++) {
     for(let j = 0; j < width; j++) {
@@ -288,17 +288,17 @@ function findIslands(seed, mainID) {
       }
     }
   }
-  
+
   return islands;
 }
 
 /* Recursively marks horizontally connected land blocks with given island ID */
 function markIsland(i, j, islandID, mainID, islands, seed) {
   const inBounds = i >= 0 && i < islands.length && j >= 0 && j < islands[0].length;
-  
+
   if(inBounds && islands[i][j] == 0 && seed[i][j] == mainID) {
     islands[i][j] = islandID;
-    
+
     markIsland(i - 1, j, islandID, mainID, islands, seed);
     markIsland(i + 1, j, islandID, mainID, islands, seed);
     markIsland(i, j - 1, islandID, mainID, islands, seed);

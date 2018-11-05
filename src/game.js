@@ -1,4 +1,4 @@
-import { ImageLoader, send, postChat, createCanvas } from './utils';
+import { ImageLoader, Styles, send, postChat, createCanvas } from './utils';
 import { Keyboard, Keys } from './keyboard';
 import { GameMap } from './map';
 import { TILES, TILEMAP, BASES, FRAMES, DROPS, SPRITES } from './tiles';
@@ -7,13 +7,15 @@ import { Player, Camera } from './game-objects';
 import { Modes, Context } from './context';
 import { RefreshManager  } from './refresh';
 
-const Styles = {
-  light: 'white',
-  special: 'rgb(23, 139, 251)',
-  lightBG: 'rgba(255,255,255,0.8)',
-  darkBG: 'rgba(0,0,0,0.8)',
-  fontFamily: 'Roboto Slab',
-};
+const TSIZE = 16;
+const DSIZE = 64;
+const RATIO = DSIZE / TSIZE;
+const PLAYER_REAL_WIDTH = 14;
+const PLAYER_REAL_HEIGHT = 15;
+const PLAYER_SRC_WIDTH = 14;
+const PLAYER_SRC_HEIGHT = 16;
+const PLAYER_DISPLAY_WIDTH = PLAYER_SRC_WIDTH * RATIO;
+const PLAYER_DISPLAY_HEIGHT = DSIZE;
 
 export class Game {
   constructor(ctx, canvasWidth, canvasHeight) {
@@ -157,7 +159,9 @@ export class Game {
             const { x: xLoc, y: yLoc } = data;
 
             const DEFAULT_SPEED = 4 * this.map.dsize;
-            this.player = new Player(xLoc, yLoc, 14 / 16 * this.map.dsize, 15 / 16 * this.map.dsize, this.map.width, this.map.height, this.map.dsize, DEFAULT_SPEED);
+            const width = PLAYER_REAL_WIDTH * RATIO;
+            const height = PLAYER_REAL_HEIGHT * RATIO;
+            this.player = new Player(xLoc, yLoc, width, height, this.map.width, this.map.height, this.map.dsize, DEFAULT_SPEED);
             send(this.socket, 'newPlayer', this.player);
 
             resolve();
@@ -465,16 +469,20 @@ export class Game {
     const tileX = (tile - 1) % image.width;
     const tileY = (tile - 1) / image.width | 0;
 
+    const sourceXOffset = (this.map.tsize - PLAYER_SRC_WIDTH) / 2;
+    const targetXOffset = -((PLAYER_SRC_WIDTH - PLAYER_REAL_WIDTH) / 2 * RATIO);
+    const targetYOffset = -((PLAYER_SRC_HEIGHT - PLAYER_REAL_HEIGHT) * RATIO);
+
     ctx.drawImage(
       image, // image
-      tileX * (1 + this.map.tsize) + 1 + 1, // source x
+      tileX * (1 + this.map.tsize) + 1 + sourceXOffset, // source x
       tileY * (1 + this.map.tsize) + 1, // source y
-      14, // source width
-      this.map.tsize, // source height
-      Math.round(x), // target x
-      Math.round(y) - (1 / 16 * this.map.dsize), // target y
-      player.width, // target width
-      this.map.dsize, // target height
+      PLAYER_SRC_WIDTH, // source width
+      PLAYER_SRC_HEIGHT, // source height
+      Math.round(x) + targetXOffset, // target x
+      Math.round(y) + targetYOffset, // target y
+      PLAYER_DISPLAY_WIDTH, // target width
+      PLAYER_DISPLAY_HEIGHT, // target height
     );
   }
 

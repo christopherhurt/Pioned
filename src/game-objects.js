@@ -80,8 +80,8 @@ export class Player extends GameObject {
   }
 
   collide(dirx, diry, map, delta) {
-    const collideWidth = this.width - 1;
-    const collideHeight = this.height - 1;
+    const collideWidth = this.width;
+    const collideHeight = this.height;
 
     this.x += dirx * this.speed * delta;
 
@@ -158,4 +158,3 @@ export class Camera {
     this.y = Math.max(0, Math.min(this.y, this.maxY));
   }
 }
-

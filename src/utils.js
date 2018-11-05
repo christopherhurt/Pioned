@@ -1,33 +1,29 @@
+export const Styles = {
+  light: 'white',
+  special: 'rgb(23, 139, 251)',
+  lightBG: 'rgba(255,255,255,0.8)',
+  darkBG: 'rgba(0,0,0,0.8)',
+  fontFamily: 'Roboto Slab',
+};
+
 export function copyArray(arr) {
   const copy = [];
-  
+
   for(let i = 0; i < arr.length; i++) {
     const row = [];
-    
+
     for(let j = 0; j < arr[0].length; j++) {
       row.push(arr[i][j]);
     }
-    
+
     copy.push(row);
   }
-  
+
   return copy;
 }
 
 export function fillZeros(width, height) {
-  const zeros = [];
-  
-  for(let i = 0; i < height; i++) {
-    const row = [];
-    
-    for(let j = 0; j < width; j++) {
-      row.push(0);
-    }
-    
-    zeros.push(row);
-  }
-  
-  return zeros;
+  return Array(height).fill().map(() => Array(width).fill(0));
 }
 
 export function send(socket, type, data) {

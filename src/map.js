@@ -24,19 +24,19 @@ export class GameMap {
     return Math.floor(x / this.dsize);
   }
 
-  getRow(y){
+  getRow(y) {
     return Math.floor(y / this.dsize);
   }
 
-  getX(col){
+  getX(col) {
     return col * this.dsize;
   }
 
-  getY(row){
+  getY(row) {
     return row * this.dsize;
   }
 
-  isSolidTile(col, row){
+  isSolidTile(col, row) {
     for (let layer = 0; layer < this.layers.length; layer++) {
       const tile = this.getTile(layer, col, row);
       if (SOLID[tile]) {
