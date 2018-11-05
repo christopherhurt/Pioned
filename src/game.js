@@ -72,10 +72,6 @@ export class Game {
     this.spriteMap = this.loader.get('sprites');
     this.spriteMap.width = 9;
 
-    const DEFAULT_SPEED = 4 * this.map.dsize;
-    this.player = new Player(this.map.dsize, this.map.dsize, this.map.width, this.map.height, DEFAULT_SPEED);
-    send(this.socket, 'newPlayer', this.player);
-
     this.camera = new Camera(this.canvasWidth, this.canvasHeight, this.map.width, this.map.height);
     this.camera.update(this.player);
 
@@ -116,7 +112,6 @@ export class Game {
           case 'map': {
             this.map = Object.assign(new GameMap, data);
             postChat('Downloaded map!', 'success');
-            resolve();
             break;
           }
           case 'players': {
@@ -159,10 +154,14 @@ export class Game {
             break;
           }
           case 'startingPos': {
-            const { id, x, y, dir, moving } = data;
-            this.player.x = x;
-            this.player.y = y;
-            this.camera.update(this.player);
+            const { x: xLoc, y: yLoc } = data;
+
+            const DEFAULT_SPEED = 4 * this.map.dsize;
+            this.player = new Player(xLoc, yLoc, this.map.dsize, this.map.dsize, this.map.width, this.map.height, this.map.dsize, DEFAULT_SPEED);
+            send(this.socket, 'newPlayer', this.player);
+
+            resolve();
+            break;
           }
         }
       };

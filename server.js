@@ -73,6 +73,9 @@ wss.on('connection', socket => {
   send(socket, 'map', map);
   send(socket, 'players', players);
 
+  const spawnLoc = findStartingCoordinates(layers, MAP_SIZE, 'land', COLLIDER_OBJECTS);
+  send(socket, 'startingPos', spawnLoc);
+
   wss.broadcastOthers(socket, 'info', `Player${socket.id} joined!`);
 
   socket.on('message', message => {
@@ -80,16 +83,8 @@ wss.on('connection', socket => {
     switch (type) {
       case 'newPlayer': {
         const player = data;
-        const spawnLoc = findStartingCoordinates(layers, MAP_SIZE, 'land', COLLIDER_OBJECTS);
-        const xLoc = spawnLoc['x'];
-        const yLoc = spawnLoc['y'];
-        
-        player.x = xLoc * D_SIZE + D_SIZE / 2 - player.width / 2;
-        player.y = yLoc * D_SIZE + D_SIZE / 2 - player.height / 2;
-        
         players[socket.id] = player;
         wss.broadcastOthers(socket, 'newPlayer', { id: socket.id, player: player });
-        send(socket, 'startingPos', player);
         break;
       }
       case 'playerMoved': {

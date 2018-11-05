@@ -10,8 +10,11 @@ export class GameObject {
 }
 
 export class Player extends GameObject {
-  constructor(width, height, mapWidth, mapHeight, speed) {
-    super(0, 0, width, height);
+  constructor(xLoc, yLoc, width, height, mapWidth, mapHeight, dsize, speed) {
+    const x = xLoc * dsize + dsize / 2 - width / 2;
+    const y = yLoc * dsize + dsize / 2 - height / 2;
+
+    super(x, y, width, height);
     this.maxX = mapWidth - width;
     this.maxY = mapHeight - height;
     this.speed = speed;
