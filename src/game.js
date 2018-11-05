@@ -299,12 +299,12 @@ export class Game {
     }
     
     // Check current island
-    const isCol = parseInt(this.player.x / this.map.width * this.map.islands[0].length);
-    const isRow = parseInt(this.player.y / this.map.height * this.map.islands.length);
+    const isCol = parseInt((this.player.x + this.player.width / 2) / this.map.width * this.map.islands[0].length);
+    const isRow = parseInt((this.player.y + this.player.height / 2) / this.map.height * this.map.islands.length);
     const currIsland = this.map.islands[isRow][isCol];
     
-    const pCol = parseInt(this.player.x / this.map.dsize);
-    const pRow = parseInt(this.player.y / this.map.dsize);
+    const pCol = parseInt((this.player.x + this.player.width / 2) / this.map.dsize);
+    const pRow = parseInt((this.player.y + this.player.height / 2) / this.map.dsize);
     const currTile = this.map.getTile(0, pCol, pRow);
     const landID = TILES['land'];
     
