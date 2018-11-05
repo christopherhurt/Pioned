@@ -1,18 +1,57 @@
 /* Lookup table to map tile name to tile map ID */
 export const TILES = {
-  'water': -1,
-  'land': 44,
-  'tree_bottom': 15,
-  'tree_top': 1,
-  'apple_tree_bottom': 16,
-  'apple_tree_top': 2,
-  'yellow_flower': 5,
-  'red_flower': 6,
-  'white_flower': 19,
-  'stump': 18,
-  'bridge': 25,
-  'side_bridge': 13,
+  'water': 1,
+  'land': 2,
+  'tree_bottom': 3,
+  'tree_top': 4,
+  'apple_tree_bottom': 5,
+  'apple_tree_top': 6,
+  'yellow_flower': 7,
+  'red_flower': 8,
+  'white_flower': 9,
+  'stump': 10,
+  'bridge': 11,
+  'side_bridge': 12,
 };
+
+// Negative means animated. Check negated index in FRAMES
+// E.g., -1 => FRAMES[1]
+export const TILEMAP = [
+  null,                         // ==== N/A ====
+  -1,                           // water
+  44,                           // land
+  15,                           // tree_bottom
+  1,                            // tree_top
+  16,                           // apple_tree_bottom
+  2,                            // apple_tree_top
+  5,                            // yellow_flower
+  6,                            // red_flower
+  19,                           // white_flower
+  18,                           // stump
+  25,                           // bridge
+  13,                           // side_bridge
+];
+
+export const FRAMES = [
+  null,
+  [35, 44, 53],
+];
+
+export const DROPS = [
+  null,                        // ==== N/A ====
+  null,                        // water
+  null,                        // land
+  ['wood', 2],                 // tree_bottom
+  null,                        // tree_top
+  ['wood', 2],                 // apple_tree_bottom
+  null,                        // apple_tree_top
+  ['yellow_flower', 1],        // yellow_flower
+  ['red_flower', 1],           // red_flower
+  ['white_flower', 1],         // white_flower
+  ['wood', 1],                 // stump
+  ['wood', 1],                 // bridge
+  ['wood', 1],                 // side_bridge
+];
 
 export const PLAYERS = [
   'girl_player',
@@ -22,7 +61,6 @@ export const PLAYERS = [
 
 /* Lookup table for sprites */
 export const SPRITES = {
-  'water': [35, 44, 53],
   'girl_player': [
     25, 26, 27, // Down
     16, 17, 18, // Left

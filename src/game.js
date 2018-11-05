@@ -1,16 +1,18 @@
-import { ImageLoader, Keyboard, Keys, send, postChat, createCanvas } from './utils';
+import { ImageLoader, send, postChat, createCanvas } from './utils';
+import { Keyboard, Keys } from './keyboard';
 import { GameMap } from './map';
-import { TILES, SPRITES } from './tiles';
+import { TILES, TILEMAP, FRAMES, DROPS, SPRITES } from './tiles';
 import { Inventory } from './inventory';
 import { Player, Camera } from './game-objects';
 import { Modes, Context } from './context';
+import { RefreshManager  } from './refresh';
 
 const Styles = {
   light: 'white',
+  special: 'rgb(23, 139, 251)',
   lightBG: 'rgba(255,255,255,0.8)',
   darkBG: 'rgba(0,0,0,0.8)',
-  largeFont: '50px Roboto Slab',
-  mediumFont: '25px Roboto Slab',
+  fontFamily: 'Roboto Slab',
 };
 
 export class Game {
@@ -50,8 +52,14 @@ export class Game {
       Keys.I,
       Keys.ESC,
     ]);
+    this.menuRepeatDelay = 100;
 
     this.context = new Context(Modes.GAME);
+
+    this.refreshManager = new RefreshManager();
+    this.refreshManager.register('sprite', 2, 200);
+    this.refreshManager.register('map', 3, 1500);
+    this.refreshManager.register('menu', 2, 100);
 
     // Create a canvas for each layer
     this.layerCanvas = this.map.layers.map(() => createCanvas(this.canvasWidth, this.canvasHeight));
@@ -73,6 +81,10 @@ export class Game {
     this.camera.update(this.player);
 
     this.inventory = new Inventory();
+    this.inventory.add('a', 10);
+    this.inventory.add('b', 20);
+    this.inventory.add('c', 30);
+    this.inventory.add('d', 40);
 
     // Initial draw of the map
     this._drawMap(0);
@@ -162,32 +174,20 @@ export class Game {
       return;
     }
 
-    // Frames for each (moving) sprite
-    const mapSpriteFrames = 3;
-    const playerSpriteFrames = 2;
-    // SRR = Sprite Refresh Rate (update every x seconds)
-    const mapSRR = 1.5;
-    const playerSRR = 0.2;
-    const mapUpdateMS = 1000.0 * mapSRR * mapSpriteFrames;
-    const playerUpdateMS = 1000.0 * playerSRR * playerSpriteFrames;
-
     const tick = (elapsed) => {
       window.requestAnimationFrame(tick);
-
-      // Clear previous frame
-      this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
       // Compute delta time in seconds -- also cap it
       // Maximum delta of 250 ms
       const delta = Math.min(0.25, (elapsed - this.previousElapsed) / 1000.0);
       this.previousElapsed = elapsed;
 
-      const time = new Date().getTime();
-      const mapSpriteIndex = (time % mapUpdateMS) / mapUpdateMS * mapSpriteFrames | 0;
-      const playerSpriteIndex = (time % playerUpdateMS) / playerUpdateMS * playerSpriteFrames | 0;
+      this.refreshManager.update('sprite');
+      this.refreshManager.update('map');
+      this.refreshManager.updateIfFalse('menu');
 
       this.update(delta);
-      this.render(mapSpriteIndex, playerSpriteIndex);
+      this.render();
     };
 
     tick();
@@ -216,7 +216,34 @@ export class Game {
   }
 
   _updateInventory(delta) {
+    const itemIDS = this.inventory.getItemIDS();
+    if (itemIDS.length > 0) {
 
+      const up = this.keyboard.isDownRepeat([Keys.UP, Keys.W], this.menuRepeatDelay);
+      const down = this.keyboard.isDownRepeat([Keys.DOWN, Keys.S], this.menuRepeatDelay);
+
+      if (up || down) {
+        if (this.refreshManager.get('menu')) {
+          this.refreshManager.reset('menu');
+
+          let i = (this.inventory.selected === null)
+            ? 0
+            : itemIDS.indexOf(this.inventory.selected);
+
+          if (up) {
+            i--;
+          } else {
+            i++;
+          }
+
+          // Account for negative modulus
+          i = (i + itemIDS.length) % itemIDS.length;
+          const newId = itemIDS[i];
+          this.inventory.select(newId);
+        }
+      }
+
+    }
   }
 
   _updateGame(delta) {
@@ -289,7 +316,7 @@ export class Game {
       const row = y / this.map.dsize | 0;
 
       const obj = this.map.getTile(1, col, row);
-      if (obj === TILES['tree_bottom'] || obj === TILES['apple_tree_bottom']) {
+      if (obj !== 0) {
         this.map.setTile(1, col, row, 0);
         send(this.socket, 'tileUpdate', { layer: 1, col, row, type: 0 });
 
@@ -298,7 +325,12 @@ export class Game {
           send(this.socket, 'tileUpdate', { layer: 2, col, row: row - 1, type: 0 });
         }
 
-        this.inventory.add('wood', 2);
+        // Get drops
+        if (DROPS[obj] !== null) {
+          const [ drop, num ] = DROPS[obj];
+          this.inventory.add(drop, num);
+        }
+
         this.hasScrolled = true;
       }
     }
@@ -326,7 +358,8 @@ export class Game {
     x += width * 0.1;
     y += height * 0.15;
 
-    ctx.font = Styles.largeFont;
+    let fontSize = 50;
+    ctx.font = `${fontSize}px ${Styles.fontFamily}`;
     ctx.fillStyle = Styles.light;
     ctx.fillText('Menu', x, y);
   }
@@ -350,37 +383,38 @@ export class Game {
     );
 
     // Margins
-    x += width * 0.1;
+    const sideMargin = width * 0.1;
+    x += sideMargin;
     y += height * 0.15;
 
-    ctx.font = Styles.largeFont;
+    let fontSize = 50;
+    ctx.font = `${fontSize}px ${Styles.fontFamily}`;
     ctx.fillStyle = Styles.light;
     ctx.fillText('Inventory', x, y);
 
-    ctx.font = Styles.mediumFont;
-    const separation = 35;
-    y += 65;
+    fontSize = 25;
+    ctx.font = `${fontSize}px ${Styles.fontFamily}`;
+    const separation = fontSize * 1.5;
+    y += separation * 2;
 
-    const items = this.inventory.getItems();
-    for (let item in items) {
-      const num = items[item];
+    const items = this.inventory.items;
+    for (let id in items) {
+      const num = items[id];
 
       // Skip empty values
       if (num === 0) {
         continue;
       }
 
-      ctx.fillText(
-        `${item.toUpperCase()} : ${num}`,
-        x,
-        y,
-      );
+      ctx.fillStyle = (id === this.inventory.selected) ? Styles.special : Styles.light;
+      ctx.fillText(id.toUpperCase(), x, y);
+      ctx.fillText(num, x + width * 0.5, y);
 
       y += separation;
     }
   }
 
-  _drawPlayer(player, spriteIndex) {
+  _drawPlayer(player) {
     const ctx = this.playerCanvas.getContext('2d');
 
     const x = -this.camera.x + player.x;
@@ -389,7 +423,7 @@ export class Game {
     const image = this.spriteMap;
 
     // Only animate player if moving
-    const index = player.moving ? spriteIndex + 1 : 0;
+    const index = player.moving ? this.refreshManager.index('sprite') + 1 : 0;
     const tile = SPRITES[player.sprite][player.dir * 3 + index];
     const tileX = (tile - 1) % image.width;
     const tileY = (tile - 1) / image.width | 0;
@@ -425,13 +459,13 @@ export class Game {
     );
   }
 
-  _drawPlayers(spriteIndex) {
+  _drawPlayers() {
     const ctx = this.playerCanvas.getContext('2d');
     ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
     // Draw each other player
     for (let key in this.players) {
-      this._drawPlayer(this.players[key], spriteIndex);
+      this._drawPlayer(this.players[key]);
     }
 
     if (!this.player.moving) {
@@ -440,14 +474,14 @@ export class Game {
     }
 
     // Draw player
-    this._drawPlayer(this.player, spriteIndex);
+    this._drawPlayer(this.player);
   }
 
-  _drawMap(spriteIndex) {
-    this.map.layers.forEach((layer, index) => this._drawLayer(index, spriteIndex));
+  _drawMap() {
+    this.map.layers.forEach((layer, index) => this._drawLayer(index));
   }
 
-  _drawLayer(layer, spriteIndex) {
+  _drawLayer(layer) {
     const ctx = this.layerCanvas[layer].getContext('2d');
     ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
@@ -466,17 +500,16 @@ export class Game {
           continue;
         }
 
-        let image;
-        if (tile === TILES['water']) {
+        let image = this.tileMap;
+        let tileIndex = TILEMAP[tile];
+
+        if (tileIndex < 0) {
           image = this.spriteMap;
-          tile = SPRITES['water'][spriteIndex];
-        }
-        else {
-          image = this.tileMap;
+          tileIndex = FRAMES[-tileIndex][this.refreshManager.index('map')];
         }
 
-        const tileX = (tile - 1) % image.width;
-        const tileY = (tile - 1) / image.width | 0;
+        const tileX = (tileIndex - 1) % image.width;
+        const tileY = (tileIndex - 1) / image.width | 0;
 
         const x = i * this.map.dsize + offsetX;
         const y = j * this.map.dsize + offsetY;
@@ -496,22 +529,22 @@ export class Game {
     }
   }
 
-  render(mapSpriteIndex, playerSpriteIndex) {
+  render() {
+    // Clear previous frame
+    this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+
     // Redraw map if there has been scroll
-    if (mapSpriteIndex !== this.prevMapSpriteIndex || this.hasScrolled) {
+    if (this.hasScrolled || this.refreshManager.get('map')) {
       this.hasScrolled = false;
-      this._drawMap(mapSpriteIndex);
-      this._drawPlayers(playerSpriteIndex);
+      this._drawMap();
+      this._drawPlayers();
     }
 
     // Redraw players if they moved
-    if (playerSpriteIndex !== this.prevPlayerSpriteIndex || this.playersMoved) {
+    if (this.playersMoved || this.refreshManager.get('sprite')) {
       this.playersMoved = false;
-      this._drawPlayers(playerSpriteIndex);
+      this._drawPlayers();
     }
-
-    this.prevMapSpriteIndex = mapSpriteIndex;
-    this.prevPlayerSpriteIndex = playerSpriteIndex;
 
     // Draw the map layers into game context
     for (let i = 0; i < this.layerCanvas.length; i++) {
@@ -529,21 +562,6 @@ export class Game {
         this.ctx.drawImage(this.inventoryCanvas, 0, 0);
         break;
     }
-
-    // Uncomment the below code once collision detection for trees is finished
-    // =======================================================================
-
-//  // Draw map layers (except last object layer)
-//  const last = this.layerCanvas.length - 1;
-//  for (let i = 0; i < last; i++) {
-//    this.ctx.drawImage(this.layerCanvas[i], 0, 0);
-//  }
-
-//  // Draw players
-//  this.ctx.drawImage(this.playerCanvas, 0, 0);
-
-//  // Draw last object layer
-//  this.ctx.drawImage(this.layerCanvas[last], 0, 0);
   }
 
   resize(width, height) {
@@ -561,6 +579,6 @@ export class Game {
 
     // Re-render
     this.hasScrolled = true;
-    this.render(this.prevMapSpriteIndex, this.prevPlayerSpriteIndex);
+    this.render();
   }
 }
