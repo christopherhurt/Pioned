@@ -1,7 +1,7 @@
 import { ImageLoader, send, postChat, createCanvas } from './utils';
 import { Keyboard, Keys } from './keyboard';
 import { GameMap } from './map';
-import { TILES, TILEMAP, FRAMES, DROPS, SPRITES } from './tiles';
+import { TILES, TILEMAP, BASES, FRAMES, DROPS, SPRITES } from './tiles';
 import { Inventory } from './inventory';
 import { Player, Camera } from './game-objects';
 import { Modes, Context } from './context';
@@ -81,10 +81,6 @@ export class Game {
     this.camera.update(this.player);
 
     this.inventory = new Inventory();
-    this.inventory.add('a', 10);
-    this.inventory.add('b', 20);
-    this.inventory.add('c', 30);
-    this.inventory.add('d', 40);
 
     // Initial draw of the map
     this._drawMap(0);
@@ -217,32 +213,29 @@ export class Game {
 
   _updateInventory(delta) {
     const itemIDS = this.inventory.getItemIDS();
-    if (itemIDS.length > 0) {
 
-      const up = this.keyboard.isDownRepeat([Keys.UP, Keys.W], this.menuRepeatDelay);
-      const down = this.keyboard.isDownRepeat([Keys.DOWN, Keys.S], this.menuRepeatDelay);
+    const up = this.keyboard.isDownRepeat([Keys.UP, Keys.W], this.menuRepeatDelay);
+    const down = this.keyboard.isDownRepeat([Keys.DOWN, Keys.S], this.menuRepeatDelay);
 
-      if (up || down) {
-        if (this.refreshManager.get('menu')) {
-          this.refreshManager.reset('menu');
+    if (up || down) {
+      if (this.refreshManager.get('menu')) {
+        this.refreshManager.reset('menu');
 
-          let i = (this.inventory.selected === null)
-            ? 0
-            : itemIDS.indexOf(this.inventory.selected);
+        let i = (this.inventory.selected === null)
+          ? 0
+          : itemIDS.indexOf(this.inventory.selected);
 
-          if (up) {
-            i--;
-          } else {
-            i++;
-          }
-
-          // Account for negative modulus
-          i = (i + itemIDS.length) % itemIDS.length;
-          const newId = itemIDS[i];
-          this.inventory.select(newId);
+        if (up) {
+          i--;
+        } else {
+          i++;
         }
-      }
 
+        // Account for negative modulus
+        i = (i + itemIDS.length) % itemIDS.length;
+        const newId = itemIDS[i];
+        this.inventory.select(newId);
+      }
     }
   }
 
@@ -279,8 +272,9 @@ export class Game {
       });
     }
 
-    // Place bridge
-    if (this.keyboard.isDown(Keys.K)) {
+    // Place object
+    const item = this.inventory.selected;
+    if (this.keyboard.isDown(Keys.K) && item !== this.inventory.NONE) {
       const [ x, y ] = this.player.selectCoords;
       const col = x / this.map.dsize | 0;
       const row = y / this.map.dsize | 0;
@@ -288,28 +282,34 @@ export class Game {
       const base = this.map.getTile(0, col, row);
       const obj = this.map.getTile(1, col, row);
 
-      if (base === TILES['water'] && obj === 0 && this.inventory.verify('wood', 1)) {
-        let objID;
-        switch (this.player.dir) {
-          case 0: // Up
-          case 3: // Down
-            objID = 'bridge';
-            break;
-          case 1: // Left
-          case 2: // Right
-            objID = 'side_bridge';
-            break;
+      if (obj === 0
+        && (!(item in BASES) || base === TILES[BASES[item]])
+        && this.inventory.verify(item, 1)) {
+
+        let objID = item;
+        if (item === 'wood') {
+          switch (this.player.dir) {
+            case 0: // Up
+            case 3: // Down
+              objID = 'bridge';
+              break;
+            case 1: // Left
+            case 2: // Right
+              objID = 'side_bridge';
+              break;
+          }
         }
+
+        this.inventory.remove(item, 1);
 
         this.map.setTile(1, col, row, TILES[objID]);
         send(this.socket, 'tileUpdate', { layer: 1, col, row, type: TILES[objID] });
 
-        this.inventory.remove('wood', 1);
         this.hasScrolled = true;
       }
     }
 
-    // Take tree
+    // Take object
     if (this.keyboard.isDown(Keys.L)) {
       const [ x, y ] = this.player.selectCoords;
       const col = x / this.map.dsize | 0;
@@ -408,7 +408,9 @@ export class Game {
 
       ctx.fillStyle = (id === this.inventory.selected) ? Styles.special : Styles.light;
       ctx.fillText(id.toUpperCase(), x, y);
-      ctx.fillText(num, x + width * 0.5, y);
+      if (id !== this.inventory.NONE) {
+        ctx.fillText(num, x + width * 0.5, y);
+      }
 
       y += separation;
     }

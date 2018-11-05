@@ -53,6 +53,13 @@ export const DROPS = [
   ['wood', 1],                 // side_bridge
 ];
 
+export const BASES = {
+  'wood': 'water',
+  'yellow_flower': 'land',
+  'red_flower': 'land',
+  'white_flower': 'land',
+};
+
 export const PLAYERS = [
   'girl_player',
   'man1_player',
