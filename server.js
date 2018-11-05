@@ -44,8 +44,8 @@ const COLLIDER_OBJECTS = [
   'tree_bottom', 'apple_tree_bottom', 'stump'
 ];
 
-const layers = createMap('land', 'water', MAP_BASE, MAP_LAND_PROB, MAP_ITER, MAP_SMOOTHNESS, MAP_OBJECTS);
-const map = new GameMap(MAP_SIZE, MAP_SIZE, T_SIZE, D_SIZE, layers);
+const [layers, islands] = createMap('land', 'water', MAP_BASE, MAP_LAND_PROB, MAP_ITER, MAP_SMOOTHNESS, MAP_OBJECTS);
+const map = new GameMap(MAP_SIZE, MAP_SIZE, T_SIZE, D_SIZE, layers, islands);
 
 const wss = new WebSocket.Server({ port: 5000 });
 

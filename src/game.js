@@ -29,8 +29,20 @@ export class Player extends GameObject {
     const g = Math.random() * 255 | 0;
     const b = Math.random() * 255 | 0;
     this.color = `rgb(${r}, ${g}, ${b})`;
+    
+    this.visitedIslands = [];
   }
 
+  markIslandVisited(island) {
+    if(!this.visitedIslands.includes(island)) {
+      this.visitedIslands.push(island);
+    }
+  }
+  
+  hasVisitedIsland(island) {
+    return this.visitedIslands.includes(island);
+  }
+  
   move(delta, dirx, diry) {
     // Move player
     this.x += dirx * this.speed * delta;
@@ -95,7 +107,7 @@ export class Game {
       Keys.D,
       Keys.K,
     ]);
-
+    
     // Create a canvas for each layer
     this.layerCanvas = this.map.layers.map(() => createCanvas(this.canvasWidth, this.canvasHeight));
     this.playerCanvas = createCanvas(this.canvasWidth, this.canvasHeight);
@@ -285,15 +297,30 @@ export class Game {
         moving: this.player.moving,
       });
     }
-
+    
+    // Check current island
+    const isCol = parseInt(this.player.x / this.map.width * this.map.islands[0].length);
+    const isRow = parseInt(this.player.y / this.map.height * this.map.islands.length);
+    const currIsland = this.map.islands[isRow][isCol];
+    
+    const pCol = parseInt(this.player.x / this.map.dsize);
+    const pRow = parseInt(this.player.y / this.map.dsize);
+    const currTile = this.map.getTile(0, pCol, pRow);
+    const landID = TILES['land'];
+    
+    if(currIsland != 0 && currTile == landID && !this.player.hasVisitedIsland(currIsland)) {
+      this.player.markIslandVisited(currIsland);
+      postChat('Island ' + currIsland + ' visited!');
+    }
+    
     // Place tree
     if (this.keyboard.isDown(Keys.K)) {
       const tree = 15;
       const ocean = 417;
-
+      
       const col = this.player.x / this.map.dsize | 0;
       const row = this.player.y / this.map.dsize | 0;
-
+      
       const base = this.map.getTile(0, col, row);
       const top = this.map.getTile(1, col, row);
 
