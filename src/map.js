@@ -1,5 +1,5 @@
 export class GameMap {
-  constructor(cols, rows, tsize, dsize, layers) {
+  constructor(cols, rows, tsize, dsize, layers, islands) {
     this.cols = cols;
     this.rows = rows;
     this.tsize = tsize;
@@ -7,8 +7,9 @@ export class GameMap {
     this.layers = layers;
     this.width = cols * dsize;
     this.height = rows * dsize;
+    this.islands = islands;
   }
-
+  
   getTile(layer, col, row) {
     return this.layers[layer][row * this.cols + col];
   }

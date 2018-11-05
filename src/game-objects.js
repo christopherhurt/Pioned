@@ -36,6 +36,8 @@ export class Player extends GameObject {
     const g = Math.random() * 255 | 0;
     const b = Math.random() * 255 | 0;
     this.color = `rgb(${r}, ${g}, ${b})`;
+
+    this.visitedIslands = [];
   }
 
   move(delta, dirx, diry) {
@@ -72,6 +74,16 @@ export class Player extends GameObject {
       (this.x + this.width / 2) + (dirOffset[0] * this.width),
       (this.y + this.height / 2) + (dirOffset[1] * this.height),
     ];
+  }
+
+  markIslandVisited(island) {
+    if(!this.visitedIslands.includes(island)) {
+      this.visitedIslands.push(island);
+    }
+  }
+
+  hasVisitedIsland(island) {
+    return this.visitedIslands.includes(island);
   }
 }
 

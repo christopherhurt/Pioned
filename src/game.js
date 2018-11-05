@@ -158,6 +158,12 @@ export class Game {
             postChat(data);
             break;
           }
+          case 'startingPos': {
+            const { id, x, y, dir, moving } = data;
+            this.player.x = x;
+            this.player.y = y;
+            this.camera.update(this.player);
+          }
         }
       };
     });
@@ -285,6 +291,21 @@ export class Game {
         dir: this.player.dir,
         moving: this.player.moving,
       });
+    }
+
+    // Check current island
+    const isCol = parseInt((this.player.x + this.player.width / 2) / this.map.width * this.map.islands[0].length);
+    const isRow = parseInt((this.player.y + this.player.height / 2) / this.map.height * this.map.islands.length);
+    const currIsland = this.map.islands[isRow][isCol];
+
+    const pCol = parseInt((this.player.x + this.player.width / 2) / this.map.dsize);
+    const pRow = parseInt((this.player.y + this.player.height / 2) / this.map.dsize);
+    const currTile = this.map.getTile(0, pCol, pRow);
+    const landID = TILES['land'];
+
+    if (currIsland != 0 && currTile == landID && !this.player.hasVisitedIsland(currIsland)) {
+      this.player.markIslandVisited(currIsland);
+      postChat('Island ' + currIsland + ' visited!');
     }
 
     // Place object

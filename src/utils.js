@@ -1,3 +1,35 @@
+export function copyArray(arr) {
+  const copy = [];
+  
+  for(let i = 0; i < arr.length; i++) {
+    const row = [];
+    
+    for(let j = 0; j < arr[0].length; j++) {
+      row.push(arr[i][j]);
+    }
+    
+    copy.push(row);
+  }
+  
+  return copy;
+}
+
+export function fillZeros(width, height) {
+  const zeros = [];
+  
+  for(let i = 0; i < height; i++) {
+    const row = [];
+    
+    for(let j = 0; j < width; j++) {
+      row.push(0);
+    }
+    
+    zeros.push(row);
+  }
+  
+  return zeros;
+}
+
 export function send(socket, type, data) {
   socket.send(JSON.stringify({type, data}));
 }
