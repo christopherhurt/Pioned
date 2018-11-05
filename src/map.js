@@ -37,19 +37,14 @@ export class GameMap {
   }
 
   isSolidTile(col, row) {
-    for (let layer = 0; layer < this.layers.length; layer++) {
-      const tile = this.getTile(layer, col, row);
-      if(layer === 0){
-        const tileOver = this.getTile(layer+1,col,row);
-        if(!SOLID[tileOver] && tileOver !== 0){
-          continue;
-        }
-      }
-      if (SOLID[tile]) {
-        return true;
-      }
+    const base = this.getTile(0, col, row);
+    const obj = this.getTile(1, col, row);
+
+    // Can walk on structures above water
+    if (obj !== 0 && !SOLID[obj]) {
+      return false;
     }
 
-    return false;
+    return SOLID[base] || SOLID[obj];
   }
 }
