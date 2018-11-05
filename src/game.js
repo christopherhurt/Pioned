@@ -20,7 +20,6 @@ export class Game {
     this.ctx = ctx;
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
-    this.previousElapsed = 0;
     this.loader = new ImageLoader();
     this.keyboard = new Keyboard();
   }
@@ -170,13 +169,29 @@ export class Game {
       return;
     }
 
+    let prevElapsed = 0;
+    let frameCount = 0;
+    let el = 0;
+
     const tick = (elapsed) => {
       window.requestAnimationFrame(tick);
 
+      let delta = elapsed - prevElapsed;
+
+      if (delta) {
+        frameCount++;
+        el += delta;
+        if (el >= 1000) {
+          this.fps = frameCount;
+          frameCount = 0;
+          el -= 1000;
+        }
+      }
+
       // Compute delta time in seconds -- also cap it
       // Maximum delta of 250 ms
-      const delta = Math.min(0.25, (elapsed - this.previousElapsed) / 1000.0);
-      this.previousElapsed = elapsed;
+      delta = Math.min(0.25, delta / 1000.0);
+      prevElapsed = elapsed;
 
       this.refreshManager.update('sprite');
       this.refreshManager.update('map');
@@ -564,6 +579,12 @@ export class Game {
         this.ctx.drawImage(this.inventoryCanvas, 0, 0);
         break;
     }
+
+    // Display fps
+    this.ctx.fillStyle = 'red';
+    const fontSize = 24;
+    this.ctx.font = `${fontSize}px ${Styles.fontFamily}`;
+    this.ctx.fillText(`fps: ${this.fps | 0}`, this.canvasWidth * 0.90, this.canvasHeight * 0.05);
   }
 
   resize(width, height) {
