@@ -52,6 +52,7 @@ To run the game server, use `yarn serve`.
 ## Ideas
 - [ ] Nighttime/daytime
 - [ ] Fireworks
+- [ ] Use cookies to save player state to prevent constant refresh for new character
 
 ## Completed Tasks
 - [x] Add movable player
