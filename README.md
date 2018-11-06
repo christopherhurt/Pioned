@@ -43,6 +43,7 @@ To run the game server, use `yarn serve`.
             -[ ] Implement Player Collision
         - [ ] Give another player a flower
 - [ ] Fix player spawning on single or few blocks
+- [ ] Make favicon display on web page
 
 ## Todo
 - [ ] Use environment variables to set the (websocket) host
