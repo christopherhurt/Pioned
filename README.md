@@ -23,21 +23,34 @@ To run the game server, use `yarn serve`.
 ## This Week
 
 **Parker**:
+- [ ] Fix removing wood on top of water bug
+- [ ] Spawn trees at certain time intervals
 
 **Jack**:
-
-**Chris**:
-
-## Todo
-
+- [ ] Player chat system
 - [ ] Performance: only draw visible characters
 - [ ] Performance: only redraw map if parts of the visible map changed (socket messages)
-- [ ] Use environment variables to set the (websocket) host
-- [ ] Add current random color mask on top of players
-- [ ] Fix removing wood on top of water bug
+- [ ] Show what is currently selected in the inventory
+- [ ] Enter to select item in inventory
+
+**Chris**:
 - [ ] Add Objective System
     - [ ] Create at least 3 different unique objectives
-- [ ] Add Clock or Point Limit and have a win/lose situations
+        - [ ] Visit randomly numbered Island
+        - [ ] Visit 5 different Islands
+        - [ ] Don't allow anyone to visit your home island
+        - [ ] Come into contact with n other players
+            -[ ] Implement Player Collision
+        - [ ] Give another player a flower
+
+## Todo
+- [ ] Use environment variables to set the (websocket) host
+- [ ] Add current random color mask on top of players
+- [ ] Objective Tracking 
+
+## Ideas
+- [ ] Nighttime/daytime
+- [ ] Fireworks
 
 ## Completed Tasks
 - [x] Add movable player
