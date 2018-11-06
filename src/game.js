@@ -245,18 +245,18 @@ export class Game {
       if (this.refreshManager.get('menu')) {
         this.refreshManager.reset('menu');
 
-        let i = (this.inventory.selected === null)
-          ? 0
-          : itemIDS.indexOf(this.inventory.selected);
+        let i = itemIDS.indexOf(this.inventory.selected);
 
         if (up) {
-          i--;
+          if (i > 0) {
+            i--;
+          }
         } else {
-          i++;
+          if (i < itemIDS.length - 1) {
+            i++;
+          }
         }
 
-        // Account for negative modulus
-        i = (i + itemIDS.length) % itemIDS.length;
         const newId = itemIDS[i];
         this.inventory.select(newId);
       }
