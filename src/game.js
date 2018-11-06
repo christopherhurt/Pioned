@@ -52,6 +52,7 @@ export class Game {
       Keys.L,
       Keys.I,
       Keys.ESC,
+      Keys.ENTER,
     ]);
     this.menuRepeatDelay = 100;
 
@@ -225,7 +226,7 @@ export class Game {
         this._updateGame(delta);
         break;
       case Modes.INVENTORY:
-        if (this.context.trySwitchModes(Modes.GAME, this.keyboard.isDown(Keys.I))) { break; };
+        if (this.context.trySwitchModes(Modes.GAME, this.keyboard.isDown([Keys.I, Keys.ENTER]))) { break; };
         this._updateInventory(delta);
         break;
     }

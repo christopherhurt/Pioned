@@ -31,7 +31,7 @@ To run the game server, use `yarn serve`.
 - [ ] Performance: only draw visible characters
 - [ ] Performance: only redraw map if parts of the visible map changed (socket messages)
 - [ ] Show what is currently selected in the inventory
-- [ ] Enter to select item in inventory
+- [x] Enter to select item in inventory
 
 **Chris**:
 - [ ] Add Objective System
