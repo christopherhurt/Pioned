@@ -34,6 +34,10 @@ To run the game server, use `yarn serve`.
 - [ ] Performance: only redraw map if parts of the visible map changed (socket messages)
 - [ ] Use environment variables to set the (websocket) host
 - [ ] Add current random color mask on top of players
+- [ ] Fix removing wood on top of water bug
+- [ ] Add Objective System
+    - [ ] Create at least 3 different unique objectives
+- [ ] Add Clock or Point Limit and have a win/lose situations
 
 ## Completed Tasks
 - [x] Add movable player
