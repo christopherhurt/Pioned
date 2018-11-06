@@ -40,7 +40,7 @@ To run the game server, use `yarn serve`.
         - [ ] Visit 5 different Islands
         - [ ] Don't allow anyone to visit your home island
         - [ ] Come into contact with n other players
-            -[ ] Implement Player Collision
+            - [ ] Implement Player Collision
         - [ ] Give another player a flower
 - [ ] Fix player spawning on single or few blocks
 
