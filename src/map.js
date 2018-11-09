@@ -1,7 +1,7 @@
 import { SOLID } from './tiles';
 
 export class GameMap {
-  constructor(cols, rows, tsize, dsize, layers, islands) {
+  constructor(cols, rows, tsize, dsize, layers, islands, numIslands) {
     this.cols = cols;
     this.rows = rows;
     this.tsize = tsize;
@@ -10,6 +10,7 @@ export class GameMap {
     this.width = cols * dsize;
     this.height = rows * dsize;
     this.islands = islands;
+    this.numIslands = numIslands;
   }
 
   getTile(layer, col, row) {

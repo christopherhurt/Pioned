@@ -10,7 +10,7 @@ export class GameObject {
 }
 
 export class Player extends GameObject {
-  constructor(xLoc, yLoc, width, height, mapWidth, mapHeight, dsize, speed) {
+  constructor(xLoc, yLoc, width, height, mapWidth, mapHeight, dsize, speed, objectiveId, objectiveData) {
     const x = xLoc * dsize + dsize / 2 - width / 2;
     const y = yLoc * dsize + dsize / 2 - height / 2;
 
@@ -43,10 +43,8 @@ export class Player extends GameObject {
     this.visitedIslands = [];
     this.contactedPlayers = [];
     
-    const objective = generateObjective();
-    this.objectiveId = objective['id'];
-    this.objectiveData = objective['data'];
-    postChat('New objective "' + getObjectiveName(objectiveId) + '": ' + getObjectiveDescription(objectiveId, objectiveData));
+    this.objectiveId = objectiveId;
+    this.objectiveData = objectiveData;
   }
 
   move(delta, dirx, diry, map) {

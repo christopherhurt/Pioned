@@ -6,6 +6,7 @@ import { Inventory } from './inventory';
 import { Player, Camera } from './game-objects';
 import { Modes, Context } from './context';
 import { RefreshManager  } from './refresh';
+import { setObjectivesGameReference, generateObjective, checkObjectiveComplete, getObjectiveName, getObjectiveDescription, OBJECTIVE_COMPLETE } from './objectives';
 
 const TSIZE = 16;
 const DSIZE = 64;
@@ -24,6 +25,7 @@ export class Game {
     this.canvasHeight = canvasHeight;
     this.loader = new ImageLoader();
     this.keyboard = new Keyboard();
+    setObjectivesGameReference(this);
   }
 
   async init() {
@@ -161,7 +163,13 @@ export class Game {
             const DEFAULT_SPEED = 4 * this.map.dsize;
             const width = PLAYER_REAL_WIDTH * RATIO;
             const height = PLAYER_REAL_HEIGHT * RATIO;
-            this.player = new Player(xLoc, yLoc, width, height, this.map.width, this.map.height, this.map.dsize, DEFAULT_SPEED);
+            
+            const objective = generateObjective();
+            const objectiveId = objective['id'];
+            const objectiveData = objective['data'];
+            postChat('New objective "' + getObjectiveName(objectiveId) + '": ' + getObjectiveDescription(objectiveId, objectiveData));
+            
+            this.player = new Player(xLoc, yLoc, width, height, this.map.width, this.map.height, this.map.dsize, DEFAULT_SPEED, objectiveId, objectiveData);
             send(this.socket, 'newPlayer', this.player);
 
             resolve();
@@ -375,9 +383,9 @@ export class Game {
     }
     
     // Check and update collisions with other players
-    for(let id in players) {
+    for(let id in this.players) {
       if(!this.player.contactedPlayers.includes(id)) {
-        const other = players[id];
+        const other = this.players[id];
         
         // Assume all players are the same size
         // So, our player is colliding if any corner is in the bounds of the other player
@@ -391,10 +399,10 @@ export class Game {
         const theirMinY = other.y;
         const theirMaxY = other.y + other.height;
         
-        const leftIn = ourMinX > theirMinX && ourMinX < theirMaxX;
-        const rightIn = ourMaxX > theirMinX && ourMaxX < theirMaxX;
-        const topIn = ourMinY > theirMinY && ourMinY < theirMaxY;
-        const bottomIn = ourMaxY > theirMinY && ourMaxY < theirMaxY;
+        const leftIn = ourMinX >= theirMinX && ourMinX <= theirMaxX;
+        const rightIn = ourMaxX >= theirMinX && ourMaxX <= theirMaxX;
+        const topIn = ourMinY >= theirMinY && ourMinY <= theirMaxY;
+        const bottomIn = ourMaxY >= theirMinY && ourMaxY <= theirMaxY;
         
         const corner1 = topIn && leftIn;
         const corner2 = topIn && rightIn;
@@ -411,7 +419,7 @@ export class Game {
     // Check objective completion
     if(checkObjectiveComplete(this.player.objectiveId, this.player.objectiveData, this.player)) {
       postChat('Objective "' + getObjectiveName(this.player.objectiveId) + '" complete!', 'success');
-      this.player.objective = OBJECTIVE_COMPLETE;
+      this.player.objectiveId = OBJECTIVE_COMPLETE;
     }
   }
 

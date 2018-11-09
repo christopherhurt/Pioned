@@ -1,6 +1,9 @@
 /*
-  Objectives manager for Pioned, including generating new objectives and checking objectives for completion
+  Objectives manager for Pioned, includes generating new objectives and checking objectives for completion
 */
+
+// Reference to Game object used to access game variables for objectives control
+export let GAME_REF = null;
 
 const NUM_OBJECTIVES = 3;
 
@@ -12,8 +15,8 @@ const VISIT_RANDOM_ISLAND = 0;
 const VISIT_N_ISLANDS = 1;
 const CONTACT_N_PLAYERS = 2;
 
-const NUM_ISLANDS = 5; // Number of islands a player must visit for VISIT_N_ISLANDS objective
-const NUM_PLAYERS = 3; // Number of other players a player must contact for CONTACT_N_PLAYERS objective
+const NUM_ISLANDS = 3; // Number of islands a player must visit for VISIT_N_ISLANDS objective
+const NUM_PLAYERS = 2; // Number of other players a player must contact for CONTACT_N_PLAYERS objective
 
 /* Randomly generates an objective to be completed by a player */
 export function generateObjective() {
@@ -24,7 +27,9 @@ export function generateObjective() {
   let data;
   switch(id) {
     case VISIT_RANDOM_ISLAND:
-      // TODO: Generate random island player needs to visit
+      // Generate random id of the island that the player needs to visit
+      const numIslands = GAME_REF.map.numIslands;
+      data = parseInt(Math.random() * numIslands + 1);
       break;
     default:
       break;
@@ -39,7 +44,7 @@ export function getObjectiveName(id) {
     case OBJECTIVE_COMPLETE:
       return 'Objective Complete';
     case VISIT_RANDOM_ISLAND:
-      return '';
+      return 'The Wanderer';
     case VISIT_N_ISLANDS:
       return 'Mr. Worldwide';
     case CONTACT_N_PLAYERS:
@@ -55,7 +60,7 @@ export function getObjectiveDescription(id, data) {
     case OBJECTIVE_COMPLETE:
       return 'You\'ve completed your objective';
     case VISIT_RANDOM_ISLAND:
-      return 'Find and visit island number ' + data;
+      return 'Find and visit island ' + data;
     case VISIT_N_ISLANDS:
       return 'Visit ' + NUM_ISLANDS + ' different islands';
     case CONTACT_N_PLAYERS:
@@ -73,7 +78,7 @@ export function checkObjectiveComplete(id, data, player) {
       return false;
     case VISIT_RANDOM_ISLAND:
       // Check if player has visited the island
-      int island = data;
+      const island = data;
       return player.visitedIslands.includes(island);
     case VISIT_N_ISLANDS:
       // Check if player has visited n islands
@@ -84,4 +89,9 @@ export function checkObjectiveComplete(id, data, player) {
     default:
       throw 'Invalid objective ID when checking objective completeness';
   }
+}
+
+/* Sets reference used to access game variables */
+export function setObjectivesGameReference(game) {
+  GAME_REF = game;
 }

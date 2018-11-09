@@ -81,7 +81,7 @@ export function createMap(mainTile, fillTile, seedSize, mainTileChance, passes, 
   if(mainTileChance < 0 || mainTileChance > 1) throw 'Main tile probability in map generation must be between 0 and 1';
 
   let lay1 = seedGen(mainID, fillID, seedSize, mainTileChance);
-  const islands = findIslands(lay1, mainID);
+  const [islands, numIslands] = findIslands(lay1, mainID);
 
   // Iterating to produce greater map detail
   for(let i = 0; i < passes; i++) {
@@ -104,7 +104,7 @@ export function createMap(mainTile, fillTile, seedSize, mainTileChance, passes, 
     }
   }
 
-  return [map, islands];
+  return [map, islands, numIslands];
 }
 
 /* Default seed value */
@@ -289,7 +289,7 @@ function findIslands(seed, mainID) {
     }
   }
 
-  return islands;
+  return [islands, islandID];
 }
 
 /* Recursively marks horizontally connected land blocks with given island ID */
