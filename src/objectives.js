@@ -64,7 +64,7 @@ export function getObjectiveDescription(id, data) {
     case VISIT_N_ISLANDS:
       return 'Visit ' + NUM_ISLANDS + ' different islands';
     case CONTACT_N_PLAYERS:
-      return 'Come into contact with ' + NUM_PLAYERS + ' different players';
+      return 'Come into contact with ' + NUM_PLAYERS + ' other players';
     default:
       throw 'Invalid objective ID when getting objective description';
   }
