@@ -41,6 +41,12 @@ export class Player extends GameObject {
     this.color = `rgb(${r}, ${g}, ${b})`;
 
     this.visitedIslands = [];
+    this.contactedPlayers = [];
+    
+    const objective = generateObjective();
+    this.objectiveId = objective['id'];
+    this.objectiveData = objective['data'];
+    postChat('New objective "' + getObjectiveName(objectiveId) + '": ' + getObjectiveDescription(objectiveId, objectiveData));
   }
 
   move(delta, dirx, diry, map) {

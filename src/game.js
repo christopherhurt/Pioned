@@ -373,6 +373,14 @@ export class Game {
         this.hasScrolled = true;
       }
     }
+    
+    // TODO: check and update collisions with other players
+    
+    // Check objective completion
+    if(checkObjectiveComplete(this.player.objectiveId, this.player.objectiveData, this.player)) {
+      postChat('Objective "' + getObjectiveName(this.player.objectiveId) + '" complete!', 'success');
+      this.player.objective = OBJECTIVE_COMPLETE;
+    }
   }
 
   _drawMenu() {
