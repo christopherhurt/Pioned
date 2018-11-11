@@ -1,4 +1,4 @@
-import { ImageLoader, Styles, send, postChat, createCanvas } from './utils';
+import { ImageLoader, Styles, send, postChat, createCanvas, intersects } from './utils';
 import { Keyboard, Keys } from './keyboard';
 import { GameMap } from './map';
 import { TILES, TILEMAP, BASES, FRAMES, DROPS, SPRITES } from './tiles';
@@ -508,9 +508,14 @@ export class Game {
     const ctx = this.playerCanvas.getContext('2d');
     ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
-    // Draw each other player
+    // Draw other player(s)
     for (let key in this.players) {
-      this._drawPlayer(this.players[key]);
+      const player = this.players[key];
+
+      // Only draw visible players
+      if (intersects(player, this.camera)) {
+        this._drawPlayer(player);
+      }
     }
 
     if (!this.player.moving) {

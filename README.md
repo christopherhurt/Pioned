@@ -28,7 +28,7 @@ To run the game server, use `yarn serve`.
 
 **Jack**:
 - [ ] Player chat system
-- [ ] Performance: only draw visible characters
+- [x] Performance: only draw visible characters
 - [ ] Performance: only redraw map if parts of the visible map changed (socket messages)
 - [ ] Show what is currently selected in the inventory
 - [ ] Enter to select item in inventory
