@@ -147,7 +147,18 @@ export class Game {
           case 'tileUpdate': {
             const { layer, col, row, type } = data;
             this.map.setTile(layer, col, row, type);
-            this.hasScrolled = true;
+
+            const tile = {
+              x: this.map.getX(col),
+              y: this.map.getY(row),
+              width: this.map.dsize,
+              height: this.map.dsize,
+            };
+            // Trigger re-render only if tile is visible
+            if (intersects(tile, this.camera)) {
+              this.hasScrolled = true;
+              console.log('Re-render map!');
+            }
             break;
           }
           case 'deletePlayer': {
