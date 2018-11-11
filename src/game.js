@@ -137,7 +137,11 @@ export class Game {
             player.y = y;
             player.dir = dir;
             player.moving = moving;
-            this.playersMoved = true;
+
+            // Trigger re-render only if player is visible
+            if (intersects(player, this.camera)) {
+              this.playersMoved = true;
+            }
             break;
           }
           case 'tileUpdate': {
