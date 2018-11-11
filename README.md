@@ -30,7 +30,7 @@ To run the game server, use `yarn serve`.
 - [ ] Player chat system
 - [ ] Performance: only draw visible characters
 - [ ] Performance: only redraw map if parts of the visible map changed (socket messages)
-- [ ] Show what is currently selected in the inventory
+- [x] Show what is currently selected in the inventory
 - [x] Enter to select item in inventory
 
 **Chris**:

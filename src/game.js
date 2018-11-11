@@ -575,6 +575,40 @@ export class Game {
     }
   }
 
+  _drawFPS() {
+    const fontSize = 24;
+    this.ctx.font = `${fontSize}px ${Styles.fontFamily}`;
+
+    this.ctx.fillStyle = 'red';
+    this.ctx.fillText(`fps: ${this.fps | 0}`, this.canvasWidth * 0.90, this.canvasHeight * 0.05);
+  }
+
+  _drawSelectedItem() {
+    const fontSize = 18;
+    this.ctx.font = `${fontSize}px ${Styles.fontFamily}`;
+
+    const x = 10;
+    const y = 10;
+
+    this.ctx.fillStyle = Styles.darkBG;
+    this.ctx.fillRect(
+      x,
+      y,
+      fontSize * 12,
+      fontSize * 1.75,
+    );
+
+    const item = this.inventory.selected;
+    let text = item.toUpperCase();
+    if (item !== this.inventory.NONE) {
+      const num = this.inventory.items[item];
+      text = `${text}: ${num}`;
+    }
+
+    this.ctx.fillStyle = Styles.light;
+    this.ctx.fillText(text, x + fontSize * 0.5, y + fontSize * 1.25);
+  }
+
   render() {
     // Clear previous frame
     this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
@@ -613,11 +647,8 @@ export class Game {
         break;
     }
 
-    // Display fps
-    this.ctx.fillStyle = 'red';
-    const fontSize = 24;
-    this.ctx.font = `${fontSize}px ${Styles.fontFamily}`;
-    this.ctx.fillText(`fps: ${this.fps | 0}`, this.canvasWidth * 0.90, this.canvasHeight * 0.05);
+    this._drawFPS();
+    this._drawSelectedItem();
   }
 
   resize(width, height) {
