@@ -98,12 +98,12 @@ export class Game {
 
   socketSetup() {
     return new Promise((resolve, reject) => {
-      postChat('Connecting to server...', 'info');
+      // postChat('Connecting to server...', 'debug');
       this.socket = new WebSocket("ws://localhost:5000");
 
       this.socket.onopen = event => {
         postChat('Connected!', 'success');
-        postChat('Downloading map...', 'info');
+        // postChat('Downloading map...', 'debug');
       };
 
       this.socket.onclose = event => {
