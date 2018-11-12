@@ -741,20 +741,20 @@ export class Game {
     const x = 10;
     const y = 10;
 
-    this.ctx.fillStyle = Styles.darkBG;
-    this.ctx.fillRect(
-      x,
-      y,
-      fontSize * 12,
-      fontSize * 1.75,
-    );
-
     const item = this.inventory.selected;
     let text = item.toUpperCase();
     if (item !== this.inventory.NONE) {
       const num = this.inventory.items[item];
       text = `${text}: ${num}`;
     }
+
+    this.ctx.fillStyle = Styles.darkBG;
+    this.ctx.fillRect(
+      x,
+      y,
+      this.ctx.measureText(text).width + fontSize,
+      fontSize * 1.75,
+    );
 
     this.ctx.fillStyle = Styles.light;
     this.ctx.fillText(text, x + fontSize * 0.5, y + fontSize * 1.25);
