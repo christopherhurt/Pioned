@@ -43,7 +43,7 @@ export class Game {
       ]);
     }
     catch (err) {
-      postChat(err, 'error')
+      postChat(err, 'error');
       return false;
     }
 
@@ -107,7 +107,7 @@ export class Game {
       };
 
       this.socket.onclose = event => {
-        postChat('Disconnected from server.', 'error')
+        postChat('Disconnected from server.', 'error');
       };
 
       this.socket.onerror = event => {
@@ -482,7 +482,7 @@ export class Game {
         const other = this.players[id];
         if(intersects(this.player, other)) {
           this.player.contactedPlayers.push(id);
-          postChat('Contacted player ' + id + '!');
+          postChat('Contacted player ' + id + '!', 'info');
         }
       }
     }
