@@ -457,7 +457,20 @@ export class Game {
       const row = y / this.map.dsize | 0;
 
       const obj = this.map.getTile(1, col, row);
-      if (obj !== 0) {
+      let allow = true;
+      if (obj === TILES['bridge'] || obj === TILES['side_bridge']) {
+        const tile = {
+          x: this.map.getX(col),
+          y: this.map.getY(row),
+          width: this.map.dsize,
+          height: this.map.dsize
+        };
+        if(intersects(this.player,tile)){
+          allow = false;
+        }
+      }
+
+      if (obj !== 0 && allow) {
         this.map.setTile(1, col, row, 0);
         send(this.socket, 'tileUpdate', { layer: 1, col, row, type: 0 });
 
