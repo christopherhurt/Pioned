@@ -178,14 +178,14 @@ export class Game {
             const DEFAULT_SPEED = 4 * this.map.dsize;
             const width = PLAYER_REAL_WIDTH * RATIO;
             const height = PLAYER_REAL_HEIGHT * RATIO;
-            
+
             this.player = new Player(xLoc, yLoc, width, height, this.map.width, this.map.height, this.map.dsize, DEFAULT_SPEED);
-            
+
             const objective = generateObjective();
             this.player.objectiveId = objective['id'];
             this.player.objectiveData = objective['data'];
             postChat('New objective "' + getObjectiveName(this.player.objectiveId) + '": ' + getObjectiveDescription(this.player.objectiveId, this.player.objectiveData));
-            
+
             send(this.socket, 'newPlayer', this.player);
 
             resolve();
@@ -395,41 +395,18 @@ export class Game {
         this.hasScrolled = true;
       }
     }
-    
+
     // Check and update collisions with other players
     for(let id in this.players) {
       if(!this.player.contactedPlayers.includes(id)) {
         const other = this.players[id];
-        
-        // Assume all players are the same size
-        // So, our player is colliding if any corner is in the bounds of the other player
-        const ourMinX = this.player.x;
-        const ourMaxX = this.player.x + this.player.width;
-        const ourMinY = this.player.y;
-        const ourMaxY = this.player.y + this.player.height;
-        
-        const theirMinX = other.x;
-        const theirMaxX = other.x + other.width;
-        const theirMinY = other.y;
-        const theirMaxY = other.y + other.height;
-        
-        const leftIn = ourMinX >= theirMinX && ourMinX <= theirMaxX;
-        const rightIn = ourMaxX >= theirMinX && ourMaxX <= theirMaxX;
-        const topIn = ourMinY >= theirMinY && ourMinY <= theirMaxY;
-        const bottomIn = ourMaxY >= theirMinY && ourMaxY <= theirMaxY;
-        
-        const corner1 = topIn && leftIn;
-        const corner2 = topIn && rightIn;
-        const corner3 = bottomIn && leftIn;
-        const corner4 = bottomIn && rightIn;
-        
-        if(corner1 || corner2 || corner3 || corner4) {
+        if(intersects(this.player, other)) {
           this.player.contactedPlayers.push(id);
           postChat('Contacted player ' + id + '!');
         }
       }
     }
-    
+
     // Check objective completion
     if(checkObjectiveComplete(this.player.objectiveId, this.player.objectiveData, this.player)) {
       postChat('Objective "' + getObjectiveName(this.player.objectiveId) + '" complete!', 'success');
