@@ -43,6 +43,7 @@ To run the game server, use `yarn serve`.
 - [ ] Objective Tracking 
 - [ ] Get favicon working on server
 - [ ] Cap on total number of trees for spawn trees
+- [ ] Chat log (enter reveals previous messages, up to some limit)
 
 ## Ideas
 - [ ] Nighttime/daytime
