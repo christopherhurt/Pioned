@@ -23,36 +23,26 @@ To run the game server, use `yarn serve`.
 ## This Week
 
 **Parker**:
-- [x] Fix removing wood on top of water bug
-- [x] Spawn trees at certain time intervals
 
 **Jack**:
-- [x] Player chat system
-- [x] Performance: only draw visible characters
-- [x] Performance: only redraw map if parts of the visible map changed (socket messages)
-- [x] Show what is currently selected in the inventory
-- [x] Enter to select item in inventory
 
 **Chris**:
-- [ ] Add Objective System
-    - [ ] Create at least 3 different unique objectives
-        - [ ] Visit randomly numbered Island
-        - [ ] Visit 5 different Islands
-        - [ ] Don't allow anyone to visit your home island
-        - [ ] Come into contact with n other players
-            - [ ] Implement Player Collision
-        - [ ] Give another player a flower
-- [ ] Fix player spawning on single or few blocks
 
 ## Todo
 - [ ] Use environment variables to set the (websocket) host
 - [ ] Add current random color mask on top of players
 - [ ] Objective Tracking 
+- [ ] Get favicon working on server
 
 ## Ideas
 - [ ] Nighttime/daytime
-- [ ] Fireworks
+- [ ] Objective completion rewards
+    - [ ] Fireworks
 - [ ] Use cookies to save player state to prevent constant refresh for new character
+- [ ] Objectives:
+    - [ ] Pyromaniac: burn bridges
+    - [ ] Don't allow anyone to visit your home island
+    - [ ] Give another player a flower
 
 ## Completed Tasks
 - [x] Add movable player
@@ -76,6 +66,20 @@ To run the game server, use `yarn serve`.
 - [x] Be able to place bridges
 - [x] Draw outline around square that will be changed
 - [x] Collision detection (including trees)
+- [x] Player chat system
+- [x] Performance: only draw visible characters
+- [x] Performance: only redraw map if parts of the visible map changed (socket messages)
+- [x] Show what is currently selected in the inventory
+- [x] Enter to select item in inventory
+- [x] Fix removing wood on top of water bug
+- [x] Spawn trees at certain time intervals
+- [x] Add Objective System
+    - [x] Create at least 3 different unique objectives
+        - [x] Visit randomly numbered Island
+        - [x] Visit 3 different Islands
+        - [x] Come into contact with n other players
+            - [x] Implement Player Collision
+- [x] Fix player spawning on single or few blocks
 
 ## Credits
 
