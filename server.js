@@ -53,16 +53,18 @@ const [layers, islands, numIslands] = createMap('land', 'water', MAP_BASE, MAP_L
 const map = new GameMap(MAP_SIZE, MAP_SIZE, T_SIZE, D_SIZE, layers, islands, numIslands);
 
 function spawnTrees(map) {
+  const treeProbability = 0.005;
+
   const rows = map.rows;
   const cols = map.cols;
-  let layer1 = fillZeros(map.cols,map.rows)
-  let layer2 = fillZeros(map.cols, map.rows)
-  for(let i = 0; i < rows; i++) {
-    for(let j = 0; j < cols; j++) {
-      if(map.getTile(0,j,i) === TILES['land'] && map.getTile(1,j,i) === 0){
-        if(Math.random() < .01) {
-          layer1[i][j] = 1
-          layer2[i][j] = 1
+  let layer1 = fillZeros(map.cols,map.rows);
+  let layer2 = fillZeros(map.cols, map.rows);
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      if (map.getTile(0,j,i) === TILES['land'] && map.getTile(1, j, i) === 0) {
+        if (Math.random() < treeProbability) {
+          layer1[i][j] = 1;
+          layer2[i][j] = 1;
           map.setTile(1, j, i, TILES['tree_bottom']);
           if (i > 0) {
             map.setTile(2, j, i-1, TILES['tree_top']);
@@ -142,7 +144,7 @@ wss.on('connection', socket => {
     //spawntrees returns 2, 2D arrays containing the layers of the map
     const layers = spawnTrees(map);
     wss.broadcast('spawnTrees', layers);
-  }, 60000)
+  }, 90000)
 
   socket.on('close', () => {
     delete players[socket.id];
