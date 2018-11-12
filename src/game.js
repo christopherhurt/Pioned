@@ -115,10 +115,6 @@ export class Game {
       this.socket.onmessage = event => {
         const { type, data } = JSON.parse(event.data);
         switch (type) {
-          case 'selfid': {
-            this.selfid = data;
-            break;
-          }
           case 'map': {
             this.map = Object.assign(new GameMap, data);
             postChat('Downloaded map!', 'success');
@@ -130,6 +126,21 @@ export class Game {
               this.players[key] = Object.assign(new Player, data[key]);
             }
             this.playersMoved = true;
+            break;
+          }
+          case 'self': {
+            const { id, name, pos } = data;
+            this.selfid = id;
+
+            const { x: xLoc, y: yLoc } = pos;
+
+            const DEFAULT_SPEED = 4 * this.map.dsize;
+            const width = PLAYER_REAL_WIDTH * RATIO;
+            const height = PLAYER_REAL_HEIGHT * RATIO;
+            this.player = new Player(xLoc, yLoc, width, height, this.map.width, this.map.height, this.map.dsize, DEFAULT_SPEED, name);
+            send(this.socket, 'newPlayer', this.player);
+
+            resolve();
             break;
           }
           case 'newPlayer': {
@@ -163,21 +174,10 @@ export class Game {
             postChat(data, 'info');
             break;
           }
-          case 'startingPos': {
-            const { x: xLoc, y: yLoc } = data;
-
-            const DEFAULT_SPEED = 4 * this.map.dsize;
-            const width = PLAYER_REAL_WIDTH * RATIO;
-            const height = PLAYER_REAL_HEIGHT * RATIO;
-            this.player = new Player(xLoc, yLoc, width, height, this.map.width, this.map.height, this.map.dsize, DEFAULT_SPEED);
-            send(this.socket, 'newPlayer', this.player);
-
-            resolve();
-            break;
-          }
           case 'chatMessage': {
             const { id, text } = data;
-            postChat(`Player${id}: ${text}`);
+            const player = this.players[id];
+            postChat(`${player.name}: ${text}`);
           }
         }
       };
@@ -240,7 +240,7 @@ export class Game {
           const text = chatInput.innerText;
           if (text.length > 0) {
             chatInput.innerText = '';
-            postChat(`(You): ${text}`);
+            postChat(`${this.player.name}: ${text}`);
             send(this.socket, 'chatMessage', text);
           }
 
@@ -536,17 +536,32 @@ export class Game {
     const targetXOffset = -((PLAYER_SRC_WIDTH - PLAYER_REAL_WIDTH) / 2 * RATIO);
     const targetYOffset = -((PLAYER_SRC_HEIGHT - PLAYER_REAL_HEIGHT) * RATIO);
 
+    const drawX = Math.round(x) + targetXOffset;
+    const drawY = Math.round(y) + targetYOffset;
+
     ctx.drawImage(
       image, // image
       tileX * (1 + this.map.tsize) + 1 + sourceXOffset, // source x
       tileY * (1 + this.map.tsize) + 1, // source y
       PLAYER_SRC_WIDTH, // source width
       PLAYER_SRC_HEIGHT, // source height
-      Math.round(x) + targetXOffset, // target x
-      Math.round(y) + targetYOffset, // target y
+      drawX, // target x
+      drawY, // target y
       PLAYER_DISPLAY_WIDTH, // target width
       PLAYER_DISPLAY_HEIGHT, // target height
     );
+
+    const fontSize = 18;
+    const textWidth = ctx.measureText(player.name).width;
+    const textX = drawX + PLAYER_DISPLAY_WIDTH / 2 - textWidth / 2;
+    const textY = drawY - 4;
+
+    ctx.fillStyle = Styles.darkBG;
+    ctx.fillRect(textX - 2, textY - fontSize, textWidth + 4, fontSize + 2);
+
+    ctx.font = `${fontSize}px ${Styles.fontFamily}`;
+    ctx.fillStyle = (player === this.player) ? Styles.special : Styles.light;
+    ctx.fillText(player.name, textX, textY - 2);
   }
 
   _drawSelect() {
