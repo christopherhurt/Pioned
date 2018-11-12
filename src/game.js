@@ -167,7 +167,7 @@ export class Game {
             const {layer1, layer2} = data;
             const numCols = this.map.cols;
             const numRows = this.map.rows;
-            
+
             for(let i = 0; i <numCols; i++) {
               for(let j=0; j < numRows; j++) {
                 if(layer1[i][j] === 1) {
@@ -178,7 +178,6 @@ export class Game {
                 }
               }
             }
-            postChat('New Trees Spawned');
             break;
           }
           case 'deletePlayer': {
