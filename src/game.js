@@ -141,6 +141,8 @@ export class Game {
             const height = PLAYER_REAL_HEIGHT * RATIO;
             this.player = new Player(xLoc, yLoc, width, height, this.map.width, this.map.height, this.map.dsize, DEFAULT_SPEED, name);
 
+            postChat('Joined the game!', 'success');
+
             const objective = generateObjective();
             this.player.objectiveId = objective['id'];
             this.player.objectiveData = objective['data'];
@@ -150,7 +152,6 @@ export class Game {
             send(this.socket, 'newPlayer', this.player);
 
             resolve();
-            postChat('Joined the game!', 'success');
             break;
           }
           case 'newPlayer': {
