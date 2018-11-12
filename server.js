@@ -103,6 +103,10 @@ wss.on('connection', socket => {
         wss.broadcastOthers(socket, 'tileUpdate', data);
         break;
       }
+      case 'chatMessage': {
+        wss.broadcastOthers(socket, 'chatMessage', { id: socket.id, text: data });
+        break;
+      }
     }
   });
 

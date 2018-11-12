@@ -175,6 +175,10 @@ export class Game {
             resolve();
             break;
           }
+          case 'chatMessage': {
+            const { id, text } = data;
+            postChat(`Player${id}: ${text}`);
+          }
         }
       };
     });
@@ -233,9 +237,11 @@ export class Game {
         case Keys.ENTER: {
           event.preventDefault();
 
-          if (chatInput.innerText.length > 0) {
-            postChat(chatInput.innerText);
+          const text = chatInput.innerText;
+          if (text.length > 0) {
             chatInput.innerText = '';
+            postChat(`(You): ${text}`);
+            send(this.socket, 'chatMessage', text);
           }
 
           break;
