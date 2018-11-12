@@ -6,6 +6,7 @@ html, body {
 
 body {
   background: #101214;
+  font-family: 'Roboto Slab', sans-serif;
 }
 
 #shade {
@@ -34,7 +35,6 @@ body {
   overflow-y: hidden;
   overflow-wrap: break-word;
 
-  font-family: sans-serif;
   font-size: 14px;
   color: white;
 }
