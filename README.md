@@ -25,6 +25,7 @@ To run the game server, use `yarn serve`.
 **Parker**:
 
 **Jack**:
+- [ ] Draw current objective above selected item (just name)
 
 **Chris**:
 
