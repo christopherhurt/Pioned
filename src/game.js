@@ -96,12 +96,12 @@ export class Game {
 
   socketSetup() {
     return new Promise((resolve, reject) => {
-      postChat('Connecting to server...');
+      postChat('Connecting to server...', 'info');
       this.socket = new WebSocket("ws://localhost:5000");
 
       this.socket.onopen = event => {
         postChat('Connected!', 'success');
-        postChat('Downloading map...');
+        postChat('Downloading map...', 'info');
       };
 
       this.socket.onclose = event => {
@@ -160,7 +160,7 @@ export class Game {
             break;
           }
           case 'info': {
-            postChat(data);
+            postChat(data, 'info');
             break;
           }
           case 'startingPos': {
@@ -365,7 +365,7 @@ export class Game {
 
     if (currIsland != 0 && currTile == landID && !this.player.hasVisitedIsland(currIsland)) {
       this.player.markIslandVisited(currIsland);
-      postChat('Island ' + currIsland + ' visited!');
+      postChat('Island ' + currIsland + ' visited!', 'info');
     }
 
     // Place object
