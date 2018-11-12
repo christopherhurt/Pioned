@@ -41,6 +41,7 @@ export class Player extends GameObject {
     this.color = `rgb(${r}, ${g}, ${b})`;
 
     this.visitedIslands = [];
+    this.contactedPlayers = [];
   }
 
   move(delta, dirx, diry, map) {
@@ -128,6 +129,13 @@ export class Player extends GameObject {
     }
   }
 
+  getCurrentIsland(map) {
+    const isCol = parseInt((this.x + this.width / 2) / map.width * map.islands[0].length);
+    const isRow = parseInt((this.y + this.height / 2) / map.height * map.islands.length);
+    const currIsland = map.islands[isRow][isCol];
+    return currIsland;
+  }
+  
   markIslandVisited(island) {
     if(!this.visitedIslands.includes(island)) {
       this.visitedIslands.push(island);

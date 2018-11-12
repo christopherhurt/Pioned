@@ -7,6 +7,8 @@
 import { TILES } from './tiles';
 import { copyArray, fillZeros } from './utils';
 
+const MIN_SPAWN_PAD_DEPTH = 1;
+
 /* Find random starting location for a newly-added player */
 export function findStartingCoordinates(layers, mapSize, spawnTile, colliderObjects) {
   // Getting ID of tile player can spawn on
@@ -39,7 +41,7 @@ export function findStartingCoordinates(layers, mapSize, spawnTile, colliderObje
 
     const tileIndex = y * mapSize + x;
     if(layers[0][tileIndex] == spawnID) {
-      spawnFound = true;
+      spawnFound = checkValidSpawnPad(layers[0], x, y, mapSize, spawnID);
 
       // Making sure player is not spawned on top of a collider object
       for(let i = 1; i < layers.length; i++) {
@@ -62,6 +64,26 @@ export function findStartingCoordinates(layers, mapSize, spawnTile, colliderObje
   return { 'x': x, 'y': y };
 }
 
+/* Checks whether player has enough land padding around them to spawn at a particular location */
+function checkValidSpawnPad(layer, x, y, mapSize, spawnID) {
+  for(let i = -MIN_SPAWN_PAD_DEPTH; i <= MIN_SPAWN_PAD_DEPTH; i++) {
+    for(let j = -MIN_SPAWN_PAD_DEPTH; j <= MIN_SPAWN_PAD_DEPTH; j++) {
+      // Getting coordinates of location being checked and seeing if it's in bounds
+      const xCheck = x + i;
+      const yCheck = y + j;
+      const tileIndex = yCheck * mapSize + xCheck;
+      const inBounds = tileIndex >= 0 && tileIndex < layer.length;
+      
+      // Invalid spawn location because nearby tile is not spawnable
+      if(inBounds && layer[tileIndex] != spawnID) {
+        return false;
+      }
+    }
+  }
+  
+  return true;
+}
+
 /* Create and return generated tile map array */
 export function createMap(mainTile, fillTile, seedSize, mainTileChance, passes, smoothing, objects) {
   // Getting IDs of tiles used to generate map
@@ -81,7 +103,7 @@ export function createMap(mainTile, fillTile, seedSize, mainTileChance, passes, 
   if(mainTileChance < 0 || mainTileChance > 1) throw 'Main tile probability in map generation must be between 0 and 1';
 
   let lay1 = seedGen(mainID, fillID, seedSize, mainTileChance);
-  const islands = findIslands(lay1, mainID);
+  const [islands, numIslands] = findIslands(lay1, mainID);
 
   // Iterating to produce greater map detail
   for(let i = 0; i < passes; i++) {
@@ -104,7 +126,7 @@ export function createMap(mainTile, fillTile, seedSize, mainTileChance, passes, 
     }
   }
 
-  return [map, islands];
+  return [map, islands, numIslands];
 }
 
 /* Default seed value */
@@ -289,7 +311,7 @@ function findIslands(seed, mainID) {
     }
   }
 
-  return islands;
+  return [islands, islandID];
 }
 
 /* Recursively marks horizontally connected land blocks with given island ID */
