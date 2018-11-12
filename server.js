@@ -1,6 +1,7 @@
 import WebSocket from 'ws';
-import { send } from './src/utils';
+import { send, fillZeros } from './src/utils';
 import { GameMap } from './src/map';
+import { TILES } from './src/tiles'
 import { findStartingCoordinates, createMap } from './src/map-gen';
 
 let index = 0;
@@ -46,7 +47,27 @@ const COLLIDER_OBJECTS = [
 
 const [layers, islands] = createMap('land', 'water', MAP_BASE, MAP_LAND_PROB, MAP_ITER, MAP_SMOOTHNESS, MAP_OBJECTS);
 const map = new GameMap(MAP_SIZE, MAP_SIZE, T_SIZE, D_SIZE, layers, islands);
-
+function spawnTrees(map) {
+  const rows = map.rows;
+  const cols = map.cols;
+  let layer1 = fillZeros(map.cols,map.rows)
+  let layer2 = fillZeros(map.cols, map.rows)
+  for(let i = 0; i < rows; i++) {
+    for(let j = 0; j < cols; j++) {
+      if(map.getTile(0,j,i) === TILES['land'] && map.getTile(1,j,i) === 0){
+        if(Math.random() < .01) {
+          layer1[i][j] = 1
+          layer2[i][j] = 1
+          map.setTile(1, j, i, TILES['tree_bottom']);
+          if (i > 0) {
+            map.setTile(2, j, i-1, TILES['tree_top']);
+          }
+        }
+      }
+    }
+  }
+  return {layer1, layer2};
+}
 const wss = new WebSocket.Server({ port: 5000 });
 
 // Broadcast to all.
@@ -77,12 +98,6 @@ wss.on('connection', socket => {
   send(socket, 'startingPos', spawnLoc);
 
   wss.broadcastOthers(socket, 'info', `Player${socket.id} joined!`);
-  
-  setInterval(() => {
-    //spawntrees returns 2, 2D arrays containing the layers of the map
-    const layers = map.spawnTrees(MAP_OBJECTS);
-    wss.broadcast('spawnTrees', layers);
-  }, 60000)
 
   socket.on('message', message => {
     const { type, data } = JSON.parse(message);
@@ -111,6 +126,12 @@ wss.on('connection', socket => {
       }
     }
   });
+
+  setInterval(() => {
+    //spawntrees returns 2, 2D arrays containing the layers of the map
+    const layers = spawnTrees(map);
+    wss.broadcast('spawnTrees', layers);
+  }, 60000)
 
   socket.on('close', () => {
     delete players[socket.id];

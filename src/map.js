@@ -49,25 +49,5 @@ export class GameMap {
     return SOLID[base] || SOLID[obj];
   }
 
-  spawnTrees(map_objects) {
-    const rows = this.rows;
-    const cols = this.cols;
-    let layer1 = fillZeros(this.cols,this.rows)
-    let layer2 = fillZeros(this.cols, this.rows)
-    for(let i = 0; i < rows; i++) {
-      for(let j = 0; j < cols; j++) {
-        if(this.getTile(0,j,i) === TILES['land'] && this.getTile(1,j,i) === 0){
-          if(Math.random() < map_objects['tree_bottom']['prob']-.025) {
-            layer1[i][j] = 1
-            layer2[i][j] = 1
-            this.setTile(1, j, i, TILES['tree_bottom']);
-            if (i > 0) {
-              this.setTile(2, j, i-1, TILES['tree_top']);
-            }
-          }
-        }
-      }
-    }
-    return {layer1, layer2};
-  }
+  
 }
