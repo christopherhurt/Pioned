@@ -1,4 +1,4 @@
-import { ImageLoader, Styles, send, postChat, createCanvas } from './utils';
+import { ImageLoader, Styles, send, postChat, createCanvas, intersects } from './utils';
 import { Keyboard, Keys } from './keyboard';
 import { GameMap } from './map';
 import { TILES, TILEMAP, BASES, FRAMES, DROPS, SPRITES } from './tiles';
@@ -139,13 +139,28 @@ export class Game {
             player.y = y;
             player.dir = dir;
             player.moving = moving;
-            this.playersMoved = true;
+
+            // Trigger re-render only if player is visible
+            if (intersects(player, this.camera)) {
+              this.playersMoved = true;
+            }
             break;
           }
           case 'tileUpdate': {
             const { layer, col, row, type } = data;
             this.map.setTile(layer, col, row, type);
-            this.hasScrolled = true;
+
+            const tile = {
+              x: this.map.getX(col),
+              y: this.map.getY(row),
+              width: this.map.dsize,
+              height: this.map.dsize,
+            };
+            // Trigger re-render only if tile is visible
+            if (intersects(tile, this.camera)) {
+              this.hasScrolled = true;
+              console.log('Re-render map!');
+            }
             break;
           }
           case 'deletePlayer': {
@@ -555,9 +570,14 @@ export class Game {
     const ctx = this.playerCanvas.getContext('2d');
     ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
-    // Draw each other player
+    // Draw other player(s)
     for (let key in this.players) {
-      this._drawPlayer(this.players[key]);
+      const player = this.players[key];
+
+      // Only draw visible players
+      if (intersects(player, this.camera)) {
+        this._drawPlayer(player);
+      }
     }
 
     if (!this.player.moving) {

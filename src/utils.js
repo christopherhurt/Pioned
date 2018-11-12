@@ -1,3 +1,11 @@
+function _intersects(x1, y1, w1, h1, x2, y2, w2, h2) {
+  return x1 <= x2 + w2 && x1 + w1 >= x2 && y1 <= y2 + h2 && y1 + h1 >= y2;
+}
+
+export function intersects(o1, o2) {
+  return _intersects(o1.x, o1.y, o1.width, o1.height, o2.x, o2.y, o2.width, o2.height);
+}
+
 export const Styles = {
   light: 'white',
   special: 'rgb(23, 139, 251)',
