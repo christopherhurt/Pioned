@@ -77,12 +77,12 @@ wss.on('connection', socket => {
   send(socket, 'startingPos', spawnLoc);
 
   wss.broadcastOthers(socket, 'info', `Player${socket.id} joined!`);
-
-  setTimeout(() => {
+  
+  setInterval(() => {
+    //spawntrees returns 2, 2D arrays containing the layers of the map
     const layers = map.spawnTrees(MAP_OBJECTS);
-    //make spawnTrees return a 2d array of where to put the trees
     wss.broadcast('spawnTrees', layers);
-  }, 5000)
+  }, 60000)
 
   socket.on('message', message => {
     const { type, data } = JSON.parse(message);

@@ -50,14 +50,14 @@ export class GameMap {
   }
 
   spawnTrees(map_objects) {
-    const rows = this.height;
-    const cols = this.width;
-    const layer1 = fillZeros(this.width,this.height)
-    const layer2 = fillZeros(this.width, this.height)
+    const rows = this.rows;
+    const cols = this.cols;
+    let layer1 = fillZeros(this.cols,this.rows)
+    let layer2 = fillZeros(this.cols, this.rows)
     for(let i = 0; i < rows; i++) {
       for(let j = 0; j < cols; j++) {
         if(this.getTile(0,j,i) === TILES['land'] && this.getTile(1,j,i) === 0){
-          if(Math.random() < map_objects['tree_bottom']['prob']) {
+          if(Math.random() < map_objects['tree_bottom']['prob']-.025) {
             layer1[i][j] = 1
             layer2[i][j] = 1
             this.setTile(1, j, i, TILES['tree_bottom']);
@@ -68,17 +68,6 @@ export class GameMap {
         }
       }
     }
-    //map is a 2d array with 2 rows
-    const map = Array(2).fill().map(()=>[]);
-    //flattening the layers
-    for(let i = 0; i<layer1.length; i++){
-      for(let j= 0; j<layer1[0].length; j++){
-        map[0].push(layer1[i][j]);
-        map[1].push(layer2[i][j]);
-      }
-    }
-    // alternative option
-    // const layer1flat = [].concat.apply([], layer1);
-    return map;
+    return {layer1, layer2};
   }
 }

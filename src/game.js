@@ -147,21 +147,20 @@ export class Game {
             break;
           }
           case 'spawnTrees': {
-            const layers = data;
-            console.dir(layers)
-            const numCols = this.canvasWidth / this.map.dsize + 1;
-            const numRows = this.canvasHeight / this.map.dsize + 1;
+            const {layer1, layer2} = data;
+            const numCols = this.map.cols;
+            const numRows = this.map.rows;
             
-            // for(let i = 0; i <numCols; i++) {
-            //   for(let j=0; j < numRows; j++){
-            //     if(layers[0][j] === 1){
-            //       this.map.setTile(1, j, i, TILES['tree_bottom']);
-            //       if (i > 0) {
-            //         this.map.setTile(2, j, i-1, TILES['tree_top']);
-            //       }
-            //     }
-            //   }
-            // }
+            for(let i = 0; i <numCols; i++) {
+              for(let j=0; j < numRows; j++){
+                if(layer1[i][j] === 1){
+                  this.map.setTile(1, j, i, TILES['tree_bottom']);
+                  if (i > 0) {
+                    this.map.setTile(2, j, i-1, TILES['tree_top']);
+                  }
+                }
+              }
+            }
             postChat('New Trees Spawned');
             break;
           }
