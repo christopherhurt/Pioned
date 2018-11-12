@@ -15,7 +15,7 @@ const VISIT_RANDOM_ISLAND = 0;
 const VISIT_N_ISLANDS = 1;
 const CONTACT_N_PLAYERS = 2;
 
-const NUM_ISLANDS = 3; // Number of islands a player must visit for VISIT_N_ISLANDS objective
+const NUM_ISLANDS = 5; // Number of islands a player must visit for VISIT_N_ISLANDS objective
 const NUM_PLAYERS = 2; // Number of other players a player must contact for CONTACT_N_PLAYERS objective
 
 /* Randomly generates an objective to be completed by a player */
