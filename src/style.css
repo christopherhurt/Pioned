@@ -51,7 +51,7 @@ body {
   width: 100%;
   min-height: 3em;
   max-height: 5em;
-  overflow-y: scroll;
+  overflow-y: auto;
 
   box-sizing: border-box;
   border-radius: 0.5em;
