@@ -23,8 +23,8 @@ To run the game server, use `yarn serve`.
 ## This Week
 
 **Parker**:
-- [ ] Fix removing wood on top of water bug
-- [ ] Spawn trees at certain time intervals
+- [x] Fix removing wood on top of water bug
+- [x] Spawn trees at certain time intervals
 
 **Jack**:
 - [ ] Player chat system

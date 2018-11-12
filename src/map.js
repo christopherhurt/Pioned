@@ -1,4 +1,5 @@
-import { SOLID } from './tiles';
+import { SOLID, TILES } from './tiles';
+import { fillZeros } from './utils';
 
 export class GameMap {
   constructor(cols, rows, tsize, dsize, layers, islands, numIslands) {
@@ -48,4 +49,6 @@ export class GameMap {
 
     return SOLID[base] || SOLID[obj];
   }
+
+  
 }
