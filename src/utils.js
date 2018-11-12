@@ -87,7 +87,7 @@ export async function postChat(message, type) {
   const chatWrap = document.getElementById('chat-wrap');
   chatWrap.scrollTop = chatWrap.scrollHeight;
 
-  await sleep(5000);
+  await sleep(10000);
   await fadeOut(div);
   chat.removeChild(div);
 }
