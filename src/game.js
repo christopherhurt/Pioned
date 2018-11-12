@@ -119,7 +119,7 @@ export class Game {
         switch (type) {
           case 'map': {
             this.map = Object.assign(new GameMap, data);
-            postChat('Downloaded map!', 'success');
+            // postChat('Downloaded map!', 'debug');
             break;
           }
           case 'players': {
@@ -150,6 +150,7 @@ export class Game {
             send(this.socket, 'newPlayer', this.player);
 
             resolve();
+            postChat('Joined the game!', 'success');
             break;
           }
           case 'newPlayer': {
