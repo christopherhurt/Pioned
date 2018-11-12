@@ -22,7 +22,7 @@ const NUM_PLAYERS = 2; // Number of other players a player must contact for CONT
 export function generateObjective() {
   // Getting objective ID
   const id = parseInt(Math.random() * NUM_OBJECTIVES);
-  
+
   // Getting objective data (where applicable)
   let data;
   switch(id) {
@@ -34,7 +34,7 @@ export function generateObjective() {
     default:
       break;
   }
-  
+
   return { 'id': id, 'data': data };
 }
 

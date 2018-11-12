@@ -6,6 +6,7 @@ html, body {
 
 body {
   background: #101214;
+  font-family: 'Roboto Slab', sans-serif;
 }
 
 #shade {
@@ -22,30 +23,54 @@ body {
   opacity: 0;
 }
 
-#chat {
+#chat-wrap {
   position: absolute;
   right: 0;
   bottom: 0;
   width: 256px;
-  height: 25%;
+  max-height: 50%;
   margin: 0 2em 2em 0;
   z-index: 2;
 
-  background: rgba(16,18,20,0.85);
-  border: 1px solid #101214;
-  border-radius: 5px;
-  box-sizing: border-box;
+  overflow-y: hidden;
+  overflow-wrap: break-word;
+
+  font-size: 14px;
   color: white;
+}
+
+#chat {
+  overflow-y: hidden;
+  width: 100%;
+}
+
+#chat-input {
+  display: inline-block;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  min-height: 3em;
+  max-height: 5em;
   overflow-y: scroll;
+
+  box-sizing: border-box;
+  border-radius: 0.5em;
+  padding: 0.75em 1em;
+
+  outline: none;
+  user-select: text;
+  white-space: pre-wrap;
+}
+
+#chat-input:focus {
+  background-color: rgba(0, 0, 0, 0.7);
 }
 
 .chat-message {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.7);
   border-radius: 0.5em;
-  font-family: sans-serif;
   margin: 1em;
   padding: 0.5em 1em;
-  font-size: 13px;
 }
 
 .chat-info-message {

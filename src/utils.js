@@ -49,7 +49,19 @@ export function createCanvas(width, height) {
   return canvas;
 };
 
-export function postChat(message, type='info') {
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function fadeOut(elem) {
+  elem.style.opacity = 1;
+  while (elem.style.opacity > 0) {
+    elem.style.opacity -= 0.1
+    await sleep(40);
+  }
+}
+
+export async function postChat(message, type) {
   const div = document.createElement('div');
   div.className = 'chat-message';
   switch(type) {
@@ -70,8 +82,14 @@ export function postChat(message, type='info') {
 
   const chat = document.getElementById('chat');
   chat.appendChild(div);
+
   // Scroll to bottom
-  chat.scrollTop = chat.scrollHeight;
+  const chatWrap = document.getElementById('chat-wrap');
+  chatWrap.scrollTop = chatWrap.scrollHeight;
+
+  await sleep(5000);
+  await fadeOut(div);
+  chat.removeChild(div);
 }
 
 export class ImageLoader {

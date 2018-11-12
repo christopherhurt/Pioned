@@ -10,7 +10,7 @@ export class GameObject {
 }
 
 export class Player extends GameObject {
-  constructor(xLoc, yLoc, width, height, mapWidth, mapHeight, dsize, speed) {
+  constructor(xLoc, yLoc, width, height, mapWidth, mapHeight, dsize, speed, name) {
     const x = xLoc * dsize + dsize / 2 - width / 2;
     const y = yLoc * dsize + dsize / 2 - height / 2;
 
@@ -18,6 +18,7 @@ export class Player extends GameObject {
     this.maxX = mapWidth - width;
     this.maxY = mapHeight - height;
     this.speed = speed;
+    this.name = name;
 
     // Assign random player
     const i = Math.random() * PLAYERS.length | 0;

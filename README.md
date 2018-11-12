@@ -27,11 +27,11 @@ To run the game server, use `yarn serve`.
 - [x] Spawn trees at certain time intervals
 
 **Jack**:
-- [ ] Player chat system
+- [x] Player chat system
 - [x] Performance: only draw visible characters
 - [x] Performance: only redraw map if parts of the visible map changed (socket messages)
-- [ ] Show what is currently selected in the inventory
-- [ ] Enter to select item in inventory
+- [x] Show what is currently selected in the inventory
+- [x] Enter to select item in inventory
 
 **Chris**:
 - [ ] Add Objective System

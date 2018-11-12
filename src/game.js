@@ -4,7 +4,6 @@ import { GameMap } from './map';
 import { TILES, TILEMAP, BASES, FRAMES, DROPS, SPRITES } from './tiles';
 import { Inventory } from './inventory';
 import { Player, Camera } from './game-objects';
-import { Modes, Context } from './context';
 import { RefreshManager  } from './refresh';
 import { setObjectivesGameReference, generateObjective, checkObjectiveComplete, getObjectiveName, getObjectiveDescription, OBJECTIVE_COMPLETE } from './objectives';
 
@@ -17,6 +16,13 @@ const PLAYER_SRC_WIDTH = 14;
 const PLAYER_SRC_HEIGHT = 16;
 const PLAYER_DISPLAY_WIDTH = PLAYER_SRC_WIDTH * RATIO;
 const PLAYER_DISPLAY_HEIGHT = DSIZE;
+
+const Modes = {
+  MENU: 1,
+  GAME: 2,
+  INVENTORY: 3,
+  CHAT: 4,
+};
 
 export class Game {
   constructor(ctx, canvasWidth, canvasHeight) {
@@ -54,10 +60,12 @@ export class Game {
       Keys.L,
       Keys.I,
       Keys.ESC,
+      Keys.ENTER,
     ]);
     this.menuRepeatDelay = 100;
 
-    this.context = new Context(Modes.GAME);
+    this.mode = Modes.GAME;
+    this.modeDelay = 300;
 
     this.refreshManager = new RefreshManager();
     this.refreshManager.register('sprite', 2, 200);
@@ -90,12 +98,12 @@ export class Game {
 
   socketSetup() {
     return new Promise((resolve, reject) => {
-      postChat('Connecting to server...');
+      postChat('Connecting to server...', 'info');
       this.socket = new WebSocket("ws://localhost:5000");
 
       this.socket.onopen = event => {
         postChat('Connected!', 'success');
-        postChat('Downloading map...');
+        postChat('Downloading map...', 'info');
       };
 
       this.socket.onclose = event => {
@@ -109,10 +117,6 @@ export class Game {
       this.socket.onmessage = event => {
         const { type, data } = JSON.parse(event.data);
         switch (type) {
-          case 'selfid': {
-            this.selfid = data;
-            break;
-          }
           case 'map': {
             this.map = Object.assign(new GameMap, data);
             postChat('Downloaded map!', 'success');
@@ -124,6 +128,28 @@ export class Game {
               this.players[key] = Object.assign(new Player, data[key]);
             }
             this.playersMoved = true;
+            break;
+          }
+          case 'self': {
+            const { id, name, pos } = data;
+            this.selfid = id;
+
+            const { x: xLoc, y: yLoc } = pos;
+
+            const DEFAULT_SPEED = 4 * this.map.dsize;
+            const width = PLAYER_REAL_WIDTH * RATIO;
+            const height = PLAYER_REAL_HEIGHT * RATIO;
+            this.player = new Player(xLoc, yLoc, width, height, this.map.width, this.map.height, this.map.dsize, DEFAULT_SPEED, name);
+
+            const objective = generateObjective();
+            this.player.objectiveId = objective['id'];
+            this.player.objectiveData = objective['data'];
+            const text = 'New objective "' + getObjectiveName(this.player.objectiveId) + '": ' + getObjectiveDescription(this.player.objectiveId, this.player.objectiveData);
+            postChat(text, 'info');
+
+            send(this.socket, 'newPlayer', this.player);
+
+            resolve();
             break;
           }
           case 'newPlayer': {
@@ -186,27 +212,13 @@ export class Game {
             break;
           }
           case 'info': {
-            postChat(data);
+            postChat(data, 'info');
             break;
           }
-          case 'startingPos': {
-            const { x: xLoc, y: yLoc } = data;
-
-            const DEFAULT_SPEED = 4 * this.map.dsize;
-            const width = PLAYER_REAL_WIDTH * RATIO;
-            const height = PLAYER_REAL_HEIGHT * RATIO;
-
-            this.player = new Player(xLoc, yLoc, width, height, this.map.width, this.map.height, this.map.dsize, DEFAULT_SPEED);
-
-            const objective = generateObjective();
-            this.player.objectiveId = objective['id'];
-            this.player.objectiveData = objective['data'];
-            postChat('New objective "' + getObjectiveName(this.player.objectiveId) + '": ' + getObjectiveDescription(this.player.objectiveId, this.player.objectiveData));
-
-            send(this.socket, 'newPlayer', this.player);
-
-            resolve();
-            break;
+          case 'chatMessage': {
+            const { id, text } = data;
+            const player = this.players[id];
+            postChat(`${player.name}: ${text}`);
           }
         }
       };
@@ -254,21 +266,72 @@ export class Game {
     tick();
   }
 
+  chatSetup() {
+    this.keyboard.pause();
+    const chatInput = document.getElementById('chat-input');
+    chatInput.contentEditable = true;
+    chatInput.focus();
+
+    const listener = (event) => {
+      const chatInput = document.getElementById('chat-input');
+      switch (event.keyCode) {
+        case Keys.ENTER: {
+          event.preventDefault();
+
+          const text = chatInput.innerText;
+          if (text.length > 0) {
+            chatInput.innerText = '';
+            postChat(`${this.player.name}: ${text}`);
+            send(this.socket, 'chatMessage', text);
+          }
+
+          break;
+        }
+        case Keys.ESC: {
+          event.preventDefault();
+          window.removeEventListener('keydown', listener);
+
+          chatInput.contentEditable = false;
+          chatInput.blur();
+
+          this.mode = Modes.GAME;
+          this.keyboard.listen();
+
+          break;
+        }
+      }
+    };
+    window.addEventListener('keydown', listener);
+  }
+
   update(delta) {
-    switch (this.context.getMode()) {
-      case Modes.MENU:
-        if (this.context.trySwitchModes(Modes.GAME, this.keyboard.isDown(Keys.ESC))) { break; };
-        this._updateMenu(delta);
+    switch (this.mode) {
+      case Modes.MENU: {
+        if (this.keyboard.isDownRepeat(Keys.ESC, this.modeDelay)) { this.mode = Modes.GAME; }
+        else {
+          this._updateMenu(delta);
+        }
         break;
-      case Modes.GAME:
-        if (this.context.trySwitchModes(Modes.MENU, this.keyboard.isDown(Keys.ESC))) { break; };
-        if (this.context.trySwitchModes(Modes.INVENTORY, this.keyboard.isDown(Keys.I))) { break; };
-        this._updateGame(delta);
+      }
+      case Modes.GAME: {
+        if (this.keyboard.isDownRepeat(Keys.ESC, this.modeDelay)) { this.mode = Modes.MENU; }
+        else if (this.keyboard.isDownRepeat(Keys.I, this.modeDelay)) { this.mode = Modes.INVENTORY; }
+        else if (this.keyboard.isDownRepeat(Keys.ENTER, this.modeDelay)) {
+          this.mode = Modes.CHAT;
+          this.chatSetup();
+        }
+        else {
+          this._updateGame(delta);
+        }
         break;
-      case Modes.INVENTORY:
-        if (this.context.trySwitchModes(Modes.GAME, this.keyboard.isDown(Keys.I))) { break; };
-        this._updateInventory(delta);
+      }
+      case Modes.INVENTORY: {
+        if (this.keyboard.isDownRepeat([Keys.I, Keys.ENTER], this.modeDelay)) { this.mode = Modes.GAME; }
+        else {
+          this._updateInventory(delta);
+        }
         break;
+      }
     }
   }
 
@@ -286,18 +349,18 @@ export class Game {
       if (this.refreshManager.get('menu')) {
         this.refreshManager.reset('menu');
 
-        let i = (this.inventory.selected === null)
-          ? 0
-          : itemIDS.indexOf(this.inventory.selected);
+        let i = itemIDS.indexOf(this.inventory.selected);
 
         if (up) {
-          i--;
+          if (i > 0) {
+            i--;
+          }
         } else {
-          i++;
+          if (i < itemIDS.length - 1) {
+            i++;
+          }
         }
 
-        // Account for negative modulus
-        i = (i + itemIDS.length) % itemIDS.length;
         const newId = itemIDS[i];
         this.inventory.select(newId);
       }
@@ -347,7 +410,7 @@ export class Game {
 
     if (currIsland != 0 && currTile == landID && !this.player.hasVisitedIsland(currIsland)) {
       this.player.markIslandVisited(currIsland);
-      postChat('Island ' + currIsland + ' visited!');
+      postChat('Island ' + currIsland + ' visited!', 'info');
     }
 
     // Place object
@@ -529,17 +592,32 @@ export class Game {
     const targetXOffset = -((PLAYER_SRC_WIDTH - PLAYER_REAL_WIDTH) / 2 * RATIO);
     const targetYOffset = -((PLAYER_SRC_HEIGHT - PLAYER_REAL_HEIGHT) * RATIO);
 
+    const drawX = Math.round(x) + targetXOffset;
+    const drawY = Math.round(y) + targetYOffset;
+
     ctx.drawImage(
       image, // image
       tileX * (1 + this.map.tsize) + 1 + sourceXOffset, // source x
       tileY * (1 + this.map.tsize) + 1, // source y
       PLAYER_SRC_WIDTH, // source width
       PLAYER_SRC_HEIGHT, // source height
-      Math.round(x) + targetXOffset, // target x
-      Math.round(y) + targetYOffset, // target y
+      drawX, // target x
+      drawY, // target y
       PLAYER_DISPLAY_WIDTH, // target width
       PLAYER_DISPLAY_HEIGHT, // target height
     );
+
+    const fontSize = 18;
+    const textWidth = ctx.measureText(player.name).width;
+    const textX = drawX + PLAYER_DISPLAY_WIDTH / 2 - textWidth / 2;
+    const textY = drawY - 4;
+
+    ctx.fillStyle = Styles.darkBG;
+    ctx.fillRect(textX - 2, textY - fontSize, textWidth + 4, fontSize + 2);
+
+    ctx.font = `${fontSize}px ${Styles.fontFamily}`;
+    ctx.fillStyle = (player === this.player) ? Styles.special : Styles.light;
+    ctx.fillText(player.name, textX, textY - 2);
   }
 
   _drawSelect() {
@@ -635,6 +713,40 @@ export class Game {
     }
   }
 
+  _drawFPS() {
+    const fontSize = 24;
+    this.ctx.font = `${fontSize}px ${Styles.fontFamily}`;
+
+    this.ctx.fillStyle = 'red';
+    this.ctx.fillText(`fps: ${this.fps | 0}`, this.canvasWidth * 0.90, this.canvasHeight * 0.05);
+  }
+
+  _drawSelectedItem() {
+    const fontSize = 18;
+    this.ctx.font = `${fontSize}px ${Styles.fontFamily}`;
+
+    const x = 10;
+    const y = 10;
+
+    this.ctx.fillStyle = Styles.darkBG;
+    this.ctx.fillRect(
+      x,
+      y,
+      fontSize * 12,
+      fontSize * 1.75,
+    );
+
+    const item = this.inventory.selected;
+    let text = item.toUpperCase();
+    if (item !== this.inventory.NONE) {
+      const num = this.inventory.items[item];
+      text = `${text}: ${num}`;
+    }
+
+    this.ctx.fillStyle = Styles.light;
+    this.ctx.fillText(text, x + fontSize * 0.5, y + fontSize * 1.25);
+  }
+
   render() {
     // Clear previous frame
     this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
@@ -662,7 +774,7 @@ export class Game {
     // Draw final object layer above player
     this.ctx.drawImage(this.layerCanvas[last], 0, 0);
 
-    switch (this.context.getMode()) {
+    switch (this.mode) {
       case Modes.MENU:
         this._drawMenu();
         this.ctx.drawImage(this.menuCanvas, 0, 0);
@@ -673,11 +785,8 @@ export class Game {
         break;
     }
 
-    // Display fps
-    this.ctx.fillStyle = 'red';
-    const fontSize = 24;
-    this.ctx.font = `${fontSize}px ${Styles.fontFamily}`;
-    this.ctx.fillText(`fps: ${this.fps | 0}`, this.canvasWidth * 0.90, this.canvasHeight * 0.05);
+    this._drawFPS();
+    this._drawSelectedItem();
   }
 
   resize(width, height) {

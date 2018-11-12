@@ -4,6 +4,10 @@ import { GameMap } from './src/map';
 import { TILES } from './src/tiles'
 import { findStartingCoordinates, createMap } from './src/map-gen';
 
+// Thank you https://nameberry.com/list/45/Unisex-Baby-Names?all=1
+const names = ['London', 'Zion', 'Murphy', 'Salem', 'Taylen', 'Angel', 'Brett', 'Kylar', 'Jaziah', 'Lake', 'Reilly', 'Emery', 'Campbell', 'Avery', 'Scout', 'Ramsey', 'Rory', 'Micah', 'Alexis', 'River', 'Armani', 'Dakotah', 'Kennedy', 'Azariah', 'Sam', 'Phoenix', 'Jess', 'Brighton', 'Justice', 'Jaidyn', 'Parker', 'Charlie', 'Valentine', 'Rio', 'Robin', 'Casey', 'Dylan', 'Kylin', 'True', 'Keegan', 'Royal', 'Kendall', 'Sasha', 'Hayden', 'Dakota', 'Gentry', 'Austen', 'Perry', 'Drew', 'Riley', 'Quinn', 'Eastyn', 'Jael', 'Toby', 'Dominique', 'Lane', 'Reagan', 'Timber', 'Lennon', 'Brady', 'Jackie', 'Gray', 'Denver', 'Payson', 'Skyler', 'Honor', 'Payton', 'Morgan', 'Paxton', 'Dana', 'Sage', 'Cypress', 'Alex', 'Timber', 'Indiana', 'Ellery', 'Landry', 'Sky', 'Clarke', 'Harper', 'Sidney', 'Jordan', 'Teagan', 'Jaden', 'Reese', 'Storm', 'Amen', 'Frankie', 'Oakley', 'Marlo', 'Finley', 'Ocean', 'Sawyer', 'Rowan', 'Jazz', 'Bailey', 'Emerson', 'Samar', 'Harley', 'Devon', 'Ryley', 'Flynn', 'Yael', 'Jalen', 'Nikita', 'Jules', 'Cameron', 'Ellington', 'Taylor', 'Hollis'];
+const getName = i => names[i % names.length];
+
 let index = 0;
 const players = {};
 
@@ -92,14 +96,15 @@ wss.broadcastOthers = (socket, type, data) => {
 
 wss.on('connection', socket => {
   socket.id = index++;
-  send(socket, 'selfid', socket.id);
+  const name = getName(socket.id);
+
   send(socket, 'map', map);
   send(socket, 'players', players);
 
   const spawnLoc = findStartingCoordinates(layers, MAP_SIZE, 'land', COLLIDER_OBJECTS);
-  send(socket, 'startingPos', spawnLoc);
+  send(socket, 'self', { id: socket.id, name, pos: spawnLoc });
 
-  wss.broadcastOthers(socket, 'info', `Player${socket.id} joined!`);
+  wss.broadcastOthers(socket, 'info', `${name} joined!`);
 
   socket.on('message', message => {
     const { type, data } = JSON.parse(message);
@@ -126,6 +131,10 @@ wss.on('connection', socket => {
         wss.broadcastOthers(socket, 'tileUpdate', data);
         break;
       }
+      case 'chatMessage': {
+        wss.broadcastOthers(socket, 'chatMessage', { id: socket.id, text: data });
+        break;
+      }
     }
   });
 
@@ -138,6 +147,6 @@ wss.on('connection', socket => {
   socket.on('close', () => {
     delete players[socket.id];
     wss.broadcastOthers(socket, 'deletePlayer', socket.id);
-    wss.broadcastOthers(socket, 'info', `Player${socket.id} disconnected.`);
+    wss.broadcastOthers(socket, 'info', `${name} disconnected.`);
   });
 });
