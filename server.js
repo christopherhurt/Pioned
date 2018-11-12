@@ -140,15 +140,15 @@ wss.on('connection', socket => {
     }
   });
 
-  setInterval(() => {
-    //spawntrees returns 2, 2D arrays containing the layers of the map
-    const layers = spawnTrees(map);
-    wss.broadcast('spawnTrees', layers);
-  }, 90000)
-
   socket.on('close', () => {
     delete players[socket.id];
     wss.broadcastOthers(socket, 'deletePlayer', socket.id);
     wss.broadcastOthers(socket, 'info', `${name} disconnected.`);
   });
 });
+
+setInterval(() => {
+  //spawntrees returns 2, 2D arrays containing the layers of the map
+  const layers = spawnTrees(map);
+  wss.broadcast('spawnTrees', layers);
+}, 90000);
