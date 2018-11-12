@@ -102,7 +102,7 @@ export class Game {
       this.socket = new WebSocket("ws://localhost:5000");
 
       this.socket.onopen = event => {
-        postChat('Connected!', 'success');
+        postChat('Connected to server!', 'success');
         // postChat('Downloading map...', 'debug');
       };
 
