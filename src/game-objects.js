@@ -10,7 +10,7 @@ export class GameObject {
 }
 
 export class Player extends GameObject {
-  constructor(xLoc, yLoc, width, height, mapWidth, mapHeight, dsize, speed, objectiveId, objectiveData) {
+  constructor(xLoc, yLoc, width, height, mapWidth, mapHeight, dsize, speed) {
     const x = xLoc * dsize + dsize / 2 - width / 2;
     const y = yLoc * dsize + dsize / 2 - height / 2;
 
@@ -42,9 +42,6 @@ export class Player extends GameObject {
 
     this.visitedIslands = [];
     this.contactedPlayers = [];
-    
-    this.objectiveId = objectiveId;
-    this.objectiveData = objectiveData;
   }
 
   move(delta, dirx, diry, map) {
@@ -132,6 +129,13 @@ export class Player extends GameObject {
     }
   }
 
+  getCurrentIsland(map) {
+    const isCol = parseInt((this.x + this.width / 2) / map.width * map.islands[0].length);
+    const isRow = parseInt((this.y + this.height / 2) / map.height * map.islands.length);
+    const currIsland = map.islands[isRow][isCol];
+    return currIsland;
+  }
+  
   markIslandVisited(island) {
     if(!this.visitedIslands.includes(island)) {
       this.visitedIslands.push(island);

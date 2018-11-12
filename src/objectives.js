@@ -29,7 +29,7 @@ export function generateObjective() {
     case VISIT_RANDOM_ISLAND:
       // Generate random id of the island that the player needs to visit
       const numIslands = GAME_REF.map.numIslands;
-      data = parseInt(Math.random() * numIslands + 1);
+      while((data = parseInt(Math.random() * numIslands + 1)) == GAME_REF.player.getCurrentIsland(GAME_REF.map));
       break;
     default:
       break;

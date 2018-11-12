@@ -164,12 +164,13 @@ export class Game {
             const width = PLAYER_REAL_WIDTH * RATIO;
             const height = PLAYER_REAL_HEIGHT * RATIO;
             
-            const objective = generateObjective();
-            const objectiveId = objective['id'];
-            const objectiveData = objective['data'];
-            postChat('New objective "' + getObjectiveName(objectiveId) + '": ' + getObjectiveDescription(objectiveId, objectiveData));
+            this.player = new Player(xLoc, yLoc, width, height, this.map.width, this.map.height, this.map.dsize, DEFAULT_SPEED);
             
-            this.player = new Player(xLoc, yLoc, width, height, this.map.width, this.map.height, this.map.dsize, DEFAULT_SPEED, objectiveId, objectiveData);
+            const objective = generateObjective();
+            this.player.objectiveId = objective['id'];
+            this.player.objectiveData = objective['data'];
+            postChat('New objective "' + getObjectiveName(this.player.objectiveId) + '": ' + getObjectiveDescription(this.player.objectiveId, this.player.objectiveData));
+            
             send(this.socket, 'newPlayer', this.player);
 
             resolve();
@@ -305,9 +306,7 @@ export class Game {
     }
 
     // Check current island
-    const isCol = parseInt((this.player.x + this.player.width / 2) / this.map.width * this.map.islands[0].length);
-    const isRow = parseInt((this.player.y + this.player.height / 2) / this.map.height * this.map.islands.length);
-    const currIsland = this.map.islands[isRow][isCol];
+    const currIsland = this.player.getCurrentIsland(this.map);
 
     const pCol = parseInt((this.player.x + this.player.width / 2) / this.map.dsize);
     const pRow = parseInt((this.player.y + this.player.height / 2) / this.map.dsize);
