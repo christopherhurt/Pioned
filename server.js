@@ -148,7 +148,10 @@ wss.on('connection', socket => {
 });
 
 setInterval(() => {
-  //spawntrees returns 2, 2D arrays containing the layers of the map
-  const layers = spawnTrees(map);
-  wss.broadcast('spawnTrees', layers);
+  // Only spawn trees if there are connected players
+  if (wss.clients.size > 0) {
+    // spawnTrees() returns two 2D arrays containing the object layers of the map
+    const layers = spawnTrees(map);
+    wss.broadcast('spawnTrees', layers);
+  }
 }, 90000);
