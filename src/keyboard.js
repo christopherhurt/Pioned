@@ -1,11 +1,28 @@
 export class Keyboard {
   constructor() {
     this._keys = {};
+
+    this.keyDownListener = evt => this._onKeyDown(evt);
+    this.keyUpListener = evt => this._onKeyUp(evt);
+  }
+
+  listen() {
+    window.addEventListener('keydown', this.keyDownListener);
+    window.addEventListener('keyup', this.keyUpListener);
+  }
+
+  pause() {
+    window.removeEventListener('keydown', this.keyDownListener);
+    window.removeEventListener('keyup', this.keyUpListener);
+
+    // Reset all keys
+    for (let key in this._keys) {
+      this._keys[key] = false;
+    }
   }
 
   listenForEvents(keys) {
-    window.addEventListener('keydown', evt => this._onKeyDown(evt));
-    window.addEventListener('keyup', evt => this._onKeyUp(evt));
+    this.listen();
 
     keys.forEach(key => {
       this._keys[key] = false;

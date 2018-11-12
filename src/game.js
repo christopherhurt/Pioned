@@ -4,7 +4,6 @@ import { GameMap } from './map';
 import { TILES, TILEMAP, BASES, FRAMES, DROPS, SPRITES } from './tiles';
 import { Inventory } from './inventory';
 import { Player, Camera } from './game-objects';
-import { Modes, Context } from './context';
 import { RefreshManager  } from './refresh';
 
 const TSIZE = 16;
@@ -16,6 +15,13 @@ const PLAYER_SRC_WIDTH = 14;
 const PLAYER_SRC_HEIGHT = 16;
 const PLAYER_DISPLAY_WIDTH = PLAYER_SRC_WIDTH * RATIO;
 const PLAYER_DISPLAY_HEIGHT = DSIZE;
+
+const Modes = {
+  MENU: 1,
+  GAME: 2,
+  INVENTORY: 3,
+  CHAT: 4,
+};
 
 export class Game {
   constructor(ctx, canvasWidth, canvasHeight) {
@@ -56,7 +62,8 @@ export class Game {
     ]);
     this.menuRepeatDelay = 100;
 
-    this.context = new Context(Modes.GAME);
+    this.mode = Modes.GAME;
+    this.modeDelay = 300;
 
     this.refreshManager = new RefreshManager();
     this.refreshManager.register('sprite', 2, 200);
@@ -214,21 +221,70 @@ export class Game {
     tick();
   }
 
+  chatSetup() {
+    this.keyboard.pause();
+    const chatInput = document.getElementById('chat-input');
+    chatInput.contentEditable = true;
+    chatInput.focus();
+
+    const listener = (event) => {
+      const chatInput = document.getElementById('chat-input');
+      switch (event.keyCode) {
+        case Keys.ENTER: {
+          event.preventDefault();
+
+          if (chatInput.innerText.length > 0) {
+            postChat(chatInput.innerText);
+            chatInput.innerText = '';
+          }
+
+          break;
+        }
+        case Keys.ESC: {
+          event.preventDefault();
+          window.removeEventListener('keydown', listener);
+
+          chatInput.contentEditable = false;
+          chatInput.blur();
+
+          this.mode = Modes.GAME;
+          this.keyboard.listen();
+
+          break;
+        }
+      }
+    };
+    window.addEventListener('keydown', listener);
+  }
+
   update(delta) {
-    switch (this.context.getMode()) {
-      case Modes.MENU:
-        if (this.context.trySwitchModes(Modes.GAME, this.keyboard.isDown(Keys.ESC))) { break; };
-        this._updateMenu(delta);
+    switch (this.mode) {
+      case Modes.MENU: {
+        if (this.keyboard.isDownRepeat(Keys.ESC, this.modeDelay)) { this.mode = Modes.GAME; }
+        else {
+          this._updateMenu(delta);
+        }
         break;
-      case Modes.GAME:
-        if (this.context.trySwitchModes(Modes.MENU, this.keyboard.isDown(Keys.ESC))) { break; };
-        if (this.context.trySwitchModes(Modes.INVENTORY, this.keyboard.isDown(Keys.I))) { break; };
-        this._updateGame(delta);
+      }
+      case Modes.GAME: {
+        if (this.keyboard.isDownRepeat(Keys.ESC, this.modeDelay)) { this.mode = Modes.MENU; }
+        else if (this.keyboard.isDownRepeat(Keys.I, this.modeDelay)) { this.mode = Modes.INVENTORY; }
+        else if (this.keyboard.isDownRepeat(Keys.ENTER, this.modeDelay)) {
+          this.mode = Modes.CHAT;
+          this.chatSetup();
+        }
+        else {
+          this._updateGame(delta);
+        }
         break;
-      case Modes.INVENTORY:
-        if (this.context.trySwitchModes(Modes.GAME, this.keyboard.isDown([Keys.I, Keys.ENTER]))) { break; };
-        this._updateInventory(delta);
+      }
+      case Modes.INVENTORY: {
+        if (this.keyboard.isDownRepeat([Keys.I, Keys.ENTER], this.modeDelay)) { this.mode = Modes.GAME; }
+        else {
+          this._updateInventory(delta);
+        }
         break;
+      }
     }
   }
 
@@ -636,7 +692,7 @@ export class Game {
     // Draw final object layer above player
     this.ctx.drawImage(this.layerCanvas[last], 0, 0);
 
-    switch (this.context.getMode()) {
+    switch (this.mode) {
       case Modes.MENU:
         this._drawMenu();
         this.ctx.drawImage(this.menuCanvas, 0, 0);

@@ -41,7 +41,7 @@ export function createCanvas(width, height) {
   return canvas;
 };
 
-export function postChat(message, type='info') {
+export function postChat(message, type) {
   const div = document.createElement('div');
   div.className = 'chat-message';
   switch(type) {
@@ -62,8 +62,10 @@ export function postChat(message, type='info') {
 
   const chat = document.getElementById('chat');
   chat.appendChild(div);
+
   // Scroll to bottom
-  chat.scrollTop = chat.scrollHeight;
+  const chatWrap = document.getElementById('chat-wrap');
+  chatWrap.scrollTop = chatWrap.scrollHeight;
 }
 
 export class ImageLoader {
