@@ -2,6 +2,14 @@
 
 Project for CS 4644 Creative Computing Capstone.
 
+## Credits
+
+Forked from Mozilla's [starting code](https://github.com/mozdevs/gamedev-js-tiles).
+
+Tilemap graphics and sprites created by [Onimaru](https://onimaru.itch.io/green-valley-map-pack).
+
+Favicon created with [favicon.io](https://favicon.io/).
+
 ## Getting started
 
 > Install yarn [here](https://yarnpkg.com/en/docs/install).
@@ -82,11 +90,3 @@ To run the game server, use `yarn serve`.
         - [x] Come into contact with n other players
             - [x] Implement Player Collision
 - [x] Fix player spawning on single or few blocks
-
-## Credits
-
-Forked from Mozilla's [starting code](https://github.com/mozdevs/gamedev-js-tiles).
-
-Tilemap graphics and sprites created by [Onimaru](https://onimaru.itch.io/green-valley-map-pack).
-
-Favicon created with [favicon.io](https://favicon.io/).
