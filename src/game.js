@@ -495,7 +495,7 @@ export class Game {
         const other = this.players[id];
         if(intersects(this.player, other)) {
           this.player.contactedPlayers.push(id);
-          postChat('Contacted player ' + id + '!', 'info');
+          postChat(`Contacted ${other.name}!`, 'info');
         }
       }
     }
