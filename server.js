@@ -78,6 +78,11 @@ function spawnTrees(map) {
 
 const wss = new WebSocket.Server({ port: 5000 });
 
+function noop() {}
+function heartbeat() {
+  this.isAlive = true;
+}
+
 // Broadcast to all.
 wss.broadcast = (type, data) => {
   wss.clients.forEach(client => {
@@ -97,6 +102,9 @@ wss.broadcastOthers = (socket, type, data) => {
 }
 
 wss.on('connection', socket => {
+  socket.isAlive = true;
+  socket.on('pong', heartbeat);
+
   socket.id = index++;
   const name = getName(socket.id);
 
@@ -147,6 +155,7 @@ wss.on('connection', socket => {
   });
 });
 
+// Periodically spawn trees on the map
 setInterval(() => {
   // Only spawn trees if there are connected players
   if (wss.clients.size > 0) {
@@ -155,3 +164,15 @@ setInterval(() => {
     wss.broadcast('spawnTrees', layers);
   }
 }, 90000);
+
+// Detect and close broken connections
+setInterval(() => {
+  wss.clients.forEach(client => {
+    if (client.isAlive === false) {
+      return client.terminate();
+    }
+
+    client.isAlive = false;
+    client.ping(noop);
+  });
+}, 30000);
