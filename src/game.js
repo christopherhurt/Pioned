@@ -537,6 +537,10 @@ export class Game {
 
     const width = this.canvasWidth * 0.60;
     const height = this.canvasHeight * 0.75;
+    const marginX = width * 0.1;
+    const marginY = height * 0.15;
+    const innerWidth = width - marginX * 2;
+    const innerHeight = height - marginY * 2;
 
     let x = (this.canvasWidth - width) / 2;
     let y = (this.canvasHeight - height) / 2;
@@ -549,33 +553,35 @@ export class Game {
       height,
     );
 
-    // Margins
-    x += width * 0.1;
-    y += height * 0.15;
+    x += marginX;
+    y += marginY;
 
-    let fontSize = 50;
-    ctx.font = `${fontSize}px ${Styles.fontFamily}`;
+    ctx.font = Styles.largeFont;
     ctx.fillStyle = Styles.light;
     ctx.fillText('Menu', x, y);
 
-    fontSize = 18;
-    ctx.font = `${fontSize}px ${Styles.fontFamily}`;
-    const separation = fontSize * 1.5;
+    ctx.font = Styles.font;
+    const separation = Styles.fontSize * 1.5;
     y += separation * 2;
 
     // Draw objective with description
     const objectiveName = getObjectiveName(this.player.objectiveId);
     const objectiveDescription = getObjectiveDescription(this.player.objectiveId, this.player.objectiveData);
+
     ctx.fillStyle = Styles.special2;
     ctx.fillText(`Objective: ${objectiveName}`, x, y);
     y += separation;
+
     ctx.fillText(objectiveDescription, x, y);
     y += separation * 2;
     ctx.fillStyle = Styles.light;
 
     ctx.fillText('Controls:', x, y);
     y += separation;
-    ctx.fillText('='.repeat(36), x, y);
+    const numRepeat = innerWidth / ctx.measureText('=').width | 0;
+    ctx.fillStyle = Styles.special;
+    ctx.fillText('='.repeat(numRepeat), x, y);
+    ctx.fillStyle = Styles.light;
     y += separation;
 
     const items = {
@@ -591,7 +597,7 @@ export class Game {
       const val = items[key];
 
       ctx.fillText(key, x, y);
-      ctx.fillText(val, x + width * 0.5 - ctx.measureText(val).width, y);
+      ctx.fillText(val, x + innerWidth - ctx.measureText(val).width, y);
 
       y += separation;
     }
