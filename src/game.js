@@ -573,13 +573,13 @@ export class Game {
     y += separation;
 
     const items = {
-      'Menu': 'ESC',
-      'Chat': 'ENTER',
-      'Exit Chat': 'ESC',
-      'Inventory': 'I',
       'Move': 'WASD/Arrows',
       'Take': 'L',
       'Place': 'K',
+      'Inventory': 'I',
+      'Menu': 'ESC',
+      'Chat': 'ENTER',
+      'Exit Chat': 'ESC',
     };
     for (let key in items) {
       const val = items[key];
