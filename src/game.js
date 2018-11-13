@@ -632,8 +632,8 @@ export class Game {
     ctx.fillStyle = Styles.light;
     ctx.fillText('Inventory', x, y);
 
-    ctx.font = Styles.mediumFont;
-    const separation = Styles.mediumFontSize * 1.5;
+    ctx.font = Styles.font;
+    const separation = Styles.fontSize * 1.5;
     y += separation * 2;
 
     const numRepeat = innerWidth / ctx.measureText('=').width | 0;
