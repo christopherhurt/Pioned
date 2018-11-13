@@ -339,7 +339,7 @@ export class Game {
         break;
       }
       case Modes.INVENTORY: {
-        if (this.keyboard.isDownRepeat([Keys.I, Keys.ENTER], this.modeDelay)) { this.mode = Modes.GAME; }
+        if (this.keyboard.isDownRepeat([Keys.I, Keys.ESC, Keys.ENTER], this.modeDelay)) { this.mode = Modes.GAME; }
         else {
           this._updateInventory(delta);
         }
