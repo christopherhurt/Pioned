@@ -26,13 +26,13 @@ export function drawTextWithBackground(text, ctx, x, y, fontSize=Styles.fontSize
   const bgHeight = fontSize * 1.7;
 
   // Alignment
-  const awords = new Set(align.split(/[ ,]+/));
-  if (awords.has('center')) {
+  const awords = align.split(/[ ,]+/);
+  if (awords.includes('center')) {
     x -= bgWidth / 2;
-  } else if (awords.has('right')) {
+  } else if (awords.includes('right')) {
     x -= bgWidth;
   }
-  if (awords.has('above')) {
+  if (awords.includes('above')) {
     y -= bgHeight;
   }
 
