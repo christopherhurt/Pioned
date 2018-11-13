@@ -842,6 +842,7 @@ export class Game {
 
     // Re-render
     this.hasScrolled = true;
+    this.infoUpdated = true;
     this.render();
   }
 }
