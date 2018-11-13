@@ -12,6 +12,7 @@ window.onload = () => {
 
   const ctx = canvas.getContext('2d');
   const game = new Game(ctx, width, height);
+  game.run();
 
   window.addEventListener('resize', async (evt) => {
     const width = window.innerWidth;
@@ -23,6 +24,5 @@ window.onload = () => {
     game.resize(width, height);
   });
 
-  game.run();
-
+  document.fonts.ready.then(() => game.redraw());
 };
