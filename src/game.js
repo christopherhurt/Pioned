@@ -152,8 +152,10 @@ export class Game {
             const objective = generateObjective();
             this.player.objectiveId = objective['id'];
             this.player.objectiveData = objective['data'];
-            const text = 'New objective "' + getObjectiveName(this.player.objectiveId) + '": ' + getObjectiveDescription(this.player.objectiveId, this.player.objectiveData);
-            postChat(text, 'info');
+
+            const objectiveName = getObjectiveName(this.player.objectiveId);
+            const objectiveDescription = getObjectiveDescription(this.player.objectiveId, this.player.objectiveData);
+            postChat(`New objective "${objectiveName}": ${objectiveDescription}`, 'info');
 
             send(this.socket, 'newPlayer', this.player);
 
