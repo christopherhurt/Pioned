@@ -9,6 +9,10 @@ body {
   font-family: 'Roboto Slab', sans-serif;
 }
 
+* {
+  cursor: none;
+}
+
 #shade {
   position: absolute;
   width: 100%;
