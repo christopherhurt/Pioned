@@ -538,7 +538,7 @@ export class Game {
     const width = this.canvasWidth * 0.60;
     const height = this.canvasHeight * 0.75;
     const marginX = width * 0.1;
-    const marginY = height * 0.15;
+    const marginY = height * 0.1;
     const innerWidth = width - marginX * 2;
     const innerHeight = height - marginY * 2;
 
@@ -556,9 +556,10 @@ export class Game {
     x += marginX;
     y += marginY;
 
-    ctx.font = Styles.largeFont;
-    ctx.fillStyle = Styles.light;
-    ctx.fillText('Menu', x, y);
+    const titleX = x - Styles.mediumFontSize2 * 0.25;
+    let [w, h] = drawTextWithBackground('Welcome to ', ctx, titleX, y, Styles.mediumFontSize2, Styles.light, 'transparent');
+    [w, h] = drawTextWithBackground('Pioned', ctx, titleX + w, y, Styles.mediumFontSize2, Styles.light, Styles.special);
+    y += h;
 
     ctx.font = Styles.font;
     const separation = Styles.fontSize * 1.5;

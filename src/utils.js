@@ -1,6 +1,7 @@
 const _fontFamily = 'Roboto Slab, sans-serif';
 const _normal = 18;
 const _medium = 24;
+const _medium2 = 32;
 const _large = 50;
 export const Styles = {
   light: 'white',
@@ -12,6 +13,7 @@ export const Styles = {
   fontFamily: _fontFamily,
   fontSize: _normal,
   mediumFontSize: _medium,
+  mediumFontSize2: _medium2,
   largeFontSize: _large,
   font: `${_normal}px ${_fontFamily}`,
   mediumFont: `${_medium}px ${_fontFamily}`,
