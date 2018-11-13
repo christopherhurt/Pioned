@@ -63,6 +63,7 @@ export class Game {
       Keys.ENTER,
     ]);
     this.menuRepeatDelay = 100;
+    this.actionDelay = 100;
 
     this.mode = Modes.GAME;
     this.modeDelay = 300;
@@ -426,7 +427,7 @@ export class Game {
 
     // Place object
     const item = this.inventory.selected;
-    if (this.keyboard.isDown(Keys.K) && item !== this.inventory.NONE) {
+    if (this.keyboard.isDownRepeat(Keys.K, this.actionDelay) && item !== this.inventory.NONE) {
       const [ x, y ] = this.player.selectCoords;
       const col = x / this.map.dsize | 0;
       const row = y / this.map.dsize | 0;
@@ -463,7 +464,7 @@ export class Game {
     }
 
     // Take object
-    if (this.keyboard.isDown(Keys.L)) {
+    if (this.keyboard.isDownRepeat(Keys.L, this.actionDelay)) {
       const [ x, y ] = this.player.selectCoords;
       const col = x / this.map.dsize | 0;
       const row = y / this.map.dsize | 0;
