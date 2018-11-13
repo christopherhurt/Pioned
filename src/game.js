@@ -734,31 +734,22 @@ export class Game {
     }
   }
 
-  _drawFPS() {
-    const ctx = this.infoCanvas.getContext('2d');
-    const text = `fps: ${this.fps | 0}`;
-    drawTextWithBackground(text, ctx, this.canvasWidth - 10, 10, Styles.fontSize, Styles.light, 'red', 'right');
-  }
-
-  _drawSelectedItem() {
-    const ctx = this.infoCanvas.getContext('2d');
-
-    const item = this.inventory.selected;
-    let text = item.toUpperCase();
-    if (item !== this.inventory.NONE) {
-      const num = this.inventory.items[item];
-      text = `${text}: ${num}`;
-    }
-
-    drawTextWithBackground(text, ctx, 10, 10);
-  }
-
   _drawInfo() {
     const ctx = this.infoCanvas.getContext('2d');
     ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
-    this._drawFPS();
-    this._drawSelectedItem();
+    // Draw FPS
+    const fpsText = `fps: ${this.fps | 0}`;
+    drawTextWithBackground(fpsText, ctx, this.canvasWidth - 10, 10, Styles.fontSize, Styles.light, 'red', 'right');
+
+    // Draw selected item
+    const item = this.inventory.selected;
+    let itemText = item.toUpperCase();
+    if (item !== this.inventory.NONE) {
+      const num = this.inventory.items[item];
+      itemText = `${itemText}: ${num}`;
+    }
+    drawTextWithBackground(itemText, ctx, 10, 10);
   }
 
   render() {
