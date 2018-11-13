@@ -84,6 +84,8 @@ export class Game {
     this.hasScrolled = true;
     this.playersMoved = true;
     this.infoUpdated = true;
+    this.menuUpdated = true;
+    this.inventoryUpdated = true;
 
     this.tileMap = this.loader.get('tiles');
     this.tileMap.width = 14;
@@ -360,6 +362,7 @@ export class Game {
       if (this.refreshManager.get('menu')) {
         this.refreshManager.reset('menu');
         this.infoUpdated = true;
+        this.inventoryUpdated = true;
 
         let i = itemIDS.indexOf(this.inventory.selected);
 
@@ -454,6 +457,7 @@ export class Game {
         }
 
         this.inventory.remove(item, 1);
+        this.inventoryUpdated = true;
 
         this.map.setTile(1, col, row, TILES[objID]);
         send(this.socket, 'tileUpdate', { layer: 1, col, row, type: TILES[objID] });
@@ -496,6 +500,7 @@ export class Game {
         if (DROPS[obj] !== null) {
           const [ drop, num ] = DROPS[obj];
           this.inventory.add(drop, num);
+          this.inventoryUpdated = true;
           if (drop === this.inventory.selected) {
             this.infoUpdated = true;
           }
@@ -522,6 +527,7 @@ export class Game {
       postChat(message, 'success');
       this.player.objectiveId = OBJECTIVE_COMPLETE;
       this.infoUpdated = true;
+      this.menuUpdated = true;
     }
   }
 
@@ -838,14 +844,22 @@ export class Game {
     this.ctx.drawImage(this.infoCanvas, 0, 0);
 
     switch (this.mode) {
-      case Modes.MENU:
-        this._drawMenu();
+      case Modes.MENU: {
+        if (this.menuUpdated) {
+          this.menuUpdated = false;
+          this._drawMenu();
+        }
         this.ctx.drawImage(this.menuCanvas, 0, 0);
         break;
-      case Modes.INVENTORY:
-        this._drawInventory();
+      }
+      case Modes.INVENTORY: {
+        if (this.inventoryUpdated) {
+          this.inventoryUpdated = false;
+          this._drawInventory();
+        }
         this.ctx.drawImage(this.inventoryCanvas, 0, 0);
         break;
+      }
     }
   }
 
