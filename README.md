@@ -33,7 +33,6 @@ To run the game server, use `yarn serve`.
 **Parker**:
 
 **Jack**:
-- [ ] Draw current objective above selected item (just name)
 
 **Chris**:
 
@@ -91,3 +90,4 @@ To run the game server, use `yarn serve`.
         - [x] Come into contact with n other players
             - [x] Implement Player Collision
 - [x] Fix player spawning on single or few blocks
+- [x] Draw current objective above selected item (just name)

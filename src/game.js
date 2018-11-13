@@ -748,14 +748,18 @@ export class Game {
     const fpsText = `fps: ${this.fps | 0}`;
     drawTextWithBackground(fpsText, ctx, this.canvasWidth - 10, 10, Styles.fontSize, Styles.light, 'red', 'right');
 
-    // Draw selected item
+    // Draw current objective
+    const objectiveName = getObjectiveName(this.player.objectiveId);
+    const [w, h] = drawTextWithBackground(`Objective: "${objectiveName}"`, ctx, 10, 10, Styles.fontSize, Styles.special);
+
+    // Draw selected item (below objective)
     const item = this.inventory.selected;
     let itemText = item.toUpperCase();
     if (item !== this.inventory.NONE) {
       const num = this.inventory.items[item];
       itemText = `${itemText}: ${num}`;
     }
-    drawTextWithBackground(itemText, ctx, 10, 10);
+    drawTextWithBackground(itemText, ctx, 10, h + 10);
   }
 
   render() {

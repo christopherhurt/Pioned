@@ -40,6 +40,8 @@ export function drawTextWithBackground(text, ctx, x, y, fontSize=Styles.fontSize
 
   ctx.fillStyle = color;
   ctx.fillText(text, x + fontSize * 0.25, y + fontSize * 1.2);
+
+  return [bgWidth, bgHeight];
 }
 
 function _intersects(x1, y1, w1, h1, x2, y2, w2, h2) {
