@@ -732,8 +732,18 @@ export class Game {
     for (let key in this.players) {
       const player = this.players[key];
 
+      const targetXOffset = -((PLAYER_SRC_WIDTH - PLAYER_REAL_WIDTH) / 2 * RATIO);
+      const targetYOffset = -((PLAYER_SRC_HEIGHT - PLAYER_REAL_HEIGHT) * RATIO);
+
+      const playerDisplay = {
+        x: Math.round(player.x) + targetXOffset,
+        y: Math.round(player.y) + targetYOffset,
+        width: PLAYER_DISPLAY_WIDTH,
+        height: PLAYER_DISPLAY_HEIGHT,
+      };
+
       // Only draw visible players
-      if (intersects(player, this.camera)) {
+      if (intersects(playerDisplay, this.camera)) {
         this._drawPlayer(player);
       }
     }
