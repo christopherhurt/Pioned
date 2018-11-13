@@ -193,7 +193,6 @@ export class Game {
             // Trigger re-render only if tile is visible
             if (intersects(tile, this.camera)) {
               this.hasScrolled = true;
-              console.log('Re-render map!');
             }
             break;
           }
