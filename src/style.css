@@ -13,14 +13,6 @@ body {
   cursor: none;
 }
 
-#shade {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: #101214;
-  z-index: -1;
-}
-
 #canvas {
   position: absolute;
   background: black;
