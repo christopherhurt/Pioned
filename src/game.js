@@ -549,6 +549,44 @@ export class Game {
     ctx.font = `${fontSize}px ${Styles.fontFamily}`;
     ctx.fillStyle = Styles.light;
     ctx.fillText('Menu', x, y);
+
+    fontSize = 18;
+    ctx.font = `${fontSize}px ${Styles.fontFamily}`;
+    const separation = fontSize * 1.5;
+    y += separation * 2;
+
+    // Draw objective with description
+    const objectiveName = getObjectiveName(this.player.objectiveId);
+    const objectiveDescription = getObjectiveDescription(this.player.objectiveId, this.player.objectiveData);
+    ctx.fillText(`Objective "${objectiveName}":`, x, y);
+    y += separation;
+    ctx.fillStyle = Styles.special;
+    ctx.fillText(objectiveDescription, x, y);
+    y += separation * 2;
+    ctx.fillStyle = Styles.light;
+
+    ctx.fillText('Controls:', x, y);
+    y += separation;
+    ctx.fillText('='.repeat(36), x, y);
+    y += separation;
+
+    const items = {
+      'Menu': 'ESC',
+      'Chat': 'ENTER',
+      'Exit Chat': 'ESC',
+      'Inventory': 'I',
+      'Move': 'WASD/Arrows',
+      'Take': 'L',
+      'Place': 'K',
+    };
+    for (let key in items) {
+      const val = items[key];
+
+      ctx.fillText(key, x, y);
+      ctx.fillText(val, x + width * 0.5 - ctx.measureText(val).width, y);
+
+      y += separation;
+    }
   }
 
   _drawInventory() {
