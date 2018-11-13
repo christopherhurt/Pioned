@@ -1,3 +1,7 @@
+const _fontFamily = 'Roboto Slab, sans-serif';
+const _normal = 18;
+const _medium = 24;
+const _large = 50;
 export const Styles = {
   light: 'white',
   special: 'rgb(23,139,251)',
@@ -5,13 +9,13 @@ export const Styles = {
   important: 'red',
   lightBG: 'rgba(255,255,255,0.8)',
   darkBG: 'rgba(0,0,0,0.8)',
-  fontFamily: 'Roboto Slab',
-  fontSize: 18,
-  mediumFontSize: 24,
-  largeFontSize: 50,
-  font: '18px Roboto Slab',
-  mediumFont: '24px Roboto Slab',
-  largeFont: '50px Roboto Slab',
+  fontFamily: _fontFamily,
+  fontSize: _normal,
+  mediumFontSize: _medium,
+  largeFontSize: _large,
+  font: `${_normal}px ${_fontFamily}`,
+  mediumFont: `${_medium}px ${_fontFamily}`,
+  largeFont: `${_large}px ${_fontFamily}`,
 };
 
 export function drawTextWithBackground(text, ctx, x, y, fontSize=Styles.fontSize, color=Styles.light, background=Styles.darkBG, align='left') {
