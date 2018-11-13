@@ -37,8 +37,6 @@ To run the game server, use `yarn serve`.
 **Chris**:
 
 ## Todo
-- [ ] Use environment variables to set the (websocket) host
-- [ ] Add current random color mask on top of players
 - [ ] Objective Tracking 
 - [ ] Get favicon working on server
 - [ ] Cap on total number of trees for spawn trees
