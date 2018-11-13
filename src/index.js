@@ -1,6 +1,6 @@
 import { Game } from './game';
 
-window.onload = () => {
+function main() {
   const width = window.innerWidth;
   const height = window.innerHeight;
 
@@ -23,6 +23,14 @@ window.onload = () => {
 
     game.resize(width, height);
   });
+}
 
-  document.fonts.ready.then(() => game.redraw());
+window.onload = () => {
+  // Wait for fonts to load first (if supported)
+  if (document.fonts !== undefined && document.fonts.ready !== undefined) {
+    document.fonts.ready.then(() => main());
+  }
+  else {
+    main();
+  }
 };
