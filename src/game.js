@@ -1,4 +1,4 @@
-import { ImageLoader, Styles, send, postChat, createCanvas, intersects } from './utils';
+import { ImageLoader, Styles, send, postChat, createCanvas, intersects, drawTextWithBackground } from './utils';
 import { Keyboard, Keys } from './keyboard';
 import { GameMap } from './map';
 import { TILES, TILEMAP, BASES, FRAMES, DROPS, SPRITES } from './tiles';
@@ -629,17 +629,16 @@ export class Game {
       PLAYER_DISPLAY_HEIGHT, // target height
     );
 
-    const fontSize = 18;
-    ctx.font = `${fontSize}px ${Styles.fontFamily}`;
-    const textWidth = ctx.measureText(player.name).width;
-    const textX = drawX + PLAYER_DISPLAY_WIDTH / 2 - textWidth / 2;
-    const textY = drawY - 4;
-
-    ctx.fillStyle = Styles.darkBG;
-    ctx.fillRect(textX - 2, textY - fontSize, textWidth + 4, fontSize + 2);
-
-    ctx.fillStyle = (player === this.player) ? Styles.special : Styles.light;
-    ctx.fillText(player.name, textX, textY - 2);
+    drawTextWithBackground(
+      player.name, // text
+      ctx, // ctx
+      drawX + PLAYER_DISPLAY_WIDTH / 2, // x
+      drawY - 4, // y
+      Styles.fontSize, // fontSize
+      (player === this.player) ? Styles.special : Styles.light, // color
+      Styles.darkBG, // background
+      'center above', // align
+    );
   }
 
   _drawSelect() {
@@ -737,22 +736,12 @@ export class Game {
 
   _drawFPS() {
     const ctx = this.infoCanvas.getContext('2d');
-
-    const fontSize = 24;
-    ctx.font = `${fontSize}px ${Styles.fontFamily}`;
-
-    ctx.fillStyle = 'red';
-    ctx.fillText(`fps: ${this.fps | 0}`, this.canvasWidth * 0.90, this.canvasHeight * 0.05);
+    const text = `fps: ${this.fps | 0}`;
+    drawTextWithBackground(text, ctx, this.canvasWidth - 10, 10, Styles.fontSize, Styles.light, 'red', 'right');
   }
 
   _drawSelectedItem() {
     const ctx = this.infoCanvas.getContext('2d');
-
-    const fontSize = 18;
-    ctx.font = `${fontSize}px ${Styles.fontFamily}`;
-
-    const x = 10;
-    const y = 10;
 
     const item = this.inventory.selected;
     let text = item.toUpperCase();
@@ -761,16 +750,7 @@ export class Game {
       text = `${text}: ${num}`;
     }
 
-    ctx.fillStyle = Styles.darkBG;
-    ctx.fillRect(
-      x,
-      y,
-      ctx.measureText(text).width + fontSize,
-      fontSize * 1.75,
-    );
-
-    ctx.fillStyle = Styles.light;
-    ctx.fillText(text, x + fontSize * 0.5, y + fontSize * 1.25);
+    drawTextWithBackground(text, ctx, 10, 10);
   }
 
   _drawInfo() {
