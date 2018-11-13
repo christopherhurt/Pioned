@@ -41,6 +41,7 @@ To run the game server, use `yarn serve`.
 - [ ] Get favicon working on server
 - [ ] Cap on total number of trees for spawn trees
 - [ ] Chat log (enter reveals previous messages, up to some limit)
+- [ ] Fix collision detection bug when zoomed really far out
 
 ## Ideas
 - [ ] Nighttime/daytime
