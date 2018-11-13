@@ -56,9 +56,12 @@ body {
   outline: none;
   user-select: text;
   white-space: pre-wrap;
+
+  color: transparent;
 }
 
 #chat-input:focus {
+  color: inherit;
   background-color: rgba(0, 0, 0, 0.7);
 }
 
