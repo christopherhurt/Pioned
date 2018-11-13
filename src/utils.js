@@ -1,6 +1,8 @@
 export const Styles = {
   light: 'white',
-  special: 'rgb(23, 139, 251)',
+  special: 'rgb(23,139,251)',
+  special2: 'rgb(23,251,135)',
+  important: 'red',
   lightBG: 'rgba(255,255,255,0.8)',
   darkBG: 'rgba(0,0,0,0.8)',
   fontFamily: 'Roboto Slab',

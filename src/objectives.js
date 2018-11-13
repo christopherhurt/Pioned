@@ -42,7 +42,7 @@ export function generateObjective() {
 export function getObjectiveName(id) {
   switch(id) {
     case OBJECTIVE_COMPLETE:
-      return 'Objective Complete';
+      return 'Complete!';
     case VISIT_RANDOM_ISLAND:
       return 'The Wanderer';
     case VISIT_N_ISLANDS:
