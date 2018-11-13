@@ -148,6 +148,10 @@ export class Game {
             const height = PLAYER_REAL_HEIGHT * RATIO;
             this.player = new Player(xLoc, yLoc, width, height, this.map.width, this.map.height, this.map.dsize, DEFAULT_SPEED, name);
 
+            // Mark current island visited
+            const currIsland = this.player.getCurrentIsland(this.map);
+            this.player.markIslandVisited(currIsland);
+
             // postChat('Joined the game!', 'debug');
 
             const objective = generateObjective();
