@@ -875,19 +875,7 @@ export class Game {
     }
   }
 
-  resize(width, height) {
-    this.canvasWidth = width;
-    this.canvasHeight = height;
-
-    this.layerCanvas = this.map.layers.map(() => createCanvas(width, height));
-    this.playerCanvas = createCanvas(width, height);
-
-    this.camera.width = width;
-    this.camera.height = height;
-    this.camera.maxX = this.map.width - width;
-    this.camera.maxY = this.map.height - height;
-    this.camera.update(this.player);
-
+  redraw() {
     // Re-draw everything
     this.hasScrolled = true;
     this.playersMoved = true;
@@ -897,5 +885,26 @@ export class Game {
 
     // Re-render
     this.render();
+  }
+
+  resize(width, height) {
+    this.canvasWidth = width;
+    this.canvasHeight = height;
+
+    // Recreate all canvases
+    this.layerCanvas = this.map.layers.map(() => createCanvas(width, height));
+    this.playerCanvas = createCanvas(width, height);
+    this.inventoryCanvas = createCanvas(this.canvasWidth, this.canvasHeight);
+    this.menuCanvas = createCanvas(this.canvasWidth, this.canvasHeight);
+    this.infoCanvas = createCanvas(this.canvasWidth, this.canvasHeight);
+
+    // Reset camera
+    this.camera.width = width;
+    this.camera.height = height;
+    this.camera.maxX = this.map.width - width;
+    this.camera.maxY = this.map.height - height;
+    this.camera.update(this.player);
+
+    this.redraw();
   }
 }
