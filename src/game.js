@@ -882,9 +882,14 @@ export class Game {
     this.camera.maxY = this.map.height - height;
     this.camera.update(this.player);
 
-    // Re-render
+    // Re-draw everything
     this.hasScrolled = true;
+    this.playersMoved = true;
     this.infoUpdated = true;
+    this.menuUpdated = true;
+    this.inventoryUpdated = true;
+
+    // Re-render
     this.render();
   }
 }
