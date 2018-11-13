@@ -458,6 +458,7 @@ export class Game {
         send(this.socket, 'tileUpdate', { layer: 1, col, row, type: TILES[objID] });
 
         this.hasScrolled = true;
+        this.infoUpdated = true;
       }
     }
 
@@ -494,6 +495,9 @@ export class Game {
         if (DROPS[obj] !== null) {
           const [ drop, num ] = DROPS[obj];
           this.inventory.add(drop, num);
+          if (drop === this.inventory.selected) {
+            this.infoUpdated = true;
+          }
         }
 
         this.hasScrolled = true;
