@@ -609,6 +609,10 @@ export class Game {
 
     const width = this.canvasWidth * 0.60;
     const height = this.canvasHeight * 0.75;
+    const marginX = width * 0.1;
+    const marginY = height * 0.15;
+    const innerWidth = width - marginX * 2;
+    const innerHeight = height - marginY * 2;
 
     let x = (this.canvasWidth - width) / 2;
     let y = (this.canvasHeight - height) / 2;
@@ -621,20 +625,22 @@ export class Game {
       height,
     );
 
-    // Margins
-    const sideMargin = width * 0.1;
-    x += sideMargin;
-    y += height * 0.15;
+    x += marginX;
+    y += marginY;
 
-    let fontSize = 50;
-    ctx.font = `${fontSize}px ${Styles.fontFamily}`;
+    ctx.font = Styles.largeFont;
     ctx.fillStyle = Styles.light;
     ctx.fillText('Inventory', x, y);
 
-    fontSize = 25;
-    ctx.font = `${fontSize}px ${Styles.fontFamily}`;
-    const separation = fontSize * 1.5;
+    ctx.font = Styles.mediumFont;
+    const separation = Styles.mediumFontSize * 1.5;
     y += separation * 2;
+
+    const numRepeat = innerWidth / ctx.measureText('=').width | 0;
+    ctx.fillStyle = Styles.special2;
+    ctx.fillText('='.repeat(numRepeat), x, y);
+    ctx.fillStyle = Styles.light;
+    y += separation;
 
     const items = this.inventory.items;
     for (let id in items) {
@@ -648,7 +654,7 @@ export class Game {
       ctx.fillStyle = (id === this.inventory.selected) ? Styles.special : Styles.light;
       ctx.fillText(id.toUpperCase(), x, y);
       if (id !== this.inventory.NONE) {
-        ctx.fillText(num, x + width * 0.5, y);
+        ctx.fillText(num, x + innerWidth - ctx.measureText(num).width, y);
       }
 
       y += separation;
