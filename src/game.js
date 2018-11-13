@@ -320,7 +320,7 @@ export class Game {
   update(delta) {
     switch (this.mode) {
       case Modes.MENU: {
-        if (this.keyboard.isDownRepeat(Keys.ESC, this.modeDelay)) { this.mode = Modes.GAME; }
+        if (this.keyboard.isDownRepeat([Keys.ESC, Keys.ENTER], this.modeDelay)) { this.mode = Modes.GAME; }
         else {
           this._updateMenu(delta);
         }
