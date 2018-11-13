@@ -77,6 +77,12 @@ export class Game {
     this.playerCanvas = createCanvas(this.canvasWidth, this.canvasHeight);
     this.inventoryCanvas = createCanvas(this.canvasWidth, this.canvasHeight);
     this.menuCanvas = createCanvas(this.canvasWidth, this.canvasHeight);
+    this.infoCanvas = createCanvas(this.canvasWidth, this.canvasHeight);
+
+    // Set to initially draw all layers
+    this.hasScrolled = true;
+    this.playersMoved = true;
+    this.infoUpdated = true;
 
     this.tileMap = this.loader.get('tiles');
     this.tileMap.width = 14;
@@ -247,6 +253,7 @@ export class Game {
         el += delta;
         if (el >= 1000) {
           this.fps = frameCount;
+          this.infoUpdated = true;
           frameCount = 0;
           el -= 1000;
         }
@@ -350,6 +357,7 @@ export class Game {
     if (up || down) {
       if (this.refreshManager.get('menu')) {
         this.refreshManager.reset('menu');
+        this.infoUpdated = true;
 
         let i = itemIDS.indexOf(this.inventory.selected);
 
@@ -623,6 +631,7 @@ export class Game {
     );
 
     const fontSize = 18;
+    ctx.font = `${fontSize}px ${Styles.fontFamily}`;
     const textWidth = ctx.measureText(player.name).width;
     const textX = drawX + PLAYER_DISPLAY_WIDTH / 2 - textWidth / 2;
     const textY = drawY - 4;
@@ -630,7 +639,6 @@ export class Game {
     ctx.fillStyle = Styles.darkBG;
     ctx.fillRect(textX - 2, textY - fontSize, textWidth + 4, fontSize + 2);
 
-    ctx.font = `${fontSize}px ${Styles.fontFamily}`;
     ctx.fillStyle = (player === this.player) ? Styles.special : Styles.light;
     ctx.fillText(player.name, textX, textY - 2);
   }
@@ -729,16 +737,20 @@ export class Game {
   }
 
   _drawFPS() {
-    const fontSize = 24;
-    this.ctx.font = `${fontSize}px ${Styles.fontFamily}`;
+    const ctx = this.infoCanvas.getContext('2d');
 
-    this.ctx.fillStyle = 'red';
-    this.ctx.fillText(`fps: ${this.fps | 0}`, this.canvasWidth * 0.90, this.canvasHeight * 0.05);
+    const fontSize = 24;
+    ctx.font = `${fontSize}px ${Styles.fontFamily}`;
+
+    ctx.fillStyle = 'red';
+    ctx.fillText(`fps: ${this.fps | 0}`, this.canvasWidth * 0.90, this.canvasHeight * 0.05);
   }
 
   _drawSelectedItem() {
+    const ctx = this.infoCanvas.getContext('2d');
+
     const fontSize = 18;
-    this.ctx.font = `${fontSize}px ${Styles.fontFamily}`;
+    ctx.font = `${fontSize}px ${Styles.fontFamily}`;
 
     const x = 10;
     const y = 10;
@@ -750,16 +762,24 @@ export class Game {
       text = `${text}: ${num}`;
     }
 
-    this.ctx.fillStyle = Styles.darkBG;
-    this.ctx.fillRect(
+    ctx.fillStyle = Styles.darkBG;
+    ctx.fillRect(
       x,
       y,
-      this.ctx.measureText(text).width + fontSize,
+      ctx.measureText(text).width + fontSize,
       fontSize * 1.75,
     );
 
-    this.ctx.fillStyle = Styles.light;
-    this.ctx.fillText(text, x + fontSize * 0.5, y + fontSize * 1.25);
+    ctx.fillStyle = Styles.light;
+    ctx.fillText(text, x + fontSize * 0.5, y + fontSize * 1.25);
+  }
+
+  _drawInfo() {
+    const ctx = this.infoCanvas.getContext('2d');
+    ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+
+    this._drawFPS();
+    this._drawSelectedItem();
   }
 
   render() {
@@ -779,6 +799,12 @@ export class Game {
       this._drawPlayers();
     }
 
+    // Redraw info (fps, current item, etc) if anything updated
+    if (this.infoUpdated) {
+      this.infoUpdated = false;
+      this._drawInfo();
+    }
+
     // Draw the map layers into game context
     const last = this.layerCanvas.length - 1;
     for (let i = 0; i < last; i++) {
@@ -788,6 +814,7 @@ export class Game {
 
     // Draw final object layer above player
     this.ctx.drawImage(this.layerCanvas[last], 0, 0);
+    this.ctx.drawImage(this.infoCanvas, 0, 0);
 
     switch (this.mode) {
       case Modes.MENU:
@@ -799,9 +826,6 @@ export class Game {
         this.ctx.drawImage(this.inventoryCanvas, 0, 0);
         break;
     }
-
-    this._drawFPS();
-    this._drawSelectedItem();
   }
 
   resize(width, height) {
