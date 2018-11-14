@@ -53,6 +53,8 @@ To run the game server, use `yarn serve`.
     - [ ] Don't allow anyone to visit your home island
     - [ ] Give another player a flower
 - [ ] Display chat messages above player who sent it (if visible)
+- [ ] More world events
+    - [ ] Volcanic eruption rains fire and takes out bridges
 
 ## Completed Tasks
 - [x] Add movable player
