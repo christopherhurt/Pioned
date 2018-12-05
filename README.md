@@ -55,6 +55,11 @@ To run the game server, use `yarn serve`.
 - [ ] More world events
     - [ ] Volcanic eruption rains fire and takes out bridges
 
+- [ ] Rewards:
+    - [ ] The Wanderer: permanent speed boost (visual: boots/indicator)
+    - [ ] Social butterfly: +0.n chance for extra wood
+    - [ ] Mister worldwide (change this to visit all islands): ???
+
 ## Completed Tasks
 - [x] Add movable player
     - [x] Fix camera movement with respect to player
