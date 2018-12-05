@@ -32,6 +32,7 @@ To run the game server, use `yarn serve`.
 
 **Parker**
 - [ ] Fix Wood on Water Deletion Bug
+
 **Jack**:
 
 **Chris**:
