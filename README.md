@@ -30,8 +30,8 @@ To run the game server, use `yarn serve`.
 
 ## This Week
 
-**Parker**:
-
+**Parker**
+- [ ] Fix Wood on Water Deletion Bug
 **Jack**:
 
 **Chris**:
