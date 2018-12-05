@@ -38,10 +38,8 @@ To run the game server, use `yarn serve`.
 
 ## Todo
 - [ ] Objective Tracking 
-- [ ] Get favicon working on server
-- [ ] Cap on total number of trees for spawn trees
 - [ ] Chat log (enter reveals previous messages, up to some limit)
-- [ ] Fix collision detection bug when zoomed really far out
+- [ ] Fix collision detection bug with low FPS
 
 ## Ideas
 - [ ] Nighttime/daytime
@@ -93,3 +91,5 @@ To run the game server, use `yarn serve`.
             - [x] Implement Player Collision
 - [x] Fix player spawning on single or few blocks
 - [x] Draw current objective above selected item (just name)
+- [x] Get favicon working on server
+
