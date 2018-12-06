@@ -34,6 +34,9 @@ To run the game server, use `yarn serve`.
 - [ ] Fix Wood on Water Deletion Bug
 
 **Jack**:
+- [ ] Rewards for objectives
+- [ ] Consecutive objectives:
+    - [ ] Get fire for completing all objectives
 
 **Chris**:
 
