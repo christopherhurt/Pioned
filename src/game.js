@@ -525,9 +525,20 @@ export class Game {
     if(checkObjectiveComplete(this.player.objectiveId, this.player.objectiveData, this.player)) {
       const message = `Objective '${getObjectiveName(this.player.objectiveId)}' complete!`;
       postChat(message, 'success');
-      this.player.objectiveId = OBJECTIVE_COMPLETE;
+
       this.infoUpdated = true;
       this.menuUpdated = true;
+
+      const objective = generateObjective();
+
+      if (objective === null) {
+        this.player.objectiveId = OBJECTIVE_COMPLETE;
+        postChat('All objectives completed!', 'success');
+      }
+      else {
+        this.player.objectiveId = objective['id'];
+        this.player.objectiveData = objective['data'];
+      }
     }
   }
 

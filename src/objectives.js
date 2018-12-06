@@ -15,13 +15,24 @@ const VISIT_RANDOM_ISLAND = 0;
 const VISIT_N_ISLANDS = 1;
 const CONTACT_N_PLAYERS = 2;
 
+// List of all (uncompleted) objective IDs
+const uncompletedObjectives = [];
+for (let i = 0; i < NUM_OBJECTIVES; i++) {
+  uncompletedObjectives.push(i);
+}
+
 const NUM_ISLANDS = 5; // Number of islands a player must visit for VISIT_N_ISLANDS objective
 const NUM_PLAYERS = 2; // Number of other players a player must contact for CONTACT_N_PLAYERS objective
 
 /* Randomly generates an objective to be completed by a player */
 export function generateObjective() {
-  // Getting objective ID
-  const id = parseInt(Math.random() * NUM_OBJECTIVES);
+  if (uncompletedObjectives.length == 0) {
+    return null;
+  }
+
+  // Getting objective ID from remaining uncompleted objectives
+  const index = Math.random() * uncompletedObjectives.length | 0;
+  const id = uncompletedObjectives.splice(index, 1)[0];
 
   // Getting objective data (where applicable)
   let data;
@@ -58,7 +69,7 @@ export function getObjectiveName(id) {
 export function getObjectiveDescription(id, data) {
   switch(id) {
     case OBJECTIVE_COMPLETE:
-      return 'You\'ve completed your objective';
+      return 'All objectives completed';
     case VISIT_RANDOM_ISLAND:
       return 'Find and visit island ' + data;
     case VISIT_N_ISLANDS:
