@@ -37,6 +37,7 @@ To run the game server, use `yarn serve`.
 - [ ] Rewards for objectives
 - [ ] Consecutive objectives:
     - [ ] Get fire for completing all objectives
+- [ ] Display chat messages above player who sent it (if visible)
 
 **Chris**:
 
@@ -47,8 +48,6 @@ To run the game server, use `yarn serve`.
 
 ## Ideas
 - [ ] Nighttime/daytime
-- [ ] Objective completion rewards
-    - [ ] Fireworks
 - [ ] Use cookies to save player state to prevent constant refresh for new character
 - [ ] Objectives:
     - [ ] Pyromaniac: burn bridges
@@ -58,7 +57,7 @@ To run the game server, use `yarn serve`.
 - [ ] More world events
     - [ ] Volcanic eruption rains fire and takes out bridges
 
-- [ ] Rewards:
+- [ ] Objective completion rewards:
     - [ ] The Wanderer: permanent speed boost (visual: boots/indicator)
     - [ ] Social butterfly: +0.n chance for extra wood
     - [ ] Mister worldwide (change this to visit all islands): ???
