@@ -485,6 +485,12 @@ export class Game {
         if(intersects(this.player,tile)){
           allow = false;
         }
+        for(let id in this.players) {
+          const other = this.players[id];
+          if(intersects(other, tile)) {
+            allow = false;
+          }
+        }
       }
 
       if (obj !== 0 && allow) {
