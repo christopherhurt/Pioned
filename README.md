@@ -34,16 +34,19 @@ To run the game server, use `yarn serve`.
 - [ ] Fix Wood on Water Deletion Bug
 
 **Jack**:
-- [ ] Rewards for objectives
+- [ ] Objective completion rewards:
+    - [ ] The Wanderer: permanent speed boost (visual: boots/indicator)
+    - [ ] Social butterfly: +0.n chance for extra wood
+    - [ ] Mister worldwide (change this to visit all islands): ???
 - [ ] Consecutive objectives:
     - [ ] Get fire for completing all objectives
 - [ ] Display chat messages above player who sent it (if visible)
+- [ ] Chat log (enter reveals previous messages, up to some limit)
 
 **Chris**:
 
 ## Todo
-- [ ] Objective Tracking 
-- [ ] Chat log (enter reveals previous messages, up to some limit)
+- [ ] Objective Tracking (i.e., show stats about how much left to do until completing objective)
 - [ ] Fix collision detection bug with low FPS
 
 ## Ideas
@@ -53,14 +56,8 @@ To run the game server, use `yarn serve`.
     - [ ] Pyromaniac: burn bridges
     - [ ] Don't allow anyone to visit your home island
     - [ ] Give another player a flower
-- [ ] Display chat messages above player who sent it (if visible)
 - [ ] More world events
     - [ ] Volcanic eruption rains fire and takes out bridges
-
-- [ ] Objective completion rewards:
-    - [ ] The Wanderer: permanent speed boost (visual: boots/indicator)
-    - [ ] Social butterfly: +0.n chance for extra wood
-    - [ ] Mister worldwide (change this to visit all islands): ???
 
 ## Completed Tasks
 - [x] Add movable player
