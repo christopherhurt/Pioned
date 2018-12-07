@@ -23,13 +23,14 @@ const NUM_PLAYERS = 2; // Number of other players a player must contact for CONT
 
 /* Randomly generates an objective to be completed by a player */
 export function generateObjective(player, map) {
+  let id;
   if (uncompletedObjectives.length == 0) {
-    return null;
+    id = OBJECTIVE_COMPLETE;
+  } else {
+    // Getting objective ID from remaining uncompleted objectives
+    const index = Math.random() * uncompletedObjectives.length | 0;
+    id = uncompletedObjectives.splice(index, 1)[0];
   }
-
-  // Getting objective ID from remaining uncompleted objectives
-  const index = Math.random() * uncompletedObjectives.length | 0;
-  const id = uncompletedObjectives.splice(index, 1)[0];
 
   // Getting objective data (where applicable)
   let data;
@@ -43,14 +44,15 @@ export function generateObjective(player, map) {
       break;
   }
 
-  return { 'id': id, 'data': data };
+  player.objectiveId = id;
+  player.objectiveData = data;
 }
 
 /* Gets displayable name of specified objective */
-export function getObjectiveName(id) {
-  switch(id) {
+export function getObjectiveName(player) {
+  switch(player.objectiveId) {
     case OBJECTIVE_COMPLETE:
-      return 'Complete!';
+      return 'All Complete';
     case VISIT_RANDOM_ISLAND:
       return 'The Wanderer';
     case VISIT_N_ISLANDS:
@@ -63,12 +65,12 @@ export function getObjectiveName(id) {
 }
 
 /* Gets textual description of specified objective */
-export function getObjectiveDescription(id, data, player) {
-  switch(id) {
+export function getObjectiveDescription(player) {
+  switch(player.objectiveId) {
     case OBJECTIVE_COMPLETE:
-      return 'All objectives completed';
+      return 'Good job!';
     case VISIT_RANDOM_ISLAND:
-      return `Find and visit island ${data}`;
+      return `Find and visit island ${player.objectiveData}`;
     case VISIT_N_ISLANDS:
       return `Visit different islands (${player.contactedPlayers.length}/${NUM_ISLANDS})`;
     case CONTACT_N_PLAYERS:
@@ -79,14 +81,14 @@ export function getObjectiveDescription(id, data, player) {
 }
 
 /* Check if a given objective has been completed by the player */
-export function checkObjectiveComplete(id, data, player) {
-  switch(id) {
+export function checkObjectiveComplete(player) {
+  switch(player.objectiveId) {
     case OBJECTIVE_COMPLETE:
       // Check if player has already completed their objective(s)
       return false;
     case VISIT_RANDOM_ISLAND:
       // Check if player has visited the island
-      const island = data;
+      const island = player.objectiveData;
       return player.visitedIslands.includes(island);
     case VISIT_N_ISLANDS:
       // Check if player has visited n islands

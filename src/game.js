@@ -102,6 +102,9 @@ export class Game {
     this._drawMap(0);
     this._drawPlayers(0);
 
+    // Misc dev variables
+    this.devCompletedObjective = false;
+
     return true;
   }
 
@@ -156,10 +159,7 @@ export class Game {
 
             // postChat('Joined the game!', 'debug');
 
-            const objective = generateObjective(this.player, this.map);
-            this.player.objectiveId = objective['id'];
-            this.player.objectiveData = objective['data'];
-            this.devCompletedObjective = false;
+            generateObjective(this.player, this.map);
 
             send(this.socket, 'newPlayer', this.player);
 
@@ -400,27 +400,24 @@ export class Game {
     }
 
     // Check objective completion
-    if(checkObjectiveComplete(this.player.objectiveId, this.player.objectiveData, this.player) || this.devCompletedObjective) {
+    if(checkObjectiveComplete(this.player) || this.devCompletedObjective) {
       if (this.devCompletedObjective) {
         this.devCompletedObjective = false;
       }
 
-      const message = `Objective '${getObjectiveName(this.player.objectiveId)}' complete!`;
+      const message = `Objective '${getObjectiveName(this.player)}' complete!`;
       postChat(message, 'success');
+
+      // giveObjectiveReward(this.player.objectiveId);
+
+      generateObjective(this.player, this.map);
+
+      if (this.player.objectiveId === OBJECTIVE_COMPLETE) {
+        postChat('All objectives completed!', 'success');
+      }
 
       this.infoUpdated = true;
       this.menuUpdated = true;
-
-      const objective = generateObjective(this.player, this.map);
-
-      if (objective === null) {
-        this.player.objectiveId = OBJECTIVE_COMPLETE;
-        postChat('All objectives completed!', 'success');
-      }
-      else {
-        this.player.objectiveId = objective['id'];
-        this.player.objectiveData = objective['data'];
-      }
     }
   }
 
@@ -623,8 +620,8 @@ export class Game {
     y += separation * 2;
 
     // Draw objective with description
-    const objectiveName = getObjectiveName(this.player.objectiveId);
-    const objectiveDescription = getObjectiveDescription(this.player.objectiveId, this.player.objectiveData, this.player);
+    const objectiveName = getObjectiveName(this.player);
+    const objectiveDescription = getObjectiveDescription(this.player);
 
     ctx.fillStyle = Styles.special2;
     ctx.fillText(`Objective: ${objectiveName}`, x, y);
@@ -875,7 +872,7 @@ export class Game {
     drawTextWithBackground(fpsText, ctx, this.canvasWidth - 10, 10, Styles.fontSize, Styles.light, Styles.important, 'right');
 
     // Draw current objective
-    const objectiveName = getObjectiveName(this.player.objectiveId);
+    const objectiveName = getObjectiveName(this.player);
     const [w, h] = drawTextWithBackground(`Objective: ${objectiveName}`, ctx, 10, 10, Styles.fontSize, Styles.special2);
 
     // Draw selected item (below objective)
