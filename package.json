@@ -6,7 +6,7 @@
   "author": "Jack Cogdill <jackcogdill@users.noreply.github.com>",
   "license": "MIT",
   "scripts": {
-    "client": "webpack-dev-server --inline --colors --watch --hot --config webpack.dev.js",
+    "client": "webpack-dev-server --inline --colors --watch --hot --open --config webpack.dev.js",
     "server": "nodemon --exec \"yarn serve\"",
     "start": "concurrently \"yarn client\" \"yarn server\"",
     "build": "webpack --config webpack.prod.js",
