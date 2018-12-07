@@ -642,12 +642,11 @@ export class Game {
 
     const items = {
       'Move': 'WASD/Arrows',
-      'Take': 'L',
-      'Place': 'K',
+      'Pick Up Item': 'L',
+      'Use Item': 'K',
       'Inventory': 'I',
       'Menu': 'ESC',
       'Chat': 'ENTER',
-      'Exit Chat': 'ESC',
     };
     for (let key in items) {
       const val = items[key];
