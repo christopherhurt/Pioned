@@ -7,6 +7,9 @@ import { Player, Camera } from './game-objects';
 import { RefreshManager  } from './refresh';
 import { setObjectivesGameReference, generateObjective, checkObjectiveComplete, getObjectiveName, getObjectiveDescription, OBJECTIVE_COMPLETE } from './objectives';
 
+// Set this to true for development (allows commands)
+const DEVMODE = true;
+
 const TSIZE = 16;
 const DSIZE = 64;
 const RATIO = DSIZE / TSIZE;
@@ -61,6 +64,7 @@ export class Game {
       Keys.I,
       Keys.ESC,
       Keys.ENTER,
+      Keys.FORWARD_SLASH,
     ]);
     this.menuRepeatDelay = 100;
     this.actionDelay = 100;
@@ -159,6 +163,7 @@ export class Game {
             const objective = generateObjective();
             this.player.objectiveId = objective['id'];
             this.player.objectiveData = objective['data'];
+            this.devCompletedObjective = false;
 
             send(this.socket, 'newPlayer', this.player);
 
@@ -279,6 +284,17 @@ export class Game {
     tick();
   }
 
+  handleCommand(command) {
+    switch (command) {
+      case 'complete': {
+        if (DEVMODE) {
+          this.devCompletedObjective = true;
+        }
+        break;
+      }
+    }
+  }
+
   chatSetup() {
     this.keyboard.pause();
     const chatInput = document.getElementById('chat-input');
@@ -293,9 +309,15 @@ export class Game {
 
           const text = chatInput.innerText;
           if (text.length > 0) {
-            chatInput.innerText = '';
-            postChat(`${this.player.name}: ${text}`);
-            send(this.socket, 'chatMessage', text);
+            if (text[0] === '/') {
+              this.handleCommand(text.substr(1));
+              chatInput.innerText = '';
+            }
+            else {
+              chatInput.innerText = '';
+              postChat(`${this.player.name}: ${text}`);
+              send(this.socket, 'chatMessage', text);
+            }
           }
 
           break;
@@ -329,7 +351,20 @@ export class Game {
       case Modes.GAME: {
         if (this.keyboard.isDownRepeat(Keys.ESC, this.modeDelay)) { this.mode = Modes.MENU; }
         else if (this.keyboard.isDownRepeat(Keys.I, this.modeDelay)) { this.mode = Modes.INVENTORY; }
-        else if (this.keyboard.isDownRepeat(Keys.ENTER, this.modeDelay)) {
+        else if (this.keyboard.isDownRepeat([Keys.ENTER, Keys.FORWARD_SLASH], this.modeDelay)) {
+          if (this.keyboard.isDown(Keys.FORWARD_SLASH)) {
+            const chatInput = document.getElementById('chat-input');
+            chatInput.innerText = '/';
+
+            // Move cursor one character over
+            // Thank you https://stackoverflow.com/a/6249440/1313757
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.setStart(chatInput.childNodes[0], 1);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
           this.mode = Modes.CHAT;
           this.chatSetup();
         }
@@ -522,7 +557,11 @@ export class Game {
     }
 
     // Check objective completion
-    if(checkObjectiveComplete(this.player.objectiveId, this.player.objectiveData, this.player)) {
+    if(checkObjectiveComplete(this.player.objectiveId, this.player.objectiveData, this.player) || this.devCompletedObjective) {
+      if (this.devCompletedObjective) {
+        this.devCompletedObjective = false;
+      }
+
       const message = `Objective '${getObjectiveName(this.player.objectiveId)}' complete!`;
       postChat(message, 'success');
 
