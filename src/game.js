@@ -5,7 +5,7 @@ import { TILES, TILEMAP, BASES, FRAMES, DROPS, SPRITES } from './tiles';
 import { Inventory } from './inventory';
 import { Player, Camera } from './game-objects';
 import { RefreshManager  } from './refresh';
-import { generateObjective, checkObjectiveComplete, getObjectiveName, getObjectiveDescription, OBJECTIVE_COMPLETE } from './objectives';
+import { giveObjectiveReward, generateObjective, checkObjectiveComplete, getObjectiveName, getObjectiveDescription, OBJECTIVE_COMPLETE } from './objectives';
 
 const TSIZE = 16;
 const DSIZE = 64;
@@ -148,10 +148,9 @@ export class Game {
 
             const { x: xLoc, y: yLoc } = pos;
 
-            const DEFAULT_SPEED = 4 * this.map.dsize;
             const width = PLAYER_REAL_WIDTH * RATIO;
             const height = PLAYER_REAL_HEIGHT * RATIO;
-            this.player = new Player(xLoc, yLoc, width, height, this.map.width, this.map.height, this.map.dsize, DEFAULT_SPEED, name);
+            this.player = new Player(xLoc, yLoc, width, height, this.map.width, this.map.height, this.map.dsize, 4, name);
 
             // Mark current island visited
             const currIsland = this.player.getCurrentIsland(this.map);
@@ -405,10 +404,10 @@ export class Game {
         this.devCompletedObjective = false;
       }
 
+      giveObjectiveReward(this.player);
+
       const message = `Objective '${getObjectiveName(this.player)}' complete!`;
       postChat(message, 'success');
-
-      // giveObjectiveReward(this.player.objectiveId);
 
       generateObjective(this.player, this.map);
 

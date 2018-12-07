@@ -1,23 +1,32 @@
 import { PLAYERS } from './tiles';
 
 export class GameObject {
-  constructor(x, y, width, height) {
+  constructor(x, y, width, height, dsize, speedFactor) {
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
+
+    this.baseSpeed = this.speed = speedFactor * dsize;
+    this.speedBonus = 0;
+
+    this.level = 0;
+  }
+
+  giveSpeedBonus(percent) {
+    this.speedBonus += percent;
+    this.speed = this.baseSpeed * (1 + this.speedBonus / 100.0);
   }
 }
 
 export class Player extends GameObject {
-  constructor(xLoc, yLoc, width, height, mapWidth, mapHeight, dsize, speed, name) {
+  constructor(xLoc, yLoc, width, height, mapWidth, mapHeight, dsize, speedFactor, name) {
     const x = xLoc * dsize + dsize / 2 - width / 2;
     const y = yLoc * dsize + dsize / 2 - height / 2;
 
-    super(x, y, width, height);
+    super(x, y, width, height, dsize, speedFactor);
     this.maxX = mapWidth - width;
     this.maxY = mapHeight - height;
-    this.speed = speed;
     this.name = name;
 
     // Assign random player

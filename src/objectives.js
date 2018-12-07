@@ -101,3 +101,18 @@ export function checkObjectiveComplete(player) {
   }
 }
 
+export function giveObjectiveReward(player) {
+  switch(player.objectiveId) {
+    case VISIT_RANDOM_ISLAND:
+      player.giveSpeedBonus(20);
+      break;
+    case VISIT_N_ISLANDS:
+      break;
+    case CONTACT_N_PLAYERS:
+      break;
+    default:
+      throw 'Invalid objective ID when giving objective reward';
+  }
+  player.level++;
+}
+
