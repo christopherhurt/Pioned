@@ -72,9 +72,9 @@ export function getObjectiveDescription(player) {
     case VISIT_RANDOM_ISLAND:
       return `Find and visit island ${player.objectiveData}`;
     case VISIT_N_ISLANDS:
-      return `Visit different islands (${player.contactedPlayers.length}/${NUM_ISLANDS})`;
+      return `Visit new islands (${player.contactedPlayers.length}/${NUM_ISLANDS})`;
     case CONTACT_N_PLAYERS:
-      return `Come into contact with other players (${player.contactedPlayers.length}/${NUM_PLAYERS})`;
+      return `Contact other players (${player.contactedPlayers.length}/${NUM_PLAYERS})`;
     default:
       throw 'Invalid objective ID when getting objective description';
   }
