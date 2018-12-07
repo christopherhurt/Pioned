@@ -35,9 +35,11 @@ To run the game server, use `yarn serve`.
 
 **Jack**:
 - [ ] Objective completion rewards:
-    - [ ] The Wanderer: permanent speed boost (visual: boots/indicator)
-    - [ ] Social butterfly: +0.n chance for extra wood
-    - [ ] Mister worldwide (change this to visit all islands): ???
+    - [x] The Wanderer: permanent speed boost (visual: boots/indicator)
+    - [x] Mister worldwide: +0.n chance for extra wood
+    - [ ] Social butterfly: ???
+
+    - [ ] Visual text (and names; e.g., Lumberjack) for receiving rewards
 - [x] Consecutive objectives:
     - [ ] Get fire for completing all objectives
 - [ ] Display chat messages above player who sent it (if visible)

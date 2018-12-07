@@ -41,9 +41,9 @@ export const DROPS = [
   null,                        // ==== N/A ====
   null,                        // water
   null,                        // land
-  ['wood', 2],                 // tree_bottom
+  ['wood', 1],                 // tree_bottom
   null,                        // tree_top
-  ['wood', 2],                 // apple_tree_bottom
+  ['wood', 1],                 // apple_tree_bottom
   null,                        // apple_tree_top
   ['yellow_flower', 1],        // yellow_flower
   ['red_flower', 1],           // red_flower

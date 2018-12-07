@@ -101,12 +101,15 @@ export function checkObjectiveComplete(player) {
   }
 }
 
+import { TILES, DROPS } from './tiles';
 export function giveObjectiveReward(player) {
   switch(player.objectiveId) {
     case VISIT_RANDOM_ISLAND:
       player.giveSpeedBonus(20);
       break;
     case VISIT_N_ISLANDS:
+      DROPS[TILES['tree_bottom']] = ['wood', 2];
+      DROPS[TILES['apple_tree_bottom']] = ['wood', 2];
       break;
     case CONTACT_N_PLAYERS:
       break;
