@@ -6,10 +6,10 @@
   "author": "Jack Cogdill <jackcogdill@users.noreply.github.com>",
   "license": "MIT",
   "scripts": {
-    "client": "webpack-dev-server --inline --colors --watch --hot",
+    "client": "webpack-dev-server --inline --colors --watch --hot --config webpack.dev.js",
     "server": "nodemon --exec \"yarn serve\"",
     "start": "concurrently \"yarn client\" \"yarn server\"",
-    "build": "webpack --mode production",
+    "build": "webpack --config webpack.prod.js",
     "serve": "babel-node --presets @babel/preset-env --plugins @babel/plugin-transform-runtime ./server.js"
   },
   "devDependencies": {
@@ -24,7 +24,8 @@
     "nodemon": "^1.18.4",
     "webpack": "^4.20.2",
     "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.9"
+    "webpack-dev-server": "^3.1.9",
+    "webpack-merge": "^4.1.4"
   },
   "dependencies": {
     "ws": "^6.1.0"

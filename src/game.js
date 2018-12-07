@@ -7,9 +7,6 @@ import { Player, Camera } from './game-objects';
 import { RefreshManager  } from './refresh';
 import { setObjectivesGameReference, generateObjective, checkObjectiveComplete, getObjectiveName, getObjectiveDescription, OBJECTIVE_COMPLETE } from './objectives';
 
-// Set this to true for development (allows commands)
-const DEVMODE = true;
-
 const TSIZE = 16;
 const DSIZE = 64;
 const RATIO = DSIZE / TSIZE;
@@ -112,7 +109,7 @@ export class Game {
   socketSetup() {
     return new Promise((resolve, reject) => {
       // postChat('Connecting to server...', 'debug');
-      this.socket = new WebSocket("ws://localhost:5000");
+      this.socket = new WebSocket(`ws://${WEBSOCKET_HOST}:5000`);
 
       this.socket.onopen = event => {
         // postChat('Connected to server!', 'debug');
