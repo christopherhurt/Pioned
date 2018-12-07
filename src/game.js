@@ -301,6 +301,16 @@ export class Game {
     chatInput.contentEditable = true;
     chatInput.focus();
 
+    const exitChat = () => {
+      window.removeEventListener('keydown', listener);
+
+      chatInput.contentEditable = false;
+      chatInput.blur();
+
+      this.mode = Modes.GAME;
+      this.keyboard.listen();
+    }
+
     const listener = (event) => {
       const chatInput = document.getElementById('chat-input');
       switch (event.keyCode) {
@@ -318,20 +328,15 @@ export class Game {
               postChat(`${this.player.name}: ${text}`);
               send(this.socket, 'chatMessage', text);
             }
+
+            exitChat();
           }
 
           break;
         }
         case Keys.ESC: {
           event.preventDefault();
-          window.removeEventListener('keydown', listener);
-
-          chatInput.contentEditable = false;
-          chatInput.blur();
-
-          this.mode = Modes.GAME;
-          this.keyboard.listen();
-
+          exitChat();
           break;
         }
       }
