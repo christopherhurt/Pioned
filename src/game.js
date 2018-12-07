@@ -5,7 +5,7 @@ import { TILES, TILEMAP, BASES, FRAMES, DROPS, SPRITES } from './tiles';
 import { Inventory } from './inventory';
 import { Player, Camera } from './game-objects';
 import { RefreshManager  } from './refresh';
-import { setObjectivesGameReference, generateObjective, checkObjectiveComplete, getObjectiveName, getObjectiveDescription, OBJECTIVE_COMPLETE } from './objectives';
+import { generateObjective, checkObjectiveComplete, getObjectiveName, getObjectiveDescription, OBJECTIVE_COMPLETE } from './objectives';
 
 const TSIZE = 16;
 const DSIZE = 64;
@@ -31,7 +31,6 @@ export class Game {
     this.canvasHeight = canvasHeight;
     this.loader = new ImageLoader();
     this.keyboard = new Keyboard();
-    setObjectivesGameReference(this);
   }
 
   async init() {
@@ -157,7 +156,7 @@ export class Game {
 
             // postChat('Joined the game!', 'debug');
 
-            const objective = generateObjective();
+            const objective = generateObjective(this.player, this.map);
             this.player.objectiveId = objective['id'];
             this.player.objectiveData = objective['data'];
             this.devCompletedObjective = false;
@@ -387,6 +386,42 @@ export class Game {
         break;
       }
     }
+
+    // Check and update collisions with other players
+    for(let id in this.players) {
+      if(!this.player.contactedPlayers.includes(id)) {
+        const other = this.players[id];
+        if(intersects(this.player, other)) {
+          this.player.contactedPlayers.push(id);
+          this.menuUpdated = true;
+          postChat(`Contacted ${other.name}!`, 'info');
+        }
+      }
+    }
+
+    // Check objective completion
+    if(checkObjectiveComplete(this.player.objectiveId, this.player.objectiveData, this.player) || this.devCompletedObjective) {
+      if (this.devCompletedObjective) {
+        this.devCompletedObjective = false;
+      }
+
+      const message = `Objective '${getObjectiveName(this.player.objectiveId)}' complete!`;
+      postChat(message, 'success');
+
+      this.infoUpdated = true;
+      this.menuUpdated = true;
+
+      const objective = generateObjective(this.player, this.map);
+
+      if (objective === null) {
+        this.player.objectiveId = OBJECTIVE_COMPLETE;
+        postChat('All objectives completed!', 'success');
+      }
+      else {
+        this.player.objectiveId = objective['id'];
+        this.player.objectiveData = objective['data'];
+      }
+    }
   }
 
   _updateMenu(delta) {
@@ -466,6 +501,7 @@ export class Game {
 
     if (currIsland != 0 && currTile == landID && !this.player.hasVisitedIsland(currIsland)) {
       this.player.markIslandVisited(currIsland);
+      this.menuUpdated = true;
       postChat('Island ' + currIsland + ' visited!', 'info');
     }
 
@@ -550,41 +586,6 @@ export class Game {
         this.hasScrolled = true;
       }
     }
-
-    // Check and update collisions with other players
-    for(let id in this.players) {
-      if(!this.player.contactedPlayers.includes(id)) {
-        const other = this.players[id];
-        if(intersects(this.player, other)) {
-          this.player.contactedPlayers.push(id);
-          postChat(`Contacted ${other.name}!`, 'info');
-        }
-      }
-    }
-
-    // Check objective completion
-    if(checkObjectiveComplete(this.player.objectiveId, this.player.objectiveData, this.player) || this.devCompletedObjective) {
-      if (this.devCompletedObjective) {
-        this.devCompletedObjective = false;
-      }
-
-      const message = `Objective '${getObjectiveName(this.player.objectiveId)}' complete!`;
-      postChat(message, 'success');
-
-      this.infoUpdated = true;
-      this.menuUpdated = true;
-
-      const objective = generateObjective();
-
-      if (objective === null) {
-        this.player.objectiveId = OBJECTIVE_COMPLETE;
-        postChat('All objectives completed!', 'success');
-      }
-      else {
-        this.player.objectiveId = objective['id'];
-        this.player.objectiveData = objective['data'];
-      }
-    }
   }
 
   _drawMenu() {
@@ -623,7 +624,7 @@ export class Game {
 
     // Draw objective with description
     const objectiveName = getObjectiveName(this.player.objectiveId);
-    const objectiveDescription = getObjectiveDescription(this.player.objectiveId, this.player.objectiveData);
+    const objectiveDescription = getObjectiveDescription(this.player.objectiveId, this.player.objectiveData, this.player);
 
     ctx.fillStyle = Styles.special2;
     ctx.fillText(`Objective: ${objectiveName}`, x, y);

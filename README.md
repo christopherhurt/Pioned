@@ -42,11 +42,11 @@ To run the game server, use `yarn serve`.
     - [ ] Get fire for completing all objectives
 - [ ] Display chat messages above player who sent it (if visible)
 - [ ] Chat log (enter reveals previous messages, up to some limit)
+- [x] Objective Tracking (i.e., show stats about how much left to do until completing objective)
 
 **Chris**:
 
 ## Todo
-- [ ] Objective Tracking (i.e., show stats about how much left to do until completing objective)
 - [ ] Fix collision detection bug with low FPS
 
 ## Ideas

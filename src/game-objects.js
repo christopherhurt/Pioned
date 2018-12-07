@@ -136,7 +136,7 @@ export class Player extends GameObject {
     const currIsland = map.islands[isRow][isCol];
     return currIsland;
   }
-  
+
   markIslandVisited(island) {
     if(!this.visitedIslands.includes(island)) {
       this.visitedIslands.push(island);

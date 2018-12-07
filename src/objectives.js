@@ -2,9 +2,6 @@
   Objectives manager for Pioned, includes generating new objectives and checking objectives for completion
 */
 
-// Reference to Game object used to access game variables for objectives control
-export let GAME_REF = null;
-
 const NUM_OBJECTIVES = 3;
 
 // Identifier for determining if player's objective is complete
@@ -25,7 +22,7 @@ const NUM_ISLANDS = 5; // Number of islands a player must visit for VISIT_N_ISLA
 const NUM_PLAYERS = 2; // Number of other players a player must contact for CONTACT_N_PLAYERS objective
 
 /* Randomly generates an objective to be completed by a player */
-export function generateObjective() {
+export function generateObjective(player, map) {
   if (uncompletedObjectives.length == 0) {
     return null;
   }
@@ -39,8 +36,8 @@ export function generateObjective() {
   switch(id) {
     case VISIT_RANDOM_ISLAND:
       // Generate random id of the island that the player needs to visit
-      const numIslands = GAME_REF.map.numIslands;
-      while((data = parseInt(Math.random() * numIslands + 1)) == GAME_REF.player.getCurrentIsland(GAME_REF.map));
+      const numIslands = map.numIslands;
+      while((data = parseInt(Math.random() * numIslands + 1)) == player.getCurrentIsland(map));
       break;
     default:
       break;
@@ -66,16 +63,16 @@ export function getObjectiveName(id) {
 }
 
 /* Gets textual description of specified objective */
-export function getObjectiveDescription(id, data) {
+export function getObjectiveDescription(id, data, player) {
   switch(id) {
     case OBJECTIVE_COMPLETE:
       return 'All objectives completed';
     case VISIT_RANDOM_ISLAND:
-      return 'Find and visit island ' + data;
+      return `Find and visit island ${data}`;
     case VISIT_N_ISLANDS:
-      return 'Visit ' + NUM_ISLANDS + ' different islands';
+      return `Visit different islands (${player.contactedPlayers.length}/${NUM_ISLANDS})`;
     case CONTACT_N_PLAYERS:
-      return 'Come into contact with ' + NUM_PLAYERS + ' other players';
+      return `Come into contact with other players (${player.contactedPlayers.length}/${NUM_PLAYERS})`;
     default:
       throw 'Invalid objective ID when getting objective description';
   }
@@ -102,7 +99,3 @@ export function checkObjectiveComplete(id, data, player) {
   }
 }
 
-/* Sets reference used to access game variables */
-export function setObjectivesGameReference(game) {
-  GAME_REF = game;
-}
