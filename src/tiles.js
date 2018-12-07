@@ -82,15 +82,6 @@ export const PLAYERS = [
   'man2_player',
 ];
 
-const TSIZE = 16;
-const DSIZE = 64;
-export const PLAYER_REAL_WIDTH = 14;
-export const PLAYER_REAL_HEIGHT = 15;
-export const PLAYER_SRC_WIDTH = 14;
-export const PLAYER_SRC_HEIGHT = 16;
-export const PLAYER_DISPLAY_WIDTH = PLAYER_REAL_WIDTH / TSIZE * DSIZE;
-export const PLAYER_DISPLAY_HEIGHT = DSIZE;
-
 /* Lookup table for sprites */
 export const SPRITES = {
   'girl_player': [

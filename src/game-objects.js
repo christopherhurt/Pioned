@@ -44,12 +44,6 @@ export class Player extends GameObject {
 
     this.moving = false;
 
-    // Assign random color
-    const r = Math.random() * 255 | 0;
-    const g = Math.random() * 255 | 0;
-    const b = Math.random() * 255 | 0;
-    this.color = `rgb(${r}, ${g}, ${b})`;
-
     this.visitedIslands = [];
     this.contactedPlayers = [];
   }
