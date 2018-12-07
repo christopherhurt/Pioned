@@ -292,6 +292,10 @@ export class Game {
         }
         break;
       }
+      default: {
+        postChat(`Unkown command '${command}'`, 'error');
+        break;
+      }
     }
   }
 
