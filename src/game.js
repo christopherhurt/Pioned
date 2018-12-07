@@ -412,9 +412,9 @@ export class Game {
 
       generateObjective(this.player, this.map);
 
-      if (this.player.objectiveId === OBJECTIVE_COMPLETE) {
-        postChat('All objectives completed!', 'success');
-      }
+      // if (this.player.objectiveId === OBJECTIVE_COMPLETE) {
+      // postChat('All objectives completed!', 'success');
+      // }
 
       this.infoUpdated = true;
       this.menuUpdated = true;
