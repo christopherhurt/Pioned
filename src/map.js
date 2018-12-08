@@ -1,15 +1,14 @@
 import { SOLID, TILES } from './tiles';
 import { fillZeros } from './utils';
+import { DSIZE } from './globals';
 
 export class GameMap {
-  constructor(cols, rows, tsize, dsize, layers, islands, numIslands) {
+  constructor(cols, rows, layers, islands, numIslands) {
     this.cols = cols;
     this.rows = rows;
-    this.tsize = tsize;
-    this.dsize = dsize;
     this.layers = layers;
-    this.width = cols * dsize;
-    this.height = rows * dsize;
+    this.width = cols * DSIZE;
+    this.height = rows * DSIZE;
     this.islands = islands;
     this.numIslands = numIslands;
   }
@@ -23,19 +22,19 @@ export class GameMap {
   }
 
   getCol(x) {
-    return Math.floor(x / this.dsize);
+    return x / DSIZE | 0;
   }
 
   getRow(y) {
-    return Math.floor(y / this.dsize);
+    return y / DSIZE | 0;
   }
 
   getX(col) {
-    return col * this.dsize;
+    return col * DSIZE;
   }
 
   getY(row) {
-    return row * this.dsize;
+    return row * DSIZE;
   }
 
   isSolidTile(col, row) {
@@ -49,6 +48,4 @@ export class GameMap {
 
     return SOLID[base] || SOLID[obj];
   }
-
-  
 }

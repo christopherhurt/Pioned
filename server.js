@@ -16,8 +16,6 @@ const MAP_ITER = 3;
 const MAP_SIZE = MAP_BASE * Math.pow(2, MAP_ITER);
 const MAP_LAND_PROB = 0.3;
 const MAP_SMOOTHNESS = 5;
-const T_SIZE = 16;
-const D_SIZE = 64;
 const MAP_OBJECTS = {
   'apple_tree_bottom': {
     'rules': {
@@ -50,14 +48,14 @@ const COLLIDER_OBJECTS = [
 ];
 
 const [layers, islands, numIslands] = createMap('land', 'water', MAP_BASE, MAP_LAND_PROB, MAP_ITER, MAP_SMOOTHNESS, MAP_OBJECTS);
-const map = new GameMap(MAP_SIZE, MAP_SIZE, T_SIZE, D_SIZE, layers, islands, numIslands);
+const map = new GameMap(MAP_SIZE, MAP_SIZE, layers, islands, numIslands);
 
 function spawnTrees(map) {
   const treeProbability = 0.005;
 
   const rows = map.rows;
   const cols = map.cols;
-  let layer1 = fillZeros(map.cols,map.rows);
+  let layer1 = fillZeros(map.cols, map.rows);
   let layer2 = fillZeros(map.cols, map.rows);
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {

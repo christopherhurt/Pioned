@@ -52,6 +52,9 @@ export function drawTextWithBackground(text, ctx, x, y, fontSize=Styles.fontSize
   return [bgWidth, bgHeight];
 }
 
+// Thanks https://stackoverflow.com/q/7624920/1313757
+export const sign = x => x ? x < 0 ? -1 : 1 : 0;
+
 export const clamp = (val, min, max) => Math.max(min, Math.min(val, max));
 
 export const randChoice = (arr) => arr[Math.random() * arr.length | 0];

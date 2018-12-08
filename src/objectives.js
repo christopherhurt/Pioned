@@ -3,6 +3,7 @@
 */
 import { TILES, DROPS } from './tiles';
 import { send } from './utils';
+import { Pet } from './game-objects';
 
 const NUM_OBJECTIVES = 3;
 
@@ -104,18 +105,22 @@ export function checkObjectiveComplete(player) {
 }
 
 export function giveObjectiveReward(game) {
-  switch(game.player.objectiveId) {
+  const player = game.player;
+  switch(player.objectiveId) {
     case VISIT_RANDOM_ISLAND:
-      game.player.giveSpeedBonus(20);
+      player.giveSpeedBonus(20);
+      if (player.pet !== null) {
+        player.pet.giveSpeedBonus(20);
+      }
       return 'Gain +20 speed.';
     case VISIT_N_ISLANDS:
       DROPS[TILES['tree_bottom']] = ['wood', 2];
       DROPS[TILES['apple_tree_bottom']] = ['wood', 2];
       return '+1 wood drops from trees.';
     case CONTACT_N_PLAYERS:
-      const pet = 'butterfly';
-      game.player.pet = pet;
-      send(game.socket, 'playerPet', { pet });
+      player.pet = new Pet(player.x, player.y, 'butterfly', game.map.width, game.map.height);
+      player.pet.giveSpeedBonus(player.speedBonus);
+      send(game.socket, 'playerPet', { pet: player.pet });
       game.playersMoved = true;
       return 'A new companion joins you.';
     default:

@@ -1,8 +1,9 @@
-import { PLAYERS } from './tiles';
-import { clamp, randChoice } from './utils';
+import { SPRITE_DIMENSIONS } from './tiles';
+import { clamp, sign } from './utils';
+import { TSIZE, DSIZE, RATIO } from './globals';
 
 export class GameObject {
-  constructor(x, y, width, height, mapWidth, mapHeight, dsize, speedFactor = 4) {
+  constructor(x, y, width, height, mapWidth, mapHeight, speedFactor = 4) {
     this.x = x;
     this.y = y;
     this.width = width;
@@ -10,12 +11,16 @@ export class GameObject {
     this.maxX = mapWidth - width;
     this.maxY = mapHeight - height;
 
+    this.sprite = null;
+    this.moving = false;
+    this.numFrames = 3;
+
     // Direction
     this.dir = 3; // Start facing down
     this.dirOffset = [0, 1];
 
     // Speed
-    this.baseSpeed = this.speed = speedFactor * dsize;
+    this.baseSpeed = this.speed = speedFactor * DSIZE;
     this.speedBonus = 0;
   }
 
@@ -59,7 +64,6 @@ export class GameObject {
       this.collideY(map);
     }
 
-    // Clamp values
     this.clampXY();
   }
 
@@ -74,14 +78,14 @@ export class GameObject {
 
     // Check top row
     if (map.isSolidTile(leftCol, topRow)) {
-      this.x = Math.max(this.x, (leftCol + 1) * map.dsize);
+      this.x = Math.max(this.x, (leftCol + 1) * DSIZE);
     } else if (map.isSolidTile(rightCol, topRow)) {
-      this.x = Math.min(this.x, rightCol * map.dsize - this.width);
-    } else if (this.y + collideHeight > (topRow + 1) * map.dsize) { // Check bottom row
+      this.x = Math.min(this.x, rightCol * DSIZE - this.width);
+    } else if (this.y + collideHeight > (topRow + 1) * DSIZE) { // Check bottom row
       if (map.isSolidTile(leftCol, bottomRow)) {
-        this.x = Math.max(this.x, (leftCol + 1) * map.dsize);
+        this.x = Math.max(this.x, (leftCol + 1) * DSIZE);
       } else if (map.isSolidTile(rightCol, bottomRow)) {
-        this.x = Math.min(this.x, rightCol * map.dsize - this.width);
+        this.x = Math.min(this.x, rightCol * DSIZE - this.width);
       }
     }
   }
@@ -97,14 +101,14 @@ export class GameObject {
 
     // Check left col
     if (map.isSolidTile(leftCol, topRow)) {
-      this.y = Math.max(this.y, (topRow + 1) * map.dsize);
+      this.y = Math.max(this.y, (topRow + 1) * DSIZE);
     } else if (map.isSolidTile(leftCol, bottomRow)) {
-      this.y = Math.min(this.y, bottomRow * map.dsize - this.height);
-    } else if (this.x + collideWidth > (leftCol + 1) * map.dsize) { // Check right col
+      this.y = Math.min(this.y, bottomRow * DSIZE - this.height);
+    } else if (this.x + collideWidth > (leftCol + 1) * DSIZE) { // Check right col
       if (map.isSolidTile(rightCol, topRow)) {
-        this.y = Math.max(this.y, (topRow + 1) * map.dsize);
+        this.y = Math.max(this.y, (topRow + 1) * DSIZE);
       } else if (map.isSolidTile(rightCol, bottomRow)) {
-        this.y = Math.min(this.y, bottomRow * map.dsize - this.height);
+        this.y = Math.min(this.y, bottomRow * DSIZE - this.height);
       }
     }
   }
@@ -116,16 +120,14 @@ export class GameObject {
 }
 
 export class Player extends GameObject {
-  constructor(x, y, width, height, mapWidth, mapHeight, dsize, speedFactor, name) {
-    super(x, y, width, height, mapWidth, mapHeight, dsize, speedFactor);
+  constructor(x, y, width, height, sprite, mapWidth, mapHeight, name) {
+    super(x, y, width, height, mapWidth, mapHeight);
+
     this.name = name;
 
-    // Assign random player sprite
-    this.sprite = randChoice(PLAYERS);
+    this.sprite = sprite;
 
     this.updateSelectTile();
-
-    this.moving = false;
 
     this.visitedIslands = [];
     this.contactedPlayers = [];
@@ -165,22 +167,51 @@ export class Player extends GameObject {
   }
 }
 
-export class Camera {
-  constructor(width, height, mapWidth, mapHeight) {
-    this.x = 0;
-    this.y = 0;
-    this.width = width;
-    this.height = height;
-    this.maxX = mapWidth - width;
-    this.maxY = mapHeight - height;
+export class Pet extends GameObject {
+  constructor(x, y, sprite, mapWidth, mapHeight) {
+    const dims = SPRITE_DIMENSIONS[sprite];
+    const width = dims.realDisplayWidth;
+    const height = dims.realDisplayHeight;
+
+    super(x, y, width, height, mapWidth, mapHeight);
+
+    this.sprite = sprite;
+    if (sprite === 'butterfly') {
+      this.moving = true;
+    }
   }
 
-  update(gameObject) {
+  follow(obj, delta, map) {
+    // Go towards these values
+    const gotoX = obj.x - obj.dirOffset[0] * DSIZE;
+    const gotoY = obj.y - obj.dirOffset[1] * DSIZE;
+
+    const dirx = sign(gotoX - this.x);
+    const diry = sign(gotoY - this.y);
+
+    this.move(delta, dirx, diry, map, this.sprite !== 'butterfly');
+
+    // Don't go past
+    if (sign(gotoX - this.x) !== dirx) {
+      this.x = gotoX;
+    };
+    if (sign(gotoY - this.y) !== diry) {
+      this.y = gotoY;
+    };
+
+    this.clampXY();
+  }
+}
+
+export class Camera extends GameObject {
+  constructor(width, height, mapWidth, mapHeight) {
+    super(0, 0, width, height, mapWidth, mapHeight);
+  }
+
+  update(obj) {
     // Center camera on center of game object
-    this.x = (gameObject.x + gameObject.width / 2) - this.width / 2;
-    this.y = (gameObject.y + gameObject.height / 2) - this.height / 2;
-    // Clamp values
-    this.x = clamp(this.x, 0, this.maxX);
-    this.y = clamp(this.y, 0, this.maxY);
+    this.x = (obj.x + obj.width / 2) - this.width / 2;
+    this.y = (obj.y + obj.height / 2) - this.height / 2;
+    this.clampXY();
   }
 }

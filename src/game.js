@@ -1,26 +1,12 @@
-import { ImageLoader, Styles, send, postChat, createCanvas, intersects, drawTextWithBackground } from './utils';
+import { ImageLoader, Styles, send, postChat, createCanvas, intersects, drawTextWithBackground, randChoice } from './utils';
 import { Keyboard, Keys } from './keyboard';
 import { GameMap } from './map';
-import { TILES, TILEMAP, BASES, FRAMES, DROPS, SPRITES } from './tiles';
+import { TILES, TILEMAP, BASES, FRAMES, DROPS, PLAYERS, SPRITES, SPRITE_DIMENSIONS } from './tiles';
 import { Inventory } from './inventory';
 import { Player, Camera } from './game-objects';
 import { RefreshManager  } from './refresh';
 import { giveObjectiveReward, generateObjective, checkObjectiveComplete, getObjectiveName, getObjectiveDescription, OBJECTIVE_COMPLETE } from './objectives';
-
-const TSIZE = 16;
-const DSIZE = 64;
-const RATIO = DSIZE / TSIZE;
-const PLAYER_REAL_WIDTH = 10;
-const PLAYER_REAL_HEIGHT = 8;
-const PLAYER_SRC_WIDTH = 14;
-const PLAYER_SRC_HEIGHT = 16;
-const PLAYER_DISPLAY_WIDTH = PLAYER_SRC_WIDTH * RATIO;
-const PLAYER_DISPLAY_HEIGHT = DSIZE;
-
-const BUTTERFLY_SRC_WIDTH = 7;
-const BUTTERFLY_SRC_HEIGHT = 16;
-const BUTTERFLY_DISPLAY_WIDTH = BUTTERFLY_SRC_WIDTH * RATIO;
-const BUTTERFLY_DISPLAY_HEIGHT = DSIZE;
+import { TSIZE, DSIZE, RATIO } from './globals';
 
 const Modes = {
   MENU: 1,
@@ -153,11 +139,14 @@ export class Game {
 
             const { x: xLoc, y: yLoc } = pos;
 
-            const width = PLAYER_REAL_WIDTH * RATIO;
-            const height = PLAYER_REAL_HEIGHT * RATIO;
-            const x = xLoc * this.map.dsize + this.map.dsize / 2 - width / 2;
-            const y = yLoc * this.map.dsize + this.map.dsize / 2 - height / 2;
-            this.player = new Player(x, y, width, height, this.map.width, this.map.height, this.map.dsize, 4, name);
+            const sprite = randChoice(PLAYERS);
+            const dims = SPRITE_DIMENSIONS[sprite];
+            const width = dims.realDisplayWidth;
+            const height = dims.realDisplayHeight;
+
+            const x = xLoc * DSIZE + DSIZE / 2 - width / 2;
+            const y = yLoc * DSIZE + DSIZE / 2 - height / 2;
+            this.player = new Player(x, y, width, height, sprite, this.map.width, this.map.height, name);
 
             // Mark current island visited
             const currIsland = this.player.getCurrentIsland(this.map);
@@ -207,8 +196,8 @@ export class Game {
             const tile = {
               x: this.map.getX(col),
               y: this.map.getY(row),
-              width: this.map.dsize,
-              height: this.map.dsize,
+              width: DSIZE,
+              height: DSIZE,
             };
             // Trigger re-render only if tile is visible
             if (intersects(tile, this.camera)) {
@@ -400,6 +389,11 @@ export class Game {
       }
     }
 
+    // Move pets
+    if (this.player.pet !== null) {
+      this.player.pet.follow(this.player, delta, this.map);
+    }
+
     // Check and update collisions with other players
     for(let id in this.players) {
       if(!this.player.contactedPlayers.includes(id)) {
@@ -506,8 +500,8 @@ export class Game {
     // Check current island
     const currIsland = this.player.getCurrentIsland(this.map);
 
-    const pCol = parseInt((this.player.x + this.player.width / 2) / this.map.dsize);
-    const pRow = parseInt((this.player.y + this.player.height / 2) / this.map.dsize);
+    const pCol = parseInt((this.player.x + this.player.width / 2) / DSIZE);
+    const pRow = parseInt((this.player.y + this.player.height / 2) / DSIZE);
     const currTile = this.map.getTile(0, pCol, pRow);
     const landID = TILES['land'];
 
@@ -521,8 +515,8 @@ export class Game {
     const item = this.inventory.selected;
     if (this.keyboard.isDownRepeat(Keys.K, this.actionDelay) && item !== this.inventory.NONE) {
       const [ x, y ] = this.player.selectCoords;
-      const col = x / this.map.dsize | 0;
-      const row = y / this.map.dsize | 0;
+      const col = x / DSIZE | 0;
+      const row = y / DSIZE | 0;
 
       const base = this.map.getTile(0, col, row);
       const obj = this.map.getTile(1, col, row);
@@ -559,8 +553,8 @@ export class Game {
     // Take object
     if (this.keyboard.isDownRepeat(Keys.L, this.actionDelay)) {
       const [ x, y ] = this.player.selectCoords;
-      const col = x / this.map.dsize | 0;
-      const row = y / this.map.dsize | 0;
+      const col = x / DSIZE | 0;
+      const row = y / DSIZE | 0;
 
       const obj = this.map.getTile(1, col, row);
       let allow = true;
@@ -568,10 +562,10 @@ export class Game {
         const tile = {
           x: this.map.getX(col),
           y: this.map.getY(row),
-          width: this.map.dsize,
-          height: this.map.dsize
+          width: DSIZE,
+          height: DSIZE
         };
-        if(intersects(this.player,tile)){
+        if(intersects(this.player, tile)){
           allow = false;
         }
         for(let id in this.players) {
@@ -736,8 +730,40 @@ export class Game {
     }
   }
 
-  _drawGameObject(canvas, obj, x, y) {
-  
+  _drawSprite(obj, ctx) {
+    const image = this.spriteMap;
+
+    const x = Math.round(obj.x - this.camera.x);
+    const y = Math.round(obj.y - this.camera.y);
+
+    const index = obj.moving ? this.refreshManager.index('sprite') + 1 : 0;
+    const tile = SPRITES[obj.sprite][obj.dir * obj.numFrames + index];
+
+    const tileX = (tile - 1) % image.width;
+    const tileY = (tile - 1) / image.width | 0;
+
+    const dims = SPRITE_DIMENSIONS[obj.sprite];
+
+    const sourceXOffset = (TSIZE - dims.srcWidth) / 2;
+    const targetXOffset = (dims.realWidth - dims.srcWidth) * RATIO / 2;
+    const targetYOffset = (dims.realHeight - dims.srcHeight) * RATIO;
+
+    const drawX = x + targetXOffset;
+    const drawY = y + targetYOffset;
+
+    ctx.drawImage(
+      image, // image
+      tileX * (1 + TSIZE) + 1 + sourceXOffset, // source x
+      tileY * (1 + TSIZE) + 1, // source y
+      dims.srcWidth, // source width
+      dims.srcHeight, // source height
+      drawX, // target x
+      drawY, // target y
+      dims.srcWidth * RATIO, // target width
+      dims.srcHeight * RATIO, // target height
+    );
+
+    return [drawX, drawY];
   }
 
   _drawPlayer(player) {
@@ -745,71 +771,21 @@ export class Game {
 
     // Draw player
     // ===========
-    const x = -this.camera.x + player.x;
-    const y = -this.camera.y + player.y;
-
-    const image = this.spriteMap;
-
-    // Only animate player if moving
-    const index = player.moving ? this.refreshManager.index('sprite') + 1 : 0;
-    const tile = SPRITES[player.sprite][player.dir * 3 + index];
-    const tileX = (tile - 1) % image.width;
-    const tileY = (tile - 1) / image.width | 0;
-
-    const sourceXOffset = (this.map.tsize - PLAYER_SRC_WIDTH) / 2;
-    const targetXOffset = (PLAYER_REAL_WIDTH - PLAYER_SRC_WIDTH) / 2 * RATIO;
-    const targetYOffset = (PLAYER_REAL_HEIGHT - PLAYER_SRC_HEIGHT) * RATIO;
-
-    const drawX = Math.round(x) + targetXOffset;
-    const drawY = Math.round(y) + targetYOffset;
-
-    ctx.drawImage(
-      image, // image
-      tileX * (1 + this.map.tsize) + 1 + sourceXOffset, // source x
-      tileY * (1 + this.map.tsize) + 1, // source y
-      PLAYER_SRC_WIDTH, // source width
-      PLAYER_SRC_HEIGHT, // source height
-      drawX, // target x
-      drawY, // target y
-      PLAYER_DISPLAY_WIDTH, // target width
-      PLAYER_DISPLAY_HEIGHT, // target height
-    );
+    const [drawX, drawY] = this._drawSprite(player, ctx);
 
     // Draw any pets
     // =============
     if (player.pet !== null) {
-      const index = this.refreshManager.index('sprite');
-      const tile = SPRITES[player.pet][player.dir * 2 + index];
-      const tileX = (tile - 1) % image.width;
-      const tileY = (tile - 1) / image.width | 0;
-
-      const sourceXOffset = (this.map.tsize - BUTTERFLY_SRC_WIDTH) / 2;
-      const targetXOffset = (BUTTERFLY_SRC_WIDTH / 2 * RATIO);
-      // const targetYOffset = (BUTTERFLY_SRC_HEIGHT * RATIO);
-      const targetYOffset = 0;
-
-      const petDrawX = drawX - player.dirOffset[0] * this.map.dsize + targetXOffset;
-      const petDrawY = drawY - player.dirOffset[1] * this.map.dsize + targetYOffset;
-
-      ctx.drawImage(
-        image, // image
-        tileX * (1 + this.map.tsize) + 1 + sourceXOffset, // source x
-        tileY * (1 + this.map.tsize) + 1, // source y
-        BUTTERFLY_SRC_WIDTH, // source width
-        BUTTERFLY_SRC_HEIGHT, // source height
-        petDrawX, // target x
-        petDrawY, // target y
-        BUTTERFLY_DISPLAY_WIDTH, // target width
-        BUTTERFLY_DISPLAY_HEIGHT, // target height
-      );
+      this._drawSprite(player.pet, ctx);
     }
 
     // Draw name above player
     // ======================
+    const dims = SPRITE_DIMENSIONS[player.sprite];
     drawTextWithBackground(
       player.name, // text
       ctx, // ctx
-      drawX + PLAYER_DISPLAY_WIDTH / 2, // x
+      drawX + dims.displayWidth / 2, // x
       drawY - 4, // y
       Styles.fontSize, // fontSize
       (player === this.player) ? Styles.special : Styles.light, // color
@@ -822,8 +798,8 @@ export class Game {
     const ctx = this.playerCanvas.getContext('2d');
 
     let [ selectX, selectY ] = this.player.selectCoords;
-    selectX -= selectX % this.map.dsize;
-    selectY -= selectY % this.map.dsize;
+    selectX -= selectX % DSIZE;
+    selectY -= selectY % DSIZE;
 
     const x = -this.camera.x + selectX;
     const y = -this.camera.y + selectY;
@@ -831,8 +807,8 @@ export class Game {
     ctx.strokeRect(
       Math.round(x),
       Math.round(y),
-      this.map.dsize,
-      this.map.dsize
+      DSIZE,
+      DSIZE
     );
   }
 
@@ -844,14 +820,16 @@ export class Game {
     for (let key in this.players) {
       const player = this.players[key];
 
-      const targetXOffset = (PLAYER_REAL_WIDTH - PLAYER_SRC_WIDTH) / 2 * RATIO;
-      const targetYOffset = (PLAYER_REAL_HEIGHT - PLAYER_SRC_HEIGHT) * RATIO;
+      const dims = SPRITE_DIMENSIONS[player.sprite];
+
+      const targetXOffset = (dims.realWidth - dims.srcWidth) * RATIO / 2;
+      const targetYOffset = (dims.realHeight - dims.srcHeight) * RATIO;
 
       const playerDisplay = {
         x: Math.round(player.x) + targetXOffset,
         y: Math.round(player.y) + targetYOffset,
-        width: PLAYER_DISPLAY_WIDTH,
-        height: PLAYER_DISPLAY_HEIGHT,
+        width: dims.displayWidth,
+        height: dims.displayHeight,
       };
 
       // Only draw visible players
@@ -877,13 +855,13 @@ export class Game {
     const ctx = this.layerCanvas[layer].getContext('2d');
     ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
-    const startCol = this.camera.x / this.map.dsize | 0;
-    const startRow = this.camera.y / this.map.dsize | 0;
-    const numCols = this.camera.width / this.map.dsize + 1;
-    const numRows = this.camera.height / this.map.dsize + 1;
+    const startCol = this.camera.x / DSIZE | 0;
+    const startRow = this.camera.y / DSIZE | 0;
+    const numCols = this.camera.width / DSIZE + 1;
+    const numRows = this.camera.height / DSIZE + 1;
 
-    const offsetX = -this.camera.x + startCol * this.map.dsize;
-    const offsetY = -this.camera.y + startRow * this.map.dsize;
+    const offsetX = -this.camera.x + startCol * DSIZE;
+    const offsetY = -this.camera.y + startRow * DSIZE;
 
     for (let i = 0; i < numCols; i++) {
       for (let j = 0; j < numRows; j++) {
@@ -903,19 +881,19 @@ export class Game {
         const tileX = (tileIndex - 1) % image.width;
         const tileY = (tileIndex - 1) / image.width | 0;
 
-        const x = i * this.map.dsize + offsetX;
-        const y = j * this.map.dsize + offsetY;
+        const x = i * DSIZE + offsetX;
+        const y = j * DSIZE + offsetY;
 
         ctx.drawImage(
           image, // image
-          tileX * (1 + this.map.tsize) + 1, // source x
-          tileY * (1 + this.map.tsize) + 1, // source y
-          this.map.tsize, // source width
-          this.map.tsize, // source height
+          tileX * (1 + TSIZE) + 1, // source x
+          tileY * (1 + TSIZE) + 1, // source y
+          TSIZE, // source width
+          TSIZE, // source height
           Math.round(x), // target x
           Math.round(y), // target y
-          this.map.dsize, // target width
-          this.map.dsize // target height
+          DSIZE, // target width
+          DSIZE // target height
         );
       }
     }

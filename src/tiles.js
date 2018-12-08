@@ -1,3 +1,5 @@
+import { TSIZE, DSIZE, RATIO } from './globals';
+
 /* Lookup table to map tile name to tile map ID */
 export const TILES = {
   'water': 1,
@@ -33,8 +35,8 @@ export const TILEMAP = [
 ];
 
 export const FRAMES = [
-  null,
-  [35, 44, 53],
+  null,                        // ==== N/A ====
+  [35, 44, 53],                // water
 ];
 
 export const DROPS = [
@@ -78,8 +80,8 @@ export const BASES = {
 
 export const PLAYERS = [
   'girl_player',
-  'man1_player',
-  'man2_player',
+  'man_hat',
+  'man_beard',
 ];
 
 /* Lookup table for sprites */
@@ -90,22 +92,43 @@ export const SPRITES = {
     13, 14, 15, // Right
     7, 8, 9, // Up
   ],
-  'man1_player': [
+  'man_hat': [
     19, 20, 21, // Down
     10, 11, 12, // Left
     4, 5, 6, // Right
     1, 2, 3, // Up
   ],
-  'man2_player': [
+  'man_beard': [
     46, 47, 48, // Down
     37, 38, 39, // Left
     22, 23, 24, // Right
     28, 29, 30, // Up
   ],
   'butterfly': [
-    33, 34, // Down
-    42, 43, // Left
-    51, 52, // Right
-    33, 34, // Up
+    33, 33, 34, // Down
+    42, 42, 43, // Left
+    51, 51, 52, // Right
+    33, 33, 34, // Up
   ],
+};
+
+class SpriteDimensions {
+  constructor(realWidth, realHeight, srcWidth, srcHeight) {
+    this.srcWidth = srcWidth;
+    this.srcHeight = srcHeight;
+    this.realWidth = realWidth;
+    this.realHeight = realHeight;
+
+    this.displayWidth = srcWidth * RATIO;
+    this.displayHeight = srcHeight * RATIO;
+    this.realDisplayWidth = realWidth * RATIO;
+    this.realDisplayHeight = realHeight * RATIO;
+  }
+}
+
+export const SPRITE_DIMENSIONS = {
+  'girl_player': new SpriteDimensions(10, 8, 14, 16),
+  'man_hat': new SpriteDimensions(10, 8, 12, 16),
+  'man_beard': new SpriteDimensions(10, 8, 12, 16),
+  'butterfly': new SpriteDimensions(10, 9, 7, 16),
 };
