@@ -41,9 +41,9 @@ export const DROPS = [
   null,                        // ==== N/A ====
   null,                        // water
   null,                        // land
-  ['wood', 2],                 // tree_bottom
+  ['wood', 1],                 // tree_bottom
   null,                        // tree_top
-  ['wood', 2],                 // apple_tree_bottom
+  ['wood', 1],                 // apple_tree_bottom
   null,                        // apple_tree_top
   ['yellow_flower', 1],        // yellow_flower
   ['red_flower', 1],           // red_flower
@@ -82,15 +82,6 @@ export const PLAYERS = [
   'man2_player',
 ];
 
-const TSIZE = 16;
-const DSIZE = 64;
-export const PLAYER_REAL_WIDTH = 14;
-export const PLAYER_REAL_HEIGHT = 15;
-export const PLAYER_SRC_WIDTH = 14;
-export const PLAYER_SRC_HEIGHT = 16;
-export const PLAYER_DISPLAY_WIDTH = PLAYER_REAL_WIDTH / TSIZE * DSIZE;
-export const PLAYER_DISPLAY_HEIGHT = DSIZE;
-
 /* Lookup table for sprites */
 export const SPRITES = {
   'girl_player': [
@@ -110,5 +101,11 @@ export const SPRITES = {
     37, 38, 39, // Left
     22, 23, 24, // Right
     28, 29, 30, // Up
+  ],
+  'butterfly': [
+    33, 34, // Down
+    42, 43, // Left
+    51, 52, // Right
+    33, 34, // Up
   ],
 };

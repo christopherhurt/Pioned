@@ -1,23 +1,32 @@
 import { PLAYERS } from './tiles';
 
 export class GameObject {
-  constructor(x, y, width, height) {
+  constructor(x, y, width, height, dsize, speedFactor) {
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
+
+    this.baseSpeed = this.speed = speedFactor * dsize;
+    this.speedBonus = 0;
+
+    this.level = 0;
+  }
+
+  giveSpeedBonus(percent) {
+    this.speedBonus += percent;
+    this.speed = this.baseSpeed * (1 + this.speedBonus / 100.0);
   }
 }
 
 export class Player extends GameObject {
-  constructor(xLoc, yLoc, width, height, mapWidth, mapHeight, dsize, speed, name) {
+  constructor(xLoc, yLoc, width, height, mapWidth, mapHeight, dsize, speedFactor, name) {
     const x = xLoc * dsize + dsize / 2 - width / 2;
     const y = yLoc * dsize + dsize / 2 - height / 2;
 
-    super(x, y, width, height);
+    super(x, y, width, height, dsize, speedFactor);
     this.maxX = mapWidth - width;
     this.maxY = mapHeight - height;
-    this.speed = speed;
     this.name = name;
 
     // Assign random player
@@ -26,39 +35,34 @@ export class Player extends GameObject {
 
     // Direction
     this.dir = 3; // Start facing down
-    const dirOffset = [0, 1];
+    this.dirOffset = [0, 1];
     // Update select tile
     this.selectCoords = [
-      (this.x + this.width / 2) + (dirOffset[0] * this.width),
-      (this.y + this.height / 2) + (dirOffset[1] * this.height),
+      (this.x + this.width / 2) + (this.dirOffset[0] * this.width),
+      (this.y + this.height / 2) + (this.dirOffset[1] * this.height),
     ];
 
     this.moving = false;
 
-    // Assign random color
-    const r = Math.random() * 255 | 0;
-    const g = Math.random() * 255 | 0;
-    const b = Math.random() * 255 | 0;
-    this.color = `rgb(${r}, ${g}, ${b})`;
-
     this.visitedIslands = [];
     this.contactedPlayers = [];
+
+    this.pet = null;
   }
 
   move(delta, dirx, diry, map) {
-    let dirOffset;
     if (diry === -1) {
       this.dir = 0; // Up
-      dirOffset = [0, -1];
+      this.dirOffset = [0, -1];
     } else if (diry === 1) {
       this.dir = 3; // Down
-      dirOffset = [0, 1];
+      this.dirOffset = [0, 1];
     } else if (dirx === -1) {
       this.dir = 1; // Left
-      dirOffset = [-1, 0];
+      this.dirOffset = [-1, 0];
     } else if (dirx === 1) {
       this.dir = 2; // Right
-      dirOffset = [1, 0];
+      this.dirOffset = [1, 0];
     }
 
     // Make diagonal movement same speed as horizontal and vertical movement
@@ -76,8 +80,8 @@ export class Player extends GameObject {
 
     // Update select tile
     this.selectCoords = [
-      (this.x + this.width / 2) + (dirOffset[0] * this.width),
-      (this.y + this.height / 2) + (dirOffset[1] * this.height),
+      (this.x + this.width / 2) + (this.dirOffset[0] * this.width),
+      (this.y + this.height / 2) + (this.dirOffset[1] * this.height),
     ];
   }
 
@@ -136,7 +140,7 @@ export class Player extends GameObject {
     const currIsland = map.islands[isRow][isCol];
     return currIsland;
   }
-  
+
   markIslandVisited(island) {
     if(!this.visitedIslands.includes(island)) {
       this.visitedIslands.push(island);

@@ -127,4 +127,5 @@ export const Keys = {
   X: 88,
   Y: 89,
   Z: 90,
+  FORWARD_SLASH: 191,
 };

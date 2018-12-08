@@ -5,7 +5,7 @@ import { TILES, TILEMAP, BASES, FRAMES, DROPS, SPRITES } from './tiles';
 import { Inventory } from './inventory';
 import { Player, Camera } from './game-objects';
 import { RefreshManager  } from './refresh';
-import { setObjectivesGameReference, generateObjective, checkObjectiveComplete, getObjectiveName, getObjectiveDescription, OBJECTIVE_COMPLETE } from './objectives';
+import { giveObjectiveReward, generateObjective, checkObjectiveComplete, getObjectiveName, getObjectiveDescription, OBJECTIVE_COMPLETE } from './objectives';
 
 const TSIZE = 16;
 const DSIZE = 64;
@@ -16,6 +16,11 @@ const PLAYER_SRC_WIDTH = 14;
 const PLAYER_SRC_HEIGHT = 16;
 const PLAYER_DISPLAY_WIDTH = PLAYER_SRC_WIDTH * RATIO;
 const PLAYER_DISPLAY_HEIGHT = DSIZE;
+
+const BUTTERFLY_SRC_WIDTH = 7;
+const BUTTERFLY_SRC_HEIGHT = 16;
+const BUTTERFLY_DISPLAY_WIDTH = BUTTERFLY_SRC_WIDTH * RATIO;
+const BUTTERFLY_DISPLAY_HEIGHT = DSIZE;
 
 const Modes = {
   MENU: 1,
@@ -31,7 +36,6 @@ export class Game {
     this.canvasHeight = canvasHeight;
     this.loader = new ImageLoader();
     this.keyboard = new Keyboard();
-    setObjectivesGameReference(this);
   }
 
   async init() {
@@ -61,6 +65,7 @@ export class Game {
       Keys.I,
       Keys.ESC,
       Keys.ENTER,
+      Keys.FORWARD_SLASH,
     ]);
     this.menuRepeatDelay = 100;
     this.actionDelay = 100;
@@ -102,13 +107,16 @@ export class Game {
     this._drawMap(0);
     this._drawPlayers(0);
 
+    // Misc dev variables
+    this.devCompletedObjective = false;
+
     return true;
   }
 
   socketSetup() {
     return new Promise((resolve, reject) => {
       // postChat('Connecting to server...', 'debug');
-      this.socket = new WebSocket("ws://localhost:5000");
+      this.socket = new WebSocket(`ws://${WEBSOCKET_HOST}:5000`);
 
       this.socket.onopen = event => {
         // postChat('Connected to server!', 'debug');
@@ -145,10 +153,9 @@ export class Game {
 
             const { x: xLoc, y: yLoc } = pos;
 
-            const DEFAULT_SPEED = 4 * this.map.dsize;
             const width = PLAYER_REAL_WIDTH * RATIO;
             const height = PLAYER_REAL_HEIGHT * RATIO;
-            this.player = new Player(xLoc, yLoc, width, height, this.map.width, this.map.height, this.map.dsize, DEFAULT_SPEED, name);
+            this.player = new Player(xLoc, yLoc, width, height, this.map.width, this.map.height, this.map.dsize, 4, name);
 
             // Mark current island visited
             const currIsland = this.player.getCurrentIsland(this.map);
@@ -156,9 +163,7 @@ export class Game {
 
             // postChat('Joined the game!', 'debug');
 
-            const objective = generateObjective();
-            this.player.objectiveId = objective['id'];
-            this.player.objectiveData = objective['data'];
+            generateObjective(this.player, this.map);
 
             send(this.socket, 'newPlayer', this.player);
 
@@ -172,17 +177,25 @@ export class Game {
             break;
           }
           case 'playerMoved': {
-            const { id, x, y, dir, moving } = data;
+            const { id, x, y, dir, moving, dirOffset } = data;
             const player = this.players[id];
             player.x = x;
             player.y = y;
             player.dir = dir;
             player.moving = moving;
+            player.dirOffset = dirOffset;
 
             // Trigger re-render only if player is visible
             if (intersects(player, this.camera)) {
               this.playersMoved = true;
             }
+            break;
+          }
+          case 'playerPet': {
+            const { id, pet } = data;
+            const player = this.players[id];
+            player.pet = pet;
+            this.playersMoved = true;
             break;
           }
           case 'tileUpdate': {
@@ -279,11 +292,36 @@ export class Game {
     tick();
   }
 
+  handleCommand(command) {
+    switch (command) {
+      case 'complete': {
+        if (DEVMODE) {
+          this.devCompletedObjective = true;
+        }
+        break;
+      }
+      default: {
+        postChat(`Unkown command '${command}'`, 'error');
+        break;
+      }
+    }
+  }
+
   chatSetup() {
     this.keyboard.pause();
     const chatInput = document.getElementById('chat-input');
     chatInput.contentEditable = true;
     chatInput.focus();
+
+    const exitChat = () => {
+      window.removeEventListener('keydown', listener);
+
+      chatInput.contentEditable = false;
+      chatInput.blur();
+
+      this.mode = Modes.GAME;
+      this.keyboard.listen();
+    }
 
     const listener = (event) => {
       const chatInput = document.getElementById('chat-input');
@@ -293,23 +331,24 @@ export class Game {
 
           const text = chatInput.innerText;
           if (text.length > 0) {
-            chatInput.innerText = '';
-            postChat(`${this.player.name}: ${text}`);
-            send(this.socket, 'chatMessage', text);
+            if (text[0] === '/') {
+              this.handleCommand(text.substr(1));
+              chatInput.innerText = '';
+            }
+            else {
+              chatInput.innerText = '';
+              postChat(`${this.player.name}: ${text}`);
+              send(this.socket, 'chatMessage', text);
+            }
+
+            exitChat();
           }
 
           break;
         }
         case Keys.ESC: {
           event.preventDefault();
-          window.removeEventListener('keydown', listener);
-
-          chatInput.contentEditable = false;
-          chatInput.blur();
-
-          this.mode = Modes.GAME;
-          this.keyboard.listen();
-
+          exitChat();
           break;
         }
       }
@@ -329,7 +368,20 @@ export class Game {
       case Modes.GAME: {
         if (this.keyboard.isDownRepeat(Keys.ESC, this.modeDelay)) { this.mode = Modes.MENU; }
         else if (this.keyboard.isDownRepeat(Keys.I, this.modeDelay)) { this.mode = Modes.INVENTORY; }
-        else if (this.keyboard.isDownRepeat(Keys.ENTER, this.modeDelay)) {
+        else if (this.keyboard.isDownRepeat([Keys.ENTER, Keys.FORWARD_SLASH], this.modeDelay)) {
+          if (this.keyboard.isDown(Keys.FORWARD_SLASH)) {
+            const chatInput = document.getElementById('chat-input');
+            chatInput.innerText = '/';
+
+            // Move cursor one character over
+            // Thank you https://stackoverflow.com/a/6249440/1313757
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.setStart(chatInput.childNodes[0], 1);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
           this.mode = Modes.CHAT;
           this.chatSetup();
         }
@@ -345,6 +397,39 @@ export class Game {
         }
         break;
       }
+    }
+
+    // Check and update collisions with other players
+    for(let id in this.players) {
+      if(!this.player.contactedPlayers.includes(id)) {
+        const other = this.players[id];
+        if(intersects(this.player, other)) {
+          this.player.contactedPlayers.push(id);
+          this.menuUpdated = true;
+          postChat(`Contacted ${other.name}!`, 'info');
+        }
+      }
+    }
+
+    // Check objective completion
+    if(checkObjectiveComplete(this.player) || this.devCompletedObjective) {
+      if (this.devCompletedObjective) {
+        this.devCompletedObjective = false;
+      }
+
+      const rewardMessage = giveObjectiveReward(this);
+      this.player.level++;
+
+      postChat(`Objective complete!\n${rewardMessage}`, 'success');
+
+      generateObjective(this.player, this.map);
+
+      // if (this.player.objectiveId === OBJECTIVE_COMPLETE) {
+      // postChat('All objectives completed!', 'success');
+      // }
+
+      this.infoUpdated = true;
+      this.menuUpdated = true;
     }
   }
 
@@ -401,6 +486,7 @@ export class Game {
         y: this.player.y,
         dir: this.player.dir,
         moving: this.player.moving,
+        dirOffset: this.player.dirOffset,
       });
 
       this.camera.update(this.player);
@@ -412,6 +498,7 @@ export class Game {
         y: this.player.y,
         dir: this.player.dir,
         moving: this.player.moving,
+        dirOffset: this.player.dirOffset,
       });
     }
 
@@ -425,6 +512,7 @@ export class Game {
 
     if (currIsland != 0 && currTile == landID && !this.player.hasVisitedIsland(currIsland)) {
       this.player.markIslandVisited(currIsland);
+      this.menuUpdated = true;
       postChat('Island ' + currIsland + ' visited!', 'info');
     }
 
@@ -515,26 +603,6 @@ export class Game {
         this.hasScrolled = true;
       }
     }
-
-    // Check and update collisions with other players
-    for(let id in this.players) {
-      if(!this.player.contactedPlayers.includes(id)) {
-        const other = this.players[id];
-        if(intersects(this.player, other)) {
-          this.player.contactedPlayers.push(id);
-          postChat(`Contacted ${other.name}!`, 'info');
-        }
-      }
-    }
-
-    // Check objective completion
-    if(checkObjectiveComplete(this.player.objectiveId, this.player.objectiveData, this.player)) {
-      const message = `Objective '${getObjectiveName(this.player.objectiveId)}' complete!`;
-      postChat(message, 'success');
-      this.player.objectiveId = OBJECTIVE_COMPLETE;
-      this.infoUpdated = true;
-      this.menuUpdated = true;
-    }
   }
 
   _drawMenu() {
@@ -572,8 +640,8 @@ export class Game {
     y += separation * 2;
 
     // Draw objective with description
-    const objectiveName = getObjectiveName(this.player.objectiveId);
-    const objectiveDescription = getObjectiveDescription(this.player.objectiveId, this.player.objectiveData);
+    const objectiveName = getObjectiveName(this.player);
+    const objectiveDescription = getObjectiveDescription(this.player);
 
     ctx.fillStyle = Styles.special2;
     ctx.fillText(`Objective: ${objectiveName}`, x, y);
@@ -593,12 +661,11 @@ export class Game {
 
     const items = {
       'Move': 'WASD/Arrows',
-      'Take': 'L',
-      'Place': 'K',
+      'Pick Up Item': 'L',
+      'Use Item': 'K',
       'Inventory': 'I',
       'Menu': 'ESC',
       'Chat': 'ENTER',
-      'Exit Chat': 'ESC',
     };
     for (let key in items) {
       const val = items[key];
@@ -700,6 +767,35 @@ export class Game {
       PLAYER_DISPLAY_WIDTH, // target width
       PLAYER_DISPLAY_HEIGHT, // target height
     );
+
+    // Draw any pets
+    // =============
+    if (player.pet !== null) {
+      const index = this.refreshManager.index('sprite');
+      const tile = SPRITES[player.pet][player.dir * 2 + index];
+      const tileX = (tile - 1) % image.width;
+      const tileY = (tile - 1) / image.width | 0;
+
+      const sourceXOffset = (this.map.tsize - BUTTERFLY_SRC_WIDTH) / 2;
+      const targetXOffset = (BUTTERFLY_SRC_WIDTH / 2 * RATIO);
+      // const targetYOffset = (BUTTERFLY_SRC_HEIGHT * RATIO);
+      const targetYOffset = 0;
+
+      const petDrawX = drawX - player.dirOffset[0] * this.map.dsize + targetXOffset;
+      const petDrawY = drawY - player.dirOffset[1] * this.map.dsize + targetYOffset;
+
+      ctx.drawImage(
+        image, // image
+        tileX * (1 + this.map.tsize) + 1 + sourceXOffset, // source x
+        tileY * (1 + this.map.tsize) + 1, // source y
+        BUTTERFLY_SRC_WIDTH, // source width
+        BUTTERFLY_SRC_HEIGHT, // source height
+        petDrawX, // target x
+        petDrawY, // target y
+        BUTTERFLY_DISPLAY_WIDTH, // target width
+        BUTTERFLY_DISPLAY_HEIGHT, // target height
+      );
+    }
 
     drawTextWithBackground(
       player.name, // text
@@ -825,7 +921,7 @@ export class Game {
     drawTextWithBackground(fpsText, ctx, this.canvasWidth - 10, 10, Styles.fontSize, Styles.light, Styles.important, 'right');
 
     // Draw current objective
-    const objectiveName = getObjectiveName(this.player.objectiveId);
+    const objectiveName = getObjectiveName(this.player);
     const [w, h] = drawTextWithBackground(`Objective: ${objectiveName}`, ctx, 10, 10, Styles.fontSize, Styles.special2);
 
     // Draw selected item (below objective)

@@ -23,10 +23,6 @@ module.exports = {
       }
     ]
   },
-  devtool: 'source-map',
-  devServer: {
-    contentBase: 'build'
-  },
   plugins: [
     new CopyWebpackPlugin([
       { from: '**/*', to: '', context: 'src', ignore: [ '*.js' ] },
