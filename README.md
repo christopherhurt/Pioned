@@ -42,6 +42,7 @@ To run the game server, use `yarn serve`.
 **Chris**:
 
 ## Todo
+- [ ] Use Sets for island / player lookup in Player class
 - [ ] Fix collision detection bug with low FPS
 - [ ] Make it a unique game object which follows player (instead of just drawing it)
 
