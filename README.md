@@ -33,6 +33,9 @@ To run the game server, use `yarn serve`.
 **Parker**
 
 **Jack**:
+- [ ] NPC game objects
+    - [ ] Send pet movements to server
+    - [ ] Use BFS to get to spot next to player
 - [ ] Display chat messages above player who sent it (if visible)
 - [ ] Chat log (enter reveals previous messages, up to some limit)
 
