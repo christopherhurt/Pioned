@@ -155,7 +155,9 @@ export class Game {
 
             const width = PLAYER_REAL_WIDTH * RATIO;
             const height = PLAYER_REAL_HEIGHT * RATIO;
-            this.player = new Player(xLoc, yLoc, width, height, this.map.width, this.map.height, this.map.dsize, 4, name);
+            const x = xLoc * this.map.dsize + this.map.dsize / 2 - width / 2;
+            const y = yLoc * this.map.dsize + this.map.dsize / 2 - height / 2;
+            this.player = new Player(x, y, width, height, this.map.width, this.map.height, this.map.dsize, 4, name);
 
             // Mark current island visited
             const currIsland = this.player.getCurrentIsland(this.map);
@@ -734,9 +736,15 @@ export class Game {
     }
   }
 
+  _drawGameObject(canvas, obj, x, y) {
+  
+  }
+
   _drawPlayer(player) {
     const ctx = this.playerCanvas.getContext('2d');
 
+    // Draw player
+    // ===========
     const x = -this.camera.x + player.x;
     const y = -this.camera.y + player.y;
 
@@ -749,8 +757,8 @@ export class Game {
     const tileY = (tile - 1) / image.width | 0;
 
     const sourceXOffset = (this.map.tsize - PLAYER_SRC_WIDTH) / 2;
-    const targetXOffset = -((PLAYER_SRC_WIDTH - PLAYER_REAL_WIDTH) / 2 * RATIO);
-    const targetYOffset = -((PLAYER_SRC_HEIGHT - PLAYER_REAL_HEIGHT) * RATIO);
+    const targetXOffset = (PLAYER_REAL_WIDTH - PLAYER_SRC_WIDTH) / 2 * RATIO;
+    const targetYOffset = (PLAYER_REAL_HEIGHT - PLAYER_SRC_HEIGHT) * RATIO;
 
     const drawX = Math.round(x) + targetXOffset;
     const drawY = Math.round(y) + targetYOffset;
@@ -796,6 +804,8 @@ export class Game {
       );
     }
 
+    // Draw name above player
+    // ======================
     drawTextWithBackground(
       player.name, // text
       ctx, // ctx
@@ -834,8 +844,8 @@ export class Game {
     for (let key in this.players) {
       const player = this.players[key];
 
-      const targetXOffset = -((PLAYER_SRC_WIDTH - PLAYER_REAL_WIDTH) / 2 * RATIO);
-      const targetYOffset = -((PLAYER_SRC_HEIGHT - PLAYER_REAL_HEIGHT) * RATIO);
+      const targetXOffset = (PLAYER_REAL_WIDTH - PLAYER_SRC_WIDTH) / 2 * RATIO;
+      const targetYOffset = (PLAYER_REAL_HEIGHT - PLAYER_SRC_HEIGHT) * RATIO;
 
       const playerDisplay = {
         x: Math.round(player.x) + targetXOffset,

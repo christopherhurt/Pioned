@@ -1,56 +1,30 @@
 import { PLAYERS } from './tiles';
+import { clamp, randChoice } from './utils';
 
 export class GameObject {
-  constructor(x, y, width, height, dsize, speedFactor) {
+  constructor(x, y, width, height, mapWidth, mapHeight, dsize, speedFactor = 4) {
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
-
-    this.baseSpeed = this.speed = speedFactor * dsize;
-    this.speedBonus = 0;
-
-    this.level = 0;
-  }
-
-  giveSpeedBonus(percent) {
-    this.speedBonus += percent;
-    this.speed = this.baseSpeed * (1 + this.speedBonus / 100.0);
-  }
-}
-
-export class Player extends GameObject {
-  constructor(xLoc, yLoc, width, height, mapWidth, mapHeight, dsize, speedFactor, name) {
-    const x = xLoc * dsize + dsize / 2 - width / 2;
-    const y = yLoc * dsize + dsize / 2 - height / 2;
-
-    super(x, y, width, height, dsize, speedFactor);
     this.maxX = mapWidth - width;
     this.maxY = mapHeight - height;
-    this.name = name;
-
-    // Assign random player
-    const i = Math.random() * PLAYERS.length | 0;
-    this.sprite = PLAYERS[i];
 
     // Direction
     this.dir = 3; // Start facing down
     this.dirOffset = [0, 1];
-    // Update select tile
-    this.selectCoords = [
-      (this.x + this.width / 2) + (this.dirOffset[0] * this.width),
-      (this.y + this.height / 2) + (this.dirOffset[1] * this.height),
-    ];
 
-    this.moving = false;
-
-    this.visitedIslands = [];
-    this.contactedPlayers = [];
-
-    this.pet = null;
+    // Speed
+    this.baseSpeed = this.speed = speedFactor * dsize;
+    this.speedBonus = 0;
   }
 
-  move(delta, dirx, diry, map) {
+  clampXY() {
+    this.x = clamp(this.x, 0, this.maxX);
+    this.y = clamp(this.y, 0, this.maxY);
+  }
+
+  move(delta, dirx, diry, map, collide = true) {
     if (diry === -1) {
       this.dir = 0; // Up
       this.dirOffset = [0, -1];
@@ -71,74 +45,113 @@ export class Player extends GameObject {
       diry *= Math.sqrt(2) / 2;
     }
 
-    // Move player and do collision detection
-    this.collide(dirx, diry, map, delta);
+    // Move X
+    this.x += dirx * this.speed * delta;
+
+    if (collide && dirx) {
+      this.collideX(map);
+    }
+
+    // Move Y
+    this.y += diry * this.speed * delta;
+
+    if (collide && diry) {
+      this.collideY(map);
+    }
 
     // Clamp values
-    this.x = Math.max(0, Math.min(this.x, this.maxX));
-    this.y = Math.max(0, Math.min(this.y, this.maxY));
+    this.clampXY();
+  }
 
-    // Update select tile
+  collideX(map) {
+    const collideWidth = this.width;
+    const collideHeight = this.height;
+
+    const leftCol = map.getCol(this.x);
+    const rightCol = map.getCol(this.x + collideWidth);
+    const topRow = map.getRow(this.y);
+    const bottomRow = map.getRow(this.y + collideHeight);
+
+    // Check top row
+    if (map.isSolidTile(leftCol, topRow)) {
+      this.x = Math.max(this.x, (leftCol + 1) * map.dsize);
+    } else if (map.isSolidTile(rightCol, topRow)) {
+      this.x = Math.min(this.x, rightCol * map.dsize - this.width);
+    } else if (this.y + collideHeight > (topRow + 1) * map.dsize) { // Check bottom row
+      if (map.isSolidTile(leftCol, bottomRow)) {
+        this.x = Math.max(this.x, (leftCol + 1) * map.dsize);
+      } else if (map.isSolidTile(rightCol, bottomRow)) {
+        this.x = Math.min(this.x, rightCol * map.dsize - this.width);
+      }
+    }
+  }
+
+  collideY(map) {
+    const collideWidth = this.width;
+    const collideHeight = this.height;
+
+    const leftCol = map.getCol(this.x);
+    const rightCol = map.getCol(this.x + collideWidth);
+    const topRow = map.getRow(this.y);
+    const bottomRow = map.getRow(this.y + collideHeight);
+
+    // Check left col
+    if (map.isSolidTile(leftCol, topRow)) {
+      this.y = Math.max(this.y, (topRow + 1) * map.dsize);
+    } else if (map.isSolidTile(leftCol, bottomRow)) {
+      this.y = Math.min(this.y, bottomRow * map.dsize - this.height);
+    } else if (this.x + collideWidth > (leftCol + 1) * map.dsize) { // Check right col
+      if (map.isSolidTile(rightCol, topRow)) {
+        this.y = Math.max(this.y, (topRow + 1) * map.dsize);
+      } else if (map.isSolidTile(rightCol, bottomRow)) {
+        this.y = Math.min(this.y, bottomRow * map.dsize - this.height);
+      }
+    }
+  }
+
+  giveSpeedBonus(percent) {
+    this.speedBonus += percent;
+    this.speed = this.baseSpeed * (1 + this.speedBonus / 100.0);
+  }
+}
+
+export class Player extends GameObject {
+  constructor(x, y, width, height, mapWidth, mapHeight, dsize, speedFactor, name) {
+    super(x, y, width, height, mapWidth, mapHeight, dsize, speedFactor);
+    this.name = name;
+
+    // Assign random player sprite
+    this.sprite = randChoice(PLAYERS);
+
+    this.updateSelectTile();
+
+    this.moving = false;
+
+    this.visitedIslands = [];
+    this.contactedPlayers = [];
+
+    this.pet = null;
+
+    // Level
+    this.level = 0;
+  }
+
+  updateSelectTile() {
     this.selectCoords = [
       (this.x + this.width / 2) + (this.dirOffset[0] * this.width),
       (this.y + this.height / 2) + (this.dirOffset[1] * this.height),
     ];
   }
 
-  collide(dirx, diry, map, delta) {
-    const collideWidth = this.width;
-    const collideHeight = this.height;
-
-    this.x += dirx * this.speed * delta;
-
-    let leftCol = map.getCol(this.x);
-    let rightCol = map.getCol(this.x + collideWidth);
-    let topRow = map.getRow(this.y);
-    let bottomRow = map.getRow(this.y + collideHeight);
-
-    if (dirx) {
-      // Check top row
-      if (map.isSolidTile(leftCol, topRow)) {
-        this.x = Math.max(this.x, (leftCol + 1) * map.dsize);
-      } else if (map.isSolidTile(rightCol, topRow)) {
-        this.x = Math.min(this.x, rightCol * map.dsize - this.width);
-      } else if (this.y + collideHeight > (topRow + 1) * map.dsize) { // Check bottom row
-        if (map.isSolidTile(leftCol, bottomRow)) {
-          this.x = Math.max(this.x, (leftCol + 1) * map.dsize);
-        } else if (map.isSolidTile(rightCol, bottomRow)) {
-          this.x = Math.min(this.x, rightCol * map.dsize - this.width);
-        }
-      }
-    }
-
-    this.y += diry * this.speed * delta;
-
-    leftCol = map.getCol(this.x);
-    rightCol = map.getCol(this.x + collideWidth);
-    topRow = map.getRow(this.y);
-    bottomRow = map.getRow(this.y + collideHeight);
-
-    if (diry) {
-      // Check left col
-      if (map.isSolidTile(leftCol, topRow)) {
-        this.y = Math.max(this.y, (topRow + 1) * map.dsize);
-      } else if (map.isSolidTile(leftCol, bottomRow)) {
-        this.y = Math.min(this.y, bottomRow * map.dsize - this.height);
-      } else if (this.x + collideWidth > (leftCol + 1) * map.dsize) { // Check right col
-        if (map.isSolidTile(rightCol, topRow)) {
-          this.y = Math.max(this.y, (topRow + 1) * map.dsize);
-        } else if (map.isSolidTile(rightCol, bottomRow)) {
-          this.y = Math.min(this.y, bottomRow * map.dsize - this.height);
-        }
-      }
-    }
+  move(delta, dirx, diry, map) {
+    super.move(delta, dirx, diry, map);
+    this.updateSelectTile();
   }
 
   getCurrentIsland(map) {
-    const isCol = parseInt((this.x + this.width / 2) / map.width * map.islands[0].length);
-    const isRow = parseInt((this.y + this.height / 2) / map.height * map.islands.length);
-    const currIsland = map.islands[isRow][isCol];
-    return currIsland;
+    const col = (this.x + this.width / 2) / map.width * map.islands[0].length | 0;
+    const row = (this.y + this.height / 2) / map.height * map.islands.length | 0;
+    return map.islands[row][col];
   }
 
   markIslandVisited(island) {
@@ -167,7 +180,7 @@ export class Camera {
     this.x = (gameObject.x + gameObject.width / 2) - this.width / 2;
     this.y = (gameObject.y + gameObject.height / 2) - this.height / 2;
     // Clamp values
-    this.x = Math.max(0, Math.min(this.x, this.maxX));
-    this.y = Math.max(0, Math.min(this.y, this.maxY));
+    this.x = clamp(this.x, 0, this.maxX);
+    this.y = clamp(this.y, 0, this.maxY);
   }
 }

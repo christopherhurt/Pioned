@@ -52,13 +52,13 @@ export function drawTextWithBackground(text, ctx, x, y, fontSize=Styles.fontSize
   return [bgWidth, bgHeight];
 }
 
-function _intersects(x1, y1, w1, h1, x2, y2, w2, h2) {
-  return x1 <= x2 + w2 && x1 + w1 >= x2 && y1 <= y2 + h2 && y1 + h1 >= y2;
-}
+export const clamp = (val, min, max) => Math.max(min, Math.min(val, max));
 
-export function intersects(o1, o2) {
-  return _intersects(o1.x, o1.y, o1.width, o1.height, o2.x, o2.y, o2.width, o2.height);
-}
+export const randChoice = (arr) => arr[Math.random() * arr.length | 0];
+
+const _intersects = (x1, y1, w1, h1, x2, y2, w2, h2) => x1 <= x2 + w2 && x1 + w1 >= x2 && y1 <= y2 + h2 && y1 + h1 >= y2;
+
+export const intersects = (o1, o2) => _intersects(o1.x, o1.y, o1.width, o1.height, o2.x, o2.y, o2.width, o2.height);
 
 export function copyArray(arr) {
   const copy = [];
@@ -76,13 +76,9 @@ export function copyArray(arr) {
   return copy;
 }
 
-export function fillZeros(width, height) {
-  return Array(height).fill().map(() => Array(width).fill(0));
-}
+export const fillZeros = (width, height) => Array(height).fill().map(() => Array(width).fill(0));
 
-export function send(socket, type, data) {
-  socket.send(JSON.stringify({type, data}));
-}
+export const send = (socket, type, data) => socket.send(JSON.stringify({ type, data }));
 
 export function createCanvas(width, height) {
   const canvas = document.createElement('canvas');
@@ -95,9 +91,7 @@ export function createCanvas(width, height) {
   return canvas;
 };
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function fadeOut(elem) {
   elem.style.opacity = 1;
