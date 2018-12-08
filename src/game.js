@@ -417,11 +417,10 @@ export class Game {
         this.devCompletedObjective = false;
       }
 
-      giveObjectiveReward(this);
+      const rewardMessage = giveObjectiveReward(this);
       this.player.level++;
 
-      const message = `Objective '${getObjectiveName(this.player)}' complete!`;
-      postChat(message, 'success');
+      postChat(`Objective complete!\n${rewardMessage}`, 'success');
 
       generateObjective(this.player, this.map);
 

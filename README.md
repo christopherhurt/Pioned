@@ -39,7 +39,7 @@ To run the game server, use `yarn serve`.
     - [x] Mister worldwide: +0.n chance for extra wood
     - [x] Social butterfly: Pet butterfly
         - [ ] Make it a unique game object which follows player (instead of just drawing it)
-    - [ ] Visual text (and names; e.g., Lumberjack) for receiving rewards
+    - [x] Visual text for receiving rewards
 - [x] Consecutive objectives:
     - [ ] Get fire for completing all objectives
 - [ ] Display chat messages above player who sent it (if visible)

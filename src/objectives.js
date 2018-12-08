@@ -107,17 +107,17 @@ export function giveObjectiveReward(game) {
   switch(game.player.objectiveId) {
     case VISIT_RANDOM_ISLAND:
       game.player.giveSpeedBonus(20);
-      break;
+      return 'Gain +20 speed.';
     case VISIT_N_ISLANDS:
       DROPS[TILES['tree_bottom']] = ['wood', 2];
       DROPS[TILES['apple_tree_bottom']] = ['wood', 2];
-      break;
+      return '+1 wood drops from trees.';
     case CONTACT_N_PLAYERS:
       const pet = 'butterfly';
       game.player.pet = pet;
       send(game.socket, 'playerPet', { pet });
       game.playersMoved = true;
-      break;
+      return 'A new companion joins you.';
     default:
       throw 'Invalid objective ID when giving objective reward';
   }
