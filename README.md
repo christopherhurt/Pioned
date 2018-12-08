@@ -31,7 +31,6 @@ To run the game server, use `yarn serve`.
 ## This Week
 
 **Parker**
-- [ ] Fix Wood on Water Deletion Bug
 
 **Jack**:
 - [ ] Display chat messages above player who sent it (if visible)
@@ -99,3 +98,4 @@ To run the game server, use `yarn serve`.
     - [x] Visual text for receiving rewards
 - [x] Consecutive objectives:
 - [x] Objective Tracking (i.e., show stats about how much left to do until completing objective)
+- [x] Fix Wood on Water Deletion Bug
