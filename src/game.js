@@ -340,10 +340,9 @@ export class Game {
               postChat(`${this.player.name}: ${text}`);
               send(this.socket, 'chatMessage', text);
             }
-
-            exitChat();
           }
 
+          exitChat();
           break;
         }
         case Keys.ESC: {
