@@ -1,6 +1,8 @@
 /*
   Objectives manager for Pioned, includes generating new objectives and checking objectives for completion
 */
+import { TILES, DROPS } from './tiles';
+import { send } from './utils';
 
 const NUM_OBJECTIVES = 3;
 
@@ -101,21 +103,22 @@ export function checkObjectiveComplete(player) {
   }
 }
 
-import { TILES, DROPS } from './tiles';
-export function giveObjectiveReward(player) {
-  switch(player.objectiveId) {
+export function giveObjectiveReward(game) {
+  switch(game.player.objectiveId) {
     case VISIT_RANDOM_ISLAND:
-      player.giveSpeedBonus(20);
+      game.player.giveSpeedBonus(20);
       break;
     case VISIT_N_ISLANDS:
       DROPS[TILES['tree_bottom']] = ['wood', 2];
       DROPS[TILES['apple_tree_bottom']] = ['wood', 2];
       break;
     case CONTACT_N_PLAYERS:
+      const pet = 'butterfly';
+      game.player.pet = pet;
+      send(game.socket, 'playerPet', { pet });
+      game.playersMoved = true;
       break;
     default:
       throw 'Invalid objective ID when giving objective reward';
   }
-  player.level++;
 }
-

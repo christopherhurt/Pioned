@@ -35,33 +35,34 @@ export class Player extends GameObject {
 
     // Direction
     this.dir = 3; // Start facing down
-    const dirOffset = [0, 1];
+    this.dirOffset = [0, 1];
     // Update select tile
     this.selectCoords = [
-      (this.x + this.width / 2) + (dirOffset[0] * this.width),
-      (this.y + this.height / 2) + (dirOffset[1] * this.height),
+      (this.x + this.width / 2) + (this.dirOffset[0] * this.width),
+      (this.y + this.height / 2) + (this.dirOffset[1] * this.height),
     ];
 
     this.moving = false;
 
     this.visitedIslands = [];
     this.contactedPlayers = [];
+
+    this.pet = null;
   }
 
   move(delta, dirx, diry, map) {
-    let dirOffset;
     if (diry === -1) {
       this.dir = 0; // Up
-      dirOffset = [0, -1];
+      this.dirOffset = [0, -1];
     } else if (diry === 1) {
       this.dir = 3; // Down
-      dirOffset = [0, 1];
+      this.dirOffset = [0, 1];
     } else if (dirx === -1) {
       this.dir = 1; // Left
-      dirOffset = [-1, 0];
+      this.dirOffset = [-1, 0];
     } else if (dirx === 1) {
       this.dir = 2; // Right
-      dirOffset = [1, 0];
+      this.dirOffset = [1, 0];
     }
 
     // Make diagonal movement same speed as horizontal and vertical movement
@@ -79,8 +80,8 @@ export class Player extends GameObject {
 
     // Update select tile
     this.selectCoords = [
-      (this.x + this.width / 2) + (dirOffset[0] * this.width),
-      (this.y + this.height / 2) + (dirOffset[1] * this.height),
+      (this.x + this.width / 2) + (this.dirOffset[0] * this.width),
+      (this.y + this.height / 2) + (this.dirOffset[1] * this.height),
     ];
   }
 

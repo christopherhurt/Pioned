@@ -17,6 +17,11 @@ const PLAYER_SRC_HEIGHT = 16;
 const PLAYER_DISPLAY_WIDTH = PLAYER_SRC_WIDTH * RATIO;
 const PLAYER_DISPLAY_HEIGHT = DSIZE;
 
+const BUTTERFLY_SRC_WIDTH = 7;
+const BUTTERFLY_SRC_HEIGHT = 16;
+const BUTTERFLY_DISPLAY_WIDTH = BUTTERFLY_SRC_WIDTH * RATIO;
+const BUTTERFLY_DISPLAY_HEIGHT = DSIZE;
+
 const Modes = {
   MENU: 1,
   GAME: 2,
@@ -172,17 +177,25 @@ export class Game {
             break;
           }
           case 'playerMoved': {
-            const { id, x, y, dir, moving } = data;
+            const { id, x, y, dir, moving, dirOffset } = data;
             const player = this.players[id];
             player.x = x;
             player.y = y;
             player.dir = dir;
             player.moving = moving;
+            player.dirOffset = dirOffset;
 
             // Trigger re-render only if player is visible
             if (intersects(player, this.camera)) {
               this.playersMoved = true;
             }
+            break;
+          }
+          case 'playerPet': {
+            const { id, pet } = data;
+            const player = this.players[id];
+            player.pet = pet;
+            this.playersMoved = true;
             break;
           }
           case 'tileUpdate': {
@@ -404,7 +417,8 @@ export class Game {
         this.devCompletedObjective = false;
       }
 
-      giveObjectiveReward(this.player);
+      giveObjectiveReward(this);
+      this.player.level++;
 
       const message = `Objective '${getObjectiveName(this.player)}' complete!`;
       postChat(message, 'success');
@@ -473,6 +487,7 @@ export class Game {
         y: this.player.y,
         dir: this.player.dir,
         moving: this.player.moving,
+        dirOffset: this.player.dirOffset,
       });
 
       this.camera.update(this.player);
@@ -484,6 +499,7 @@ export class Game {
         y: this.player.y,
         dir: this.player.dir,
         moving: this.player.moving,
+        dirOffset: this.player.dirOffset,
       });
     }
 
@@ -746,6 +762,35 @@ export class Game {
       PLAYER_DISPLAY_WIDTH, // target width
       PLAYER_DISPLAY_HEIGHT, // target height
     );
+
+    // Draw any pets
+    // =============
+    if (player.pet !== null) {
+      const index = this.refreshManager.index('sprite');
+      const tile = SPRITES[player.pet][player.dir * 2 + index];
+      const tileX = (tile - 1) % image.width;
+      const tileY = (tile - 1) / image.width | 0;
+
+      const sourceXOffset = (this.map.tsize - BUTTERFLY_SRC_WIDTH) / 2;
+      const targetXOffset = (BUTTERFLY_SRC_WIDTH / 2 * RATIO);
+      // const targetYOffset = (BUTTERFLY_SRC_HEIGHT * RATIO);
+      const targetYOffset = 0;
+
+      const petDrawX = drawX - player.dirOffset[0] * this.map.dsize + targetXOffset;
+      const petDrawY = drawY - player.dirOffset[1] * this.map.dsize + targetYOffset;
+
+      ctx.drawImage(
+        image, // image
+        tileX * (1 + this.map.tsize) + 1 + sourceXOffset, // source x
+        tileY * (1 + this.map.tsize) + 1, // source y
+        BUTTERFLY_SRC_WIDTH, // source width
+        BUTTERFLY_SRC_HEIGHT, // source height
+        petDrawX, // target x
+        petDrawY, // target y
+        BUTTERFLY_DISPLAY_WIDTH, // target width
+        BUTTERFLY_DISPLAY_HEIGHT, // target height
+      );
+    }
 
     drawTextWithBackground(
       player.name, // text

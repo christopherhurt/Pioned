@@ -102,4 +102,10 @@ export const SPRITES = {
     22, 23, 24, // Right
     28, 29, 30, // Up
   ],
+  'butterfly': [
+    33, 34, // Down
+    42, 43, // Left
+    51, 52, // Right
+    33, 34, // Up
+  ],
 };
