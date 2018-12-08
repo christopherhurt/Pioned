@@ -38,6 +38,7 @@ To run the game server, use `yarn serve`.
     - [x] The Wanderer: permanent speed boost (visual: boots/indicator)
     - [x] Mister worldwide: +0.n chance for extra wood
     - [x] Social butterfly: Pet butterfly
+        - [ ] Make it a unique game object which follows player (instead of just drawing it)
     - [ ] Visual text (and names; e.g., Lumberjack) for receiving rewards
 - [x] Consecutive objectives:
     - [ ] Get fire for completing all objectives
