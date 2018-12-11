@@ -246,6 +246,8 @@ export class Game {
           case 'chatMessage': {
             const { id, text } = data;
             const player = this.players[id];
+            player.chatMessage = text;
+            player.chatTimer = 10;
             postChat(`${player.name}: ${text}`);
           }
         }
@@ -342,6 +344,8 @@ export class Game {
               chatInput.innerText = '';
               postChat(`${this.player.name}: ${text}`);
               send(this.socket, 'chatMessage', text);
+              this.player.chatMessage = text;
+              this.player.chatTimer = 10;
             }
           }
 
@@ -406,6 +410,17 @@ export class Game {
         }
         break;
       }
+    }
+
+    // Update chatTimers
+    for(let id in this.players) {
+      const player = this.players[id];
+      if (player.chatTimer > 0) {
+        player.chatTimer -= delta;
+      }
+    }
+    if (this.player.chatTimer > 0) {
+      this.player.chatTimer -= delta;
     }
 
     // Check and update collisions with other players
@@ -806,7 +821,7 @@ export class Game {
       );
     }
 
-    drawTextWithBackground(
+    const [w, h] = drawTextWithBackground(
       player.name, // text
       ctx, // ctx
       drawX + PLAYER_DISPLAY_WIDTH / 2, // x
@@ -816,6 +831,19 @@ export class Game {
       Styles.darkBG, // background
       'center above', // align
     );
+
+    if (player.chatTimer > 0) {
+      drawTextWithBackground(
+        player.chatMessage, // text
+        ctx, // ctx
+        drawX + PLAYER_DISPLAY_WIDTH / 2, // x
+        drawY - 8 - h, // y
+        Styles.fontSize, // fontSize
+        Styles.light, // color
+        Styles.darkBG, // background
+        'center above', // align
+      );
+    }
   }
 
   _drawSelect() {

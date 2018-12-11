@@ -28,6 +28,8 @@ export class Player extends GameObject {
     this.maxX = mapWidth - width;
     this.maxY = mapHeight - height;
     this.name = name;
+    this.chatMessage = null;
+    this.chatTimer = 0;
 
     // Assign random player
     const i = Math.random() * PLAYERS.length | 0;
