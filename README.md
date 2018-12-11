@@ -8,6 +8,8 @@ Forked from Mozilla's [starting code](https://github.com/mozdevs/gamedev-js-tile
 
 Tilemap graphics and sprites created by [Onimaru](https://onimaru.itch.io/green-valley-map-pack).
 
+Map generation algorithm based on example by [Mr. Speaker](http://www.mrspeaker.net/2010/12/13/terrainer-terrain-generator/).
+
 Favicon created with [favicon.io](https://favicon.io/).
 
 Music by [Abstraction](http://www.abstractionmusic.com/) (on [itch.io](https://tallbeard.itch.io/music-loop-bundle)).
