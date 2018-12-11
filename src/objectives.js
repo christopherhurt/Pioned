@@ -94,10 +94,10 @@ export function checkObjectiveComplete(player) {
       return player.visitedIslands.includes(island);
     case VISIT_N_ISLANDS:
       // Check if player has visited n islands
-      return player.visitedIslands.length == NUM_ISLANDS;
+      return player.visitedIslands.length >= NUM_ISLANDS;
     case CONTACT_N_PLAYERS:
       // Check if player has contacted n other players
-      return player.contactedPlayers.length == NUM_PLAYERS;
+      return player.contactedPlayers.length >= NUM_PLAYERS;
     default:
       throw 'Invalid objective ID when checking objective completeness';
   }
