@@ -110,6 +110,9 @@ export class Game {
     // Misc dev variables
     this.devCompletedObjective = false;
 
+    // Started playing audio
+    this.played = false;
+
     return true;
   }
 
@@ -358,7 +361,14 @@ export class Game {
   update(delta) {
     switch (this.mode) {
       case Modes.MENU: {
-        if (this.keyboard.isDownRepeat([Keys.ESC, Keys.ENTER], this.modeDelay)) { this.mode = Modes.GAME; }
+        if (this.keyboard.isDownRepeat([Keys.ESC, Keys.ENTER], this.modeDelay)) {
+          this.mode = Modes.GAME;
+          if (!this.played) {
+            this.played = true;
+            const audio = document.getElementById('audio');
+            audio.play();
+          }
+        }
         else {
           this._updateMenu(delta);
         }

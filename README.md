@@ -10,6 +10,8 @@ Tilemap graphics and sprites created by [Onimaru](https://onimaru.itch.io/green-
 
 Favicon created with [favicon.io](https://favicon.io/).
 
+Music by [Abstraction](http://www.abstractionmusic.com/) (on [itch.io](https://tallbeard.itch.io/music-loop-bundle)).
+
 ## Getting started
 
 > Install yarn [here](https://yarnpkg.com/en/docs/install).
